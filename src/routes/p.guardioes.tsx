@@ -87,17 +87,17 @@ function GuardiansPanel() {
             <div 
               key={i}
               onClick={() => handleCardClick(guardian)}
-              className="rounded-[32px] p-6 md:p-8 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:brightness-110 group relative overflow-hidden h-64 md:h-72"
+              className="rounded-3xl p-4 md:p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:brightness-110 group relative overflow-hidden h-48 md:h-56"
               style={{ backgroundColor: config.color || '#0A1942' }}
             >
               {/* Avatar Circle */}
               <div 
-                className="w-24 h-24 md:w-28 md:h-28 rounded-full mb-4 md:mb-6 flex flex-col items-center justify-center bg-gradient-to-b from-muted to-muted/50 overflow-hidden shadow-lg border-4 border-white/10"
+                className="w-16 h-16 md:w-20 md:h-20 rounded-full mb-3 md:mb-4 flex flex-col items-center justify-center bg-gradient-to-b from-muted to-muted/50 overflow-hidden shadow-md border-[3px] border-white/10"
               >
                 {config.avatarUrl ? (
                   <img src={config.avatarUrl} alt={guardian.name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-3xl md:text-4xl font-bold text-muted-foreground/50">
+                  <span className="text-xl md:text-2xl font-bold text-muted-foreground/50">
                     {guardian.name.substring(0, 2).toUpperCase()}
                   </span>
                 )}
@@ -105,7 +105,7 @@ function GuardiansPanel() {
               
               {/* Guardian Name */}
               <h3 
-                className="font-bold text-lg md:text-xl tracking-widest uppercase w-full px-1 z-10 drop-shadow-sm leading-tight break-words whitespace-normal"
+                className="font-bold text-sm md:text-base tracking-widest uppercase w-full px-1 z-10 drop-shadow-sm leading-tight break-words whitespace-normal"
                 style={{ color: getContrastColor(config.color || '#0A1942') }}
               >
                 {guardian.name}
