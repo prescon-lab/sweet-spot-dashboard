@@ -114,13 +114,25 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { Toaster } from "@/components/ui/sonner";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <SidebarProvider>
+        <AppSidebar />
+        <main className="flex-1 overflow-x-hidden pt-4 md:pt-0">
+          <div className="md:hidden p-4">
+            <SidebarTrigger />
+          </div>
+          <Outlet />
+        </main>
+      </SidebarProvider>
+      <Toaster />
     </QueryClientProvider>
   );
 }
