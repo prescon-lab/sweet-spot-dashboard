@@ -18,13 +18,13 @@ const items = [
     icon: Home,
   },
   {
-    title: "Painel",
+    title: "Painel Geral",
     url: "/p/dashboard",
     icon: Inbox,
   },
   {
-    title: "Buscar",
-    url: "#",
+    title: "Painel de EJs",
+    url: "/p/ejs",
     icon: Search,
   },
   {
