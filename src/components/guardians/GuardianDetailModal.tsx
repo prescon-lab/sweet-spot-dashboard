@@ -261,7 +261,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 {/* Photo */}
                 <div className="relative group cursor-pointer flex-shrink-0">
                   <Avatar 
-                    className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-black/10 overflow-hidden flex flex-col items-center justify-center"
+                    className="h-40 w-40 md:h-48 md:w-48 border-2 border-white/20 transition-transform group-hover:scale-105 bg-black/5 overflow-hidden flex flex-col items-center justify-center"
                   >
                     {avatarUrl ? (
                       <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />

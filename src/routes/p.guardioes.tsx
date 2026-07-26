@@ -81,7 +81,7 @@ function GuardiansPanel() {
             >
               {/* Avatar Circle */}
               <div 
-                className="w-16 h-16 md:w-20 md:h-20 rounded-full mb-3 md:mb-4 flex flex-col items-center justify-center bg-gradient-to-b from-muted to-muted/50 overflow-hidden shadow-md border-[3px] border-white/10"
+                className="w-24 h-24 md:w-28 md:h-28 rounded-full mb-4 md:mb-5 flex flex-col items-center justify-center bg-black/5 overflow-hidden border-2 border-white/10"
               >
                 {config.avatarUrl ? (
                   <img src={config.avatarUrl} alt={guardian.name} className="w-full h-full object-cover" />
