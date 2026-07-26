@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 
 export const Route = createFileRoute("/p/$token")({
   component: DashboardPanel,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/p/$token")({
 function DashboardPanel() {
   const { token } = Route.useParams();
   const [searchTerm, setSearchTerm] = useState("");
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   const handlePrint = () => {
     window.print();
@@ -132,7 +134,7 @@ function DashboardPanel() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm">Registrar reunião</Button>
-                    <Button variant="secondary" size="sm">Ver detalhes</Button>
+                    <Button variant="secondary" size="sm" onClick={() => setDetailModalOpen(true)}>Ver detalhes</Button>
                   </div>
                 </div>
               </CardContent>
@@ -166,6 +168,11 @@ function DashboardPanel() {
           </Card>
         </div>
       </div>
+
+      <EjDetailModal 
+        open={detailModalOpen} 
+        onOpenChange={setDetailModalOpen} 
+      />
     </div>
   );
 }
