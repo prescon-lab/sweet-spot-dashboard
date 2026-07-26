@@ -109,9 +109,9 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     }
   };
 
-  const onCropComplete = React.useCallback((croppedArea: any, croppedAreaPixels: any) => {
+  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
+  };
 
   const handleSaveCrop = async () => {
     if (!tempImageUrl || !croppedAreaPixels) return;
