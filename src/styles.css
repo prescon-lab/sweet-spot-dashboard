@@ -148,6 +148,29 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     @apply antialiased selection:bg-primary/20;
+    
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(150, 150, 150, 0.4) transparent;
+  }
+
+  /* Webkit Modern Minimalist Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(150, 150, 150, 0.4);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(150, 150, 150, 0.6);
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }
 

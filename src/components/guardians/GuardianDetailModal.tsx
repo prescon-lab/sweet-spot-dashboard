@@ -293,8 +293,11 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                       {/* Progress Bar */}
                       <div className="w-full bg-black/20 rounded-full h-3 overflow-hidden">
                         <div 
-                          className="bg-primary h-3 rounded-full transition-all duration-500" 
-                          style={{ width: `${goal.progress}%` }}
+                          className="h-3 rounded-full transition-all duration-500 shadow-sm" 
+                          style={{ 
+                            width: `${goal.progress}%`,
+                            backgroundColor: getContrastColor(bannerColor)
+                          }}
                         ></div>
                       </div>
                     </div>
