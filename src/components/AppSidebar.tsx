@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
+import { Calendar, Home, Inbox, Search, Settings, Users } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +26,11 @@ const items = [
     title: "Painel de EJs",
     url: "/p/ejs",
     icon: Search,
+  },
+  {
+    title: "Painel de Guardiões",
+    url: "/p/guardioes",
+    icon: Users,
   },
   {
     title: "Configurações",

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PTokenRouteImport } from './routes/p.$token'
 import { Route as PEjsRouteImport } from './routes/p.ejs'
+import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const PEjsRoute = PEjsRouteImport.update({
   path: '/p/ejs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PGuardioesRoute = PGuardioesRouteImport.update({
+  id: '/p/guardioes',
+  path: '/p/guardioes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/p/$token': typeof PTokenRoute
   '/p/ejs': typeof PEjsRoute
+  '/p/guardioes': typeof PGuardioesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/p/$token': typeof PTokenRoute
   '/p/ejs': typeof PEjsRoute
+  '/p/guardioes': typeof PGuardioesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/p/$token': typeof PTokenRoute
   '/p/ejs': typeof PEjsRoute
+  '/p/guardioes': typeof PGuardioesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/p/$token' | '/p/ejs'
+  fullPaths: '/' | '/p/$token' | '/p/ejs' | '/p/guardioes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/p/$token' | '/p/ejs'
-  id: '__root__' | '/' | '/p/$token' | '/p/ejs'
+  to: '/' | '/p/$token' | '/p/ejs' | '/p/guardioes'
+  id: '__root__' | '/' | '/p/$token' | '/p/ejs' | '/p/guardioes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PTokenRoute: typeof PTokenRoute
   PEjsRoute: typeof PEjsRoute
+  PGuardioesRoute: typeof PGuardioesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PEjsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/guardioes': {
+      id: '/p/guardioes'
+      path: '/p/guardioes'
+      fullPath: '/p/guardioes'
+      preLoaderRoute: typeof PGuardioesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PTokenRoute: PTokenRoute,
   PEjsRoute: PEjsRoute,
+  PGuardioesRoute: PGuardioesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
