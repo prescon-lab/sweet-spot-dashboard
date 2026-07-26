@@ -26,6 +26,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   const initialConfig = guardianStore.get(guardianData?.name || "");
   const [bannerColor, setBannerColor] = useState(initialConfig.color);
   const [quote, setQuote] = useState(initialConfig.quote || "FRASE DO DIA");
+  const [avatarUrl, setAvatarUrl] = useState(initialConfig.avatarUrl || "");
   const [showSettings, setShowSettings] = useState(false);
 
   // Sync to store on change
@@ -34,11 +35,22 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
       guardianStore.set(guardianData.name, {
         color: bannerColor,
         bannerUrl: "",
-        avatarUrl: "",
+        avatarUrl: avatarUrl,
         quote: quote
       });
     }
-  }, [bannerColor, quote, guardianData?.name]);
+  }, [bannerColor, quote, avatarUrl, guardianData?.name]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Fetch the EJs for this guardian
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
@@ -115,6 +127,20 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                       />
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground">Foto do Guardião</label>
+                    <Input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="text-xs file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    />
+                    {avatarUrl && (
+                      <Button variant="ghost" size="sm" onClick={() => setAvatarUrl("")} className="w-full text-xs text-red-500 h-6">
+                        Remover Foto
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -126,10 +152,15 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 {/* Photo */}
                 <div className="relative group cursor-pointer flex-shrink-0">
                   <Avatar 
-                    className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-white overflow-hidden flex flex-col justify-end bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC]"
+                    className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-white overflow-hidden flex flex-col items-center justify-center bg-gradient-to-b from-muted to-muted/50"
                   >
-                    <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-1/3 h-1/3 bg-white rounded-full opacity-80 blur-[2px]"></div>
-                    <div className="w-full h-[40%] bg-[#84CC16] rounded-t-[50%] absolute bottom-0"></div>
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-4xl font-bold text-muted-foreground/50">
+                        {guardianData?.name ? guardianData.name.substring(0, 2).toUpperCase() : "GU"}
+                      </span>
+                    )}
                   </Avatar>
                   <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm" onClick={() => setShowSettings(true)}>
                     <ImageIcon className="w-8 h-8 text-white" />

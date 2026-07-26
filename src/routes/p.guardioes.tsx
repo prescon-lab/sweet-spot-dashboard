@@ -90,6 +90,19 @@ function GuardiansPanel() {
               className="rounded-[32px] p-8 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:brightness-110 group relative overflow-hidden h-72"
               style={{ backgroundColor: config.color || '#0A1942' }}
             >
+              {/* Avatar Circle */}
+              <div 
+                className="w-32 h-32 rounded-full mb-6 flex flex-col items-center justify-center bg-gradient-to-b from-muted to-muted/50 overflow-hidden shadow-lg border-4 border-white/10"
+              >
+                {config.avatarUrl ? (
+                  <img src={config.avatarUrl} alt={guardian.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-4xl font-bold text-muted-foreground/50">
+                    {guardian.name.substring(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              
               {/* Guardian Name */}
               <h3 
                 className="font-bold text-2xl md:text-3xl tracking-widest uppercase w-full px-2 z-10 drop-shadow-sm leading-tight break-words"
