@@ -11,6 +11,7 @@ import { ejsList } from "@/lib/data";
 import { guardianStore } from "@/lib/guardianStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { Settings, Image as ImageIcon, Trash2 } from "lucide-react";
+import Cropper from "react-easy-crop";
 
 // Helper function to calculate brightness and return black or white for text contrast
 function getContrastColor(hexColor: string) {
@@ -39,6 +40,13 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialConfig.avatarUrl || null);
   const [quote, setQuote] = useState(initialConfig.quote || '');
   const [showSettings, setShowSettings] = useState(false);
+
+  // Crop states
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
 
   // Fetch the EJs for this guardian
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
@@ -94,38 +102,46 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 256;
-          const MAX_HEIGHT = 256;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
-          setAvatarUrl(compressedDataUrl);
-        };
-        img.src = reader.result as string;
+        setTempImageUrl(reader.result as string);
+        setCropModalOpen(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const onCropComplete = React.useCallback((croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleSaveCrop = async () => {
+    if (!tempImageUrl || !croppedAreaPixels) return;
+    
+    const img = new Image();
+    img.src = tempImageUrl;
+    await new Promise((resolve) => (img.onload = resolve));
+    
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    ctx.drawImage(
+      img,
+      croppedAreaPixels.x,
+      croppedAreaPixels.y,
+      croppedAreaPixels.width,
+      croppedAreaPixels.height,
+      0,
+      0,
+      256,
+      256
+    );
+    
+    const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.9); // High quality JPEG for avatar
+    setAvatarUrl(compressedDataUrl);
+    setCropModalOpen(false);
+    setTempImageUrl(null);
   };
 
 
@@ -147,6 +163,38 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
   return (
     <>
+      {/* Cropper Modal */}
+      <Dialog open={cropModalOpen} onOpenChange={(open) => {
+        setCropModalOpen(open);
+        if (!open) setTempImageUrl(null);
+      }}>
+        <DialogContent className="max-w-md bg-white p-6 rounded-3xl">
+          <h3 className="text-xl font-bold mb-4 text-[#0A1942] text-center">Ajustar Foto</h3>
+          <div className="relative w-full h-[300px] bg-black/5 rounded-2xl overflow-hidden mb-6">
+            {tempImageUrl && (
+              <Cropper
+                image={tempImageUrl}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" className="flex-1 rounded-xl" onClick={() => {
+              setCropModalOpen(false);
+              setTempImageUrl(null);
+            }}>Cancelar</Button>
+            <Button className="flex-1 bg-[#0A1942] text-white hover:bg-[#0A1942]/90 rounded-xl" onClick={handleSaveCrop}>Salvar Foto</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent 
           className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px] transition-colors duration-300"
