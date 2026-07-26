@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ejsList } from "@/lib/data";
+import { guardianStore } from "@/lib/guardianStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { Settings, Image as ImageIcon } from "lucide-react";
 
@@ -22,9 +23,22 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   const [selectedEj, setSelectedEj] = useState<any>(null);
 
   // States for customization
-  const [bannerColor, setBannerColor] = useState("#0A1942");
-  const [bannerImageUrl, setBannerImageUrl] = useState("");
+  const initialConfig = guardianStore.get(guardianData?.name || "");
+  const [bannerColor, setBannerColor] = useState(initialConfig.color);
+  const [bannerImageUrl, setBannerImageUrl] = useState(initialConfig.bannerUrl);
+  const [avatarUrl, setAvatarUrl] = useState(initialConfig.avatarUrl);
   const [showSettings, setShowSettings] = useState(false);
+
+  // Sync to store on change
+  React.useEffect(() => {
+    if (guardianData?.name) {
+      guardianStore.set(guardianData.name, {
+        color: bannerColor,
+        bannerUrl: bannerImageUrl,
+        avatarUrl: avatarUrl
+      });
+    }
+  }, [bannerColor, bannerImageUrl, avatarUrl, guardianData?.name]);
 
   // Fetch the EJs for this guardian
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
@@ -84,12 +98,23 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">Imagem (URL)</label>
+                    <label className="text-xs font-semibold text-muted-foreground">Banner (URL)</label>
                     <div className="flex gap-2">
                       <Input 
-                        placeholder="https://exemplo.com/imagem.jpg" 
+                        placeholder="Link do banner..." 
                         value={bannerImageUrl}
                         onChange={(e) => setBannerImageUrl(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground">Figurinha/Foto (URL)</label>
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="Link da foto..." 
+                        value={avatarUrl}
+                        onChange={(e) => setAvatarUrl(e.target.value)}
                         className="h-8 text-xs"
                       />
                     </div>
@@ -104,17 +129,19 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               <div className="relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 w-full">
                 {/* Photo */}
                 <div className="relative group cursor-pointer flex-shrink-0">
-                  <Avatar className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-white">
-                    {/* Placeholder for the landscape style in mockup */}
-                    <div className="w-full h-full relative overflow-hidden flex flex-col justify-end bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC]">
-                      <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-1/3 h-1/3 bg-white rounded-full opacity-80 blur-[2px]"></div>
-                      <div className="w-full h-[40%] bg-[#84CC16] rounded-t-[50%] absolute bottom-0"></div>
-                      <div className="absolute inset-0 flex items-center justify-center font-bold text-4xl text-[#0A1942] mix-blend-overlay">
+                  <Avatar 
+                    className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-white overflow-hidden flex items-center justify-center"
+                    style={{ backgroundColor: bannerColor }}
+                  >
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex items-center justify-center font-bold text-4xl text-white">
                         {guardianData?.name ? guardianData.name.substring(0, 2).toUpperCase() : "GU"}
                       </div>
-                    </div>
+                    )}
                   </Avatar>
-                  <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
+                  <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm" onClick={() => setShowSettings(true)}>
                     <ImageIcon className="w-8 h-8 text-white" />
                   </div>
                 </div>

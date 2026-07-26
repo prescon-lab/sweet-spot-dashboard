@@ -3,7 +3,9 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { ejsList } from "@/lib/data";
+import { guardianStore } from "@/lib/guardianStore";
 import { GuardianDetailModal } from "@/components/guardians/GuardianDetailModal";
+import React from "react";
 
 export const Route = createFileRoute("/p/guardioes")({
   component: GuardiansPanel,
@@ -13,6 +15,13 @@ function GuardiansPanel() {
   const [searchTerm, setSearchTerm] = useState("");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedGuardian, setSelectedGuardian] = useState<any>(null);
+  const [updateTrigger, setUpdateTrigger] = useState(0);
+
+  React.useEffect(() => {
+    const handleUpdate = () => setUpdateTrigger(prev => prev + 1);
+    window.addEventListener('guardianStoreUpdated', handleUpdate);
+    return () => window.removeEventListener('guardianStoreUpdated', handleUpdate);
+  }, []);
 
   // Derivar lista de guardiões únicos e calcular a quantidade de EJs
   const guardiansMap = new Map<string, number>();
@@ -53,23 +62,33 @@ function GuardiansPanel() {
 
       {/* Grid of Guardians */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-        {filteredGuardians.map((guardian, i) => (
-          <div 
-            key={i}
-            onClick={() => handleCardClick(guardian)}
-            className="bg-white border border-border/50 rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:border-primary/20 group"
-          >
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#0A1942] to-[#1C2F6A] mb-4 flex items-center justify-center border-4 border-transparent group-hover:border-primary/10 transition-all shadow-inner">
-              <span className="text-white text-3xl font-bold">
-                {guardian.name.substring(0, 2).toUpperCase()}
-              </span>
-            </div>
-            <h3 className="text-[#0A1942] font-bold text-sm tracking-wider uppercase truncate w-full">{guardian.name}</h3>
+        {filteredGuardians.map((guardian, i) => {
+          const config = guardianStore.get(guardian.name);
+          return (
+            <div 
+              key={i}
+              onClick={() => handleCardClick(guardian)}
+              className="bg-white border border-border/50 rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:border-primary/20 group"
+            >
+              <div 
+                className="w-24 h-24 rounded-full mb-4 flex items-center justify-center border-4 border-transparent group-hover:border-primary/10 transition-all shadow-inner overflow-hidden"
+                style={{ backgroundColor: config.color || '#0A1942' }}
+              >
+                {config.avatarUrl ? (
+                  <img src={config.avatarUrl} alt={guardian.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white text-3xl font-bold">
+                    {guardian.name.substring(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <h3 className="text-[#0A1942] font-bold text-sm tracking-wider uppercase truncate w-full">{guardian.name}</h3>
             <div className="mt-2 bg-muted/50 rounded-full px-3 py-1">
               <p className="text-muted-foreground text-xs font-semibold uppercase">{guardian.ejCount} {guardian.ejCount === 1 ? 'EJ' : 'EJs'}</p>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {filteredGuardians.length === 0 && (
