@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ejsList } from "@/lib/data";
 import { guardianStore } from "@/lib/guardianStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
-import { Settings, Image as ImageIcon } from "lucide-react";
+import { Settings, Image as ImageIcon, Trash2 } from "lucide-react";
 
 // Helper function to calculate brightness and return black or white for text contrast
 function getContrastColor(hexColor: string) {
@@ -250,19 +250,19 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                           <div className="w-px h-full bg-black/20" style={{ backgroundColor: `${getContrastColor(bannerColor)}33` }}></div>
                         </div>
                         <div className="flex-1">
-                          <div className="flex justify-between items-start mb-1">
+                          <div className="flex flex-col items-start mb-1">
+                            <span className="text-[10px] opacity-60 font-semibold tracking-widest mb-0.5">{note.date}</span>
                             <span className="text-xs font-bold uppercase tracking-wider opacity-70">{note.type} - {note.ejName}</span>
-                            <span className="text-[10px] opacity-80 bg-black/10 px-2 py-0.5 rounded-full">{note.date}</span>
                           </div>
                           <p className="text-sm opacity-90 pr-6">{note.message}</p>
                         </div>
-                        {/* Delete Button (X) */}
+                        {/* Delete Button (Trash) */}
                         <button
                           onClick={(e) => handleDeleteNotification(e, note.id)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 opacity-50 hover:opacity-100 hover:bg-black/40 transition-all text-sm font-bold text-white shadow-sm"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 opacity-50 hover:opacity-100 hover:bg-black/40 transition-all text-white shadow-sm"
                           title="Excluir notificação"
                         >
-                          X
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     );
