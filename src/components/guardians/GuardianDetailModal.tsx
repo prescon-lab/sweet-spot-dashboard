@@ -12,6 +12,17 @@ import { guardianStore } from "@/lib/guardianStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { Settings, Image as ImageIcon } from "lucide-react";
 
+// Helper function to calculate brightness and return black or white for text contrast
+function getContrastColor(hexColor: string) {
+  if (!hexColor) return '#FFFFFF';
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 128) ? '#000000' : '#FFFFFF';
+}
+
 interface GuardianDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -84,16 +95,16 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] bg-[#F8F9FA] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px]">
+        <DialogContent 
+          className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px] transition-colors duration-300"
+          style={{ backgroundColor: bannerColor }}
+        >
           
           {/* Main scrollable area */}
-          <div className="flex-1 overflow-auto rounded-[32px]">
+          <div className="flex-1 overflow-auto rounded-[32px] custom-scrollbar">
             {/* Customizable Banner Area */}
             <div 
-              className="relative w-full min-h-[300px] flex items-end p-8 md:p-12 transition-all duration-300"
-              style={{ 
-                backgroundColor: bannerColor,
-              }}
+              className="relative w-full min-h-[250px] flex items-end p-8 md:p-12"
             >
               {/* Settings Toggle Button */}
               <div className="absolute top-4 right-4 z-20">
@@ -171,14 +182,16 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 <div className="flex-1 text-center md:text-left space-y-2 mb-2">
                   <Input
                     defaultValue={guardianData?.name || "NOME DO GUARDIÃO"}
-                    className="text-3xl md:text-4xl font-bold h-14 border-transparent bg-transparent text-white hover:bg-black/10 focus-visible:bg-black/20 focus-visible:ring-white/30 transition-colors px-2 -ml-2 w-full max-w-md uppercase tracking-wider placeholder:text-white/50"
+                    className="text-3xl md:text-4xl font-bold h-14 border-transparent bg-transparent hover:bg-black/10 focus-visible:bg-black/20 transition-colors px-2 -ml-2 w-full max-w-md uppercase tracking-wider"
+                    style={{ color: getContrastColor(bannerColor) }}
                   />
                   <div className="inline-block w-full max-w-lg mt-2">
                     <Input 
                       placeholder="FRASE DO DIA" 
                       value={quote}
                       onChange={(e) => setQuote(e.target.value)}
-                      className="h-auto py-2 text-sm md:text-base bg-black/40 text-white font-medium border-transparent w-full rounded-2xl px-6 text-center md:text-left focus-visible:ring-white/30 uppercase tracking-widest placeholder:text-white/50" 
+                      className="h-auto py-2 text-sm md:text-base bg-black/20 border-transparent w-full rounded-2xl px-6 text-center md:text-left focus-visible:ring-white/30 uppercase tracking-widest" 
+                      style={{ color: getContrastColor(bannerColor) }}
                     />
                   </div>
                 </div>
@@ -186,13 +199,13 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
             </div>
 
             {/* Notifications and Results Area (2 columns) */}
-            <div className="flex flex-col md:flex-row min-h-[300px] rounded-3xl overflow-hidden mx-4 md:mx-8 mb-8 shadow-sm">
+            <div className="flex flex-col md:flex-row min-h-[300px] rounded-3xl overflow-hidden mx-4 md:mx-8 mb-8 gap-4">
               {/* Left Column - Notificações (Integrated Color) */}
               <div 
-                className="flex-1 p-8 text-white flex flex-col h-[400px] transition-colors duration-300"
-                style={{ backgroundColor: bannerColor }}
+                className="flex-1 p-8 flex flex-col h-[400px] rounded-3xl bg-black/10 backdrop-blur-md"
+                style={{ color: getContrastColor(bannerColor) }}
               >
-                <h3 className="text-xl font-semibold mb-6 tracking-wide text-white border-b border-white/20 pb-4">
+                <h3 className="text-xl font-semibold mb-6 tracking-wide border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
                   Sincronização / Notificações
                 </h3>
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
@@ -202,44 +215,47 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                       <div 
                         key={note.id} 
                         onClick={() => linkedEj && handleEjClick(linkedEj)}
-                        className="flex gap-4 p-4 rounded-3xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]"
+                        className="flex gap-4 p-4 rounded-3xl bg-black/10 border border-transparent hover:bg-black/20 transition-all cursor-pointer hover:scale-[1.02]"
                       >
                         <div className="flex flex-col items-center gap-2 mt-1">
                           <div className={`w-3 h-3 rounded-full ${note.done ? 'bg-green-500' : 'bg-amber-400'}`}></div>
-                          <div className="w-px h-full bg-white/20"></div>
+                          <div className="w-px h-full bg-black/20" style={{ backgroundColor: `${getContrastColor(bannerColor)}33` }}></div>
                         </div>
                         <div className="flex-1">
                           <div className="flex justify-between items-start mb-1">
-                            <span className="text-xs font-bold uppercase tracking-wider text-white/70">{note.type} - {note.ejName}</span>
-                            <span className="text-[10px] text-white/60 bg-white/10 px-2 py-0.5 rounded-full">{note.date}</span>
+                            <span className="text-xs font-bold uppercase tracking-wider opacity-70">{note.type} - {note.ejName}</span>
+                            <span className="text-[10px] opacity-80 bg-black/10 px-2 py-0.5 rounded-full">{note.date}</span>
                           </div>
-                          <p className="text-sm text-white/90">{note.message}</p>
+                          <p className="text-sm opacity-90">{note.message}</p>
                         </div>
                       </div>
                     );
                   })}
                   {mockNotifications.length === 0 && (
-                    <p className="text-sm text-white/40 text-center py-8">Nenhuma notificação sincronizada.</p>
+                    <p className="text-sm opacity-50 text-center py-8">Nenhuma notificação sincronizada.</p>
                   )}
                 </div>
               </div>
 
               {/* Right Column - Resultados (Light) */}
-              <div className="flex-1 bg-white p-8 flex flex-col h-[400px]">
-                <h3 className="text-xl font-semibold mb-6 tracking-wide text-[#0A1942] uppercase border-b border-[#0A1942]/10 pb-4">
+              <div 
+                className="flex-1 p-8 flex flex-col h-[400px] rounded-3xl bg-white/20 backdrop-blur-md"
+                style={{ color: getContrastColor(bannerColor) }}
+              >
+                <h3 className="text-xl font-semibold mb-6 tracking-wide uppercase border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
                   Acompanhamento de Metas
                 </h3>
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
                   {mockGoals.map((goal, idx) => (
-                    <div key={idx} className="bg-[#F5F5F5] p-4 rounded-3xl border border-transparent">
+                    <div key={idx} className="bg-black/10 p-4 rounded-3xl border border-transparent">
                       <div className="flex justify-between items-center mb-2">
-                        <h4 className="font-bold text-[#0A1942]">{goal.ejName}</h4>
-                        <span className="text-xs font-bold bg-[#E0F2FE] text-[#0A1942] px-3 py-1 rounded-full">
+                        <h4 className="font-bold">{goal.ejName}</h4>
+                        <span className="text-xs font-bold bg-black/20 px-3 py-1 rounded-full">
                           {goal.completed}/{goal.total} Metas
                         </span>
                       </div>
                       {/* Progress Bar */}
-                      <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                      <div className="w-full bg-black/20 rounded-full h-3 overflow-hidden">
                         <div 
                           className="bg-primary h-3 rounded-full transition-all duration-500" 
                           style={{ width: `${goal.progress}%` }}
@@ -248,17 +264,20 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                     </div>
                   ))}
                   {mockGoals.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-8">Nenhuma meta associada.</p>
+                    <p className="text-sm opacity-50 text-center py-8">Nenhuma meta associada.</p>
                   )}
                 </div>
               </div>
             </div>
 
             {/* EJs List Area */}
-            <div className="p-8 md:p-12 bg-[#FAF9F6]">
+            <div 
+              className="p-8 md:p-12 mx-4 md:mx-8 mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
+              style={{ color: getContrastColor(bannerColor) }}
+            >
               <div className="mb-6">
-                <h3 className="text-xl font-bold text-[#0A1942]">EJs Acompanhadas ({guardianEjs.length})</h3>
-                <p className="text-muted-foreground text-sm">Clique em uma EJ para visualizar seus detalhes.</p>
+                <h3 className="text-xl font-bold">EJs Acompanhadas ({guardianEjs.length})</h3>
+                <p className="opacity-70 text-sm">Clique em uma EJ para visualizar seus detalhes.</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -266,7 +285,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                   <div 
                     key={ej.id}
                     onClick={() => handleEjClick(ej)}
-                    className="bg-white rounded-3xl p-4 pr-6 flex items-center gap-5 cursor-pointer shadow-sm hover:shadow-md hover:scale-[1.02] transition-all border border-transparent hover:border-primary/10 group"
+                    className="bg-black/10 rounded-3xl p-4 pr-6 flex items-center gap-5 cursor-pointer shadow-sm hover:bg-black/20 hover:scale-[1.02] transition-all border border-transparent group"
                   >
                     {/* Pill Avatar */}
                     <div className="w-16 h-16 rounded-full bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] overflow-hidden flex flex-col justify-end flex-shrink-0 shadow-inner">
@@ -275,24 +294,24 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                     
                     {/* Text */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-[#0A1942] text-lg truncate group-hover:text-primary transition-colors">{ej.name}</h4>
-                      <p className="text-[10px] text-muted-foreground uppercase mt-0.5 tracking-wider font-semibold">Acompanhamento</p>
+                      <h4 className="font-bold text-lg truncate group-hover:opacity-80 transition-opacity">{ej.name}</h4>
+                      <p className="text-[10px] uppercase mt-0.5 tracking-wider font-semibold opacity-70">Acompanhamento</p>
                     </div>
                   </div>
                 ))}
                 
                 {guardianEjs.length === 0 && (
-                  <div className="col-span-full text-center py-12 border-2 border-dashed rounded-3xl bg-white/50">
-                    <p className="text-muted-foreground">Nenhuma EJ atribuída a este guardião.</p>
+                  <div className="col-span-full text-center py-12 border-2 border-dashed border-black/20 rounded-3xl bg-black/5">
+                    <p className="opacity-70">Nenhuma EJ atribuída a este guardião.</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
           
-          {/* Bottom Actions Bar (Optional, for saving explicitly) */}
-          <div className="bg-white p-4 flex justify-end z-20">
-            <Button onClick={() => onOpenChange(false)} className="bg-[#0A1942] hover:bg-[#1C2F6A] rounded-full px-8 font-bold">Salvar e Fechar</Button>
+          {/* Bottom Actions Bar */}
+          <div className="bg-black/20 backdrop-blur-md p-4 flex justify-end z-20">
+            <Button onClick={() => onOpenChange(false)} className="bg-white text-black hover:bg-white/90 rounded-full px-8 font-bold shadow-lg">Salvar e Fechar</Button>
           </div>
         </DialogContent>
       </Dialog>
