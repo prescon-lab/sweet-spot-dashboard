@@ -71,8 +71,6 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  if (!guardianData) return null;
-
   // Sync to store on change
   React.useEffect(() => {
     if (guardianData?.name) {
@@ -84,6 +82,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
       });
     }
   }, [bannerColor, quote, avatarUrl, guardianData?.name]);
+
+  if (!guardianData) return null;
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
