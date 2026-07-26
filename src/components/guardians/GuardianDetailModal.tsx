@@ -120,7 +120,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
               {/* Settings Panel (Absolute) */}
               {showSettings && (
-                <div className="absolute top-16 right-4 z-20 bg-white p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200">
+                <div className="absolute top-16 right-4 z-20 bg-white p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200 text-black">
                   <h4 className="font-bold text-sm text-[#0A1942]">Personalizar Banner</h4>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground">Cor do Painel</label>
@@ -155,15 +155,12 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 </div>
               )}
 
-              {/* Solid Background overlay is not needed if no bannerImage, but keeping structure clean */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent z-0 pointer-events-none"></div>
-
               {/* Guardian Info Content */}
               <div className="relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 w-full">
                 {/* Photo */}
                 <div className="relative group cursor-pointer flex-shrink-0">
                   <Avatar 
-                    className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-white overflow-hidden flex flex-col items-center justify-center bg-gradient-to-b from-muted to-muted/50"
+                    className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-black/10 overflow-hidden flex flex-col items-center justify-center"
                   >
                     {avatarUrl ? (
                       <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -288,8 +285,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                     className="bg-black/10 rounded-3xl p-4 pr-6 flex items-center gap-5 cursor-pointer shadow-sm hover:bg-black/20 hover:scale-[1.02] transition-all border border-transparent group"
                   >
                     {/* Pill Avatar */}
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] overflow-hidden flex flex-col justify-end flex-shrink-0 shadow-inner">
-                      <div className="w-full h-[45%] bg-[#84CC16] rounded-t-[50%]"></div>
+                    <div className="w-16 h-16 rounded-full bg-black/10 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-inner">
+                      <span className="text-xl font-bold opacity-50">{ej.name.substring(0, 2).toUpperCase()}</span>
                     </div>
                     
                     {/* Text */}
