@@ -79,9 +79,6 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               className="relative w-full min-h-[300px] flex items-end p-8 md:p-12 transition-all duration-300 rounded-t-2xl"
               style={{ 
                 backgroundColor: bannerColor,
-                backgroundImage: bannerImageUrl ? `url(${bannerImageUrl})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
               }}
             >
               {/* Settings Toggle Button */}
