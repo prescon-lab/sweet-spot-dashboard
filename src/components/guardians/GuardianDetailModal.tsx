@@ -35,9 +35,9 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
   // States for customization
   const initialConfig = guardianStore.get(guardianData?.name || "");
-  const [bannerColor, setBannerColor] = useState(guardianData?.bannerColor || '#0A1942');
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(guardianData?.avatarUrl || null);
-  const [quote, setQuote] = useState(guardianData?.quote || '');
+  const [bannerColor, setBannerColor] = useState(initialConfig.color || '#0A1942');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialConfig.avatarUrl || null);
+  const [quote, setQuote] = useState(initialConfig.quote || '');
   const [showSettings, setShowSettings] = useState(false);
 
   // Fetch the EJs for this guardian
@@ -55,10 +55,14 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
   const [notifications, setNotifications] = useState(mockNotifications);
 
-  // Sync notifications when modal opens
+  // Sync notifications and config when modal opens
   React.useEffect(() => {
     if (open) {
       setNotifications(mockNotifications);
+      const config = guardianStore.get(guardianData?.name || "");
+      setBannerColor(config.color || '#0A1942');
+      setAvatarUrl(config.avatarUrl || null);
+      setQuote(config.quote || '');
     }
   }, [open, guardianData?.name]);
 

@@ -66,18 +66,7 @@ function GuardiansPanel() {
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-fade-in space-y-6">
       
-      {/* Top Bar (Dark Blue) */}
-      <div className="bg-[#0A1942] rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 shadow-lg">
-        <div className="relative w-full md:w-96">
-          <Input 
-            type="search" 
-            placeholder="BUSCAR POR NOME DO GUARDIÃO" 
-            className="w-full bg-white text-[#0A1942] placeholder:text-[#0A1942]/60 rounded-full h-10 px-6 font-semibold border-none"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+
 
       {/* Grid of Guardians */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
@@ -111,10 +100,7 @@ function GuardiansPanel() {
                 {guardian.name}
               </h3>
 
-              {/* Number of EJs - Discrete badge */}
-              <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                <p className="text-white text-[10px] font-bold uppercase">{guardian.ejCount} {guardian.ejCount === 1 ? 'EJ' : 'EJs'}</p>
-              </div>
+
           </div>
           );
         })}
