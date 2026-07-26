@@ -35,10 +35,36 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
   // States for customization
   const initialConfig = guardianStore.get(guardianData?.name || "");
-  const [bannerColor, setBannerColor] = useState(initialConfig.color);
-  const [quote, setQuote] = useState(initialConfig.quote || "FRASE DO DIA");
-  const [avatarUrl, setAvatarUrl] = useState(initialConfig.avatarUrl || "");
+  const [bannerColor, setBannerColor] = useState(guardianData?.bannerColor || '#0A1942');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(guardianData?.avatarUrl || null);
+  const [quote, setQuote] = useState(guardianData?.quote || '');
   const [showSettings, setShowSettings] = useState(false);
+
+  // Fetch the EJs for this guardian
+  const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
+
+  // MOCK DATA GENERATION
+  const mockNotifications = guardianEjs.map((ej, idx) => ({
+    id: idx,
+    ejName: ej.name,
+    type: idx % 2 === 0 ? "Daily" : "Funil de Vendas",
+    message: idx % 2 === 0 ? "Saídas da daily registradas." : "Novo lead cadastrado no funil.",
+    date: "Hoje",
+    done: idx % 3 === 0
+  }));
+
+  const [notifications, setNotifications] = useState(mockNotifications);
+
+  const handleClearNotifications = () => {
+    setNotifications([]);
+  };
+
+  const handleDeleteNotification = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  if (!guardianData) return null;
 
   // Sync to store on change
   React.useEffect(() => {
@@ -202,17 +228,27 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 className="flex-1 p-8 flex flex-col h-[400px] rounded-3xl bg-black/10 backdrop-blur-md"
                 style={{ color: getContrastColor(bannerColor) }}
               >
-                <h3 className="text-xl font-semibold mb-6 tracking-wide border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
-                  Sincronização / Notificações
-                </h3>
+                <div className="flex justify-between items-center mb-6 border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
+                  <h3 className="text-xl font-semibold tracking-wide">
+                    Notificações
+                  </h3>
+                  {notifications.length > 0 && (
+                    <button 
+                      onClick={handleClearNotifications}
+                      className="text-xs font-bold uppercase tracking-wider opacity-70 hover:opacity-100 transition-opacity bg-black/10 px-3 py-1.5 rounded-full"
+                    >
+                      Limpar Notificações
+                    </button>
+                  )}
+                </div>
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                  {mockNotifications.map((note) => {
+                  {notifications.map((note) => {
                     const linkedEj = guardianEjs.find(ej => ej.name === note.ejName);
                     return (
                       <div 
                         key={note.id} 
                         onClick={() => linkedEj && handleEjClick(linkedEj)}
-                        className="flex gap-4 p-4 rounded-3xl bg-black/10 border border-transparent hover:bg-black/20 transition-all cursor-pointer hover:scale-[1.02]"
+                        className="flex gap-4 p-4 rounded-3xl bg-black/10 border border-transparent hover:bg-black/20 transition-all cursor-pointer hover:scale-[1.02] relative group"
                       >
                         <div className="flex flex-col items-center gap-2 mt-1">
                           <div className={`w-3 h-3 rounded-full ${note.done ? 'bg-green-500' : 'bg-amber-400'}`}></div>
@@ -223,12 +259,20 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                             <span className="text-xs font-bold uppercase tracking-wider opacity-70">{note.type} - {note.ejName}</span>
                             <span className="text-[10px] opacity-80 bg-black/10 px-2 py-0.5 rounded-full">{note.date}</span>
                           </div>
-                          <p className="text-sm opacity-90">{note.message}</p>
+                          <p className="text-sm opacity-90 pr-6">{note.message}</p>
                         </div>
+                        {/* Delete Button (X) */}
+                        <button
+                          onClick={(e) => handleDeleteNotification(e, note.id)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/10 opacity-0 group-hover:opacity-100 hover:bg-black/20 transition-all text-sm font-bold"
+                          title="Excluir notificação"
+                        >
+                          X
+                        </button>
                       </div>
                     );
                   })}
-                  {mockNotifications.length === 0 && (
+                  {notifications.length === 0 && (
                     <p className="text-sm opacity-50 text-center py-8">Nenhuma notificação sincronizada.</p>
                   )}
                 </div>
