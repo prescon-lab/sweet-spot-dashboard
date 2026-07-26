@@ -53,18 +53,18 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
             <div className="flex items-center gap-4 flex-1">
               <Avatar className="h-16 w-16 border-2 border-primary/10">
                 <AvatarFallback className="bg-muted text-lg font-bold">
-                  NO
+                  {ejData?.name ? ejData.name.substring(0, 2).toUpperCase() : "NO"}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-2 flex-1 max-w-xl">
                 <Input
-                  defaultValue="Nova EJ"
+                  defaultValue={ejData?.name || "Nova EJ"}
                   className="text-2xl font-bold h-12 border-primary/20 bg-primary/5 focus-visible:ring-primary/30"
                 />
                 <div className="flex gap-2">
-                  <Input placeholder="Guardião" defaultValue="João Silva" className="h-8 text-sm bg-muted/30 border-transparent" />
-                  <Input placeholder="Grupo" defaultValue="Grupo A" className="h-8 text-sm bg-muted/30 border-transparent" />
-                  <Input placeholder="CM" className="h-8 text-sm bg-muted/30 border-transparent" />
+                  <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-8 text-sm bg-muted/30 border-transparent" />
+                  <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-8 text-sm bg-muted/30 border-transparent" />
+                  <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-8 text-sm bg-muted/30 border-transparent" />
                 </div>
               </div>
             </div>
