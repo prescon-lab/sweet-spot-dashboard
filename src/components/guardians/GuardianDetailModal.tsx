@@ -25,8 +25,6 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   // States for customization
   const initialConfig = guardianStore.get(guardianData?.name || "");
   const [bannerColor, setBannerColor] = useState(initialConfig.color);
-  const [bannerImageUrl, setBannerImageUrl] = useState(initialConfig.bannerUrl);
-  const [avatarUrl, setAvatarUrl] = useState(initialConfig.avatarUrl);
   const [showSettings, setShowSettings] = useState(false);
 
   // Sync to store on change
@@ -34,14 +32,35 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     if (guardianData?.name) {
       guardianStore.set(guardianData.name, {
         color: bannerColor,
-        bannerUrl: bannerImageUrl,
-        avatarUrl: avatarUrl
+        bannerUrl: "", // Removed per user request
+        avatarUrl: ""  // Removed per user request
       });
     }
-  }, [bannerColor, bannerImageUrl, avatarUrl, guardianData?.name]);
+  }, [bannerColor, guardianData?.name]);
 
   // Fetch the EJs for this guardian
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
+
+  // MOCK DATA GENERATION
+  const mockNotifications = guardianEjs.map((ej, idx) => ({
+    id: idx,
+    ejName: ej.name,
+    type: idx % 2 === 0 ? "Daily" : "Funil de Vendas",
+    message: idx % 2 === 0 ? "Saídas da daily registradas." : "Novo lead cadastrado no funil.",
+    date: "Hoje",
+    done: idx % 3 === 0
+  }));
+
+  const mockGoals = guardianEjs.map((ej, idx) => {
+    const total = 5 + (idx % 3);
+    const completed = 2 + (idx % 4);
+    return {
+      ejName: ej.name,
+      total,
+      completed,
+      progress: Math.round((completed / total) * 100)
+    };
+  });
 
   const handleEjClick = (ej: any) => {
     setSelectedEj(ej);
@@ -82,7 +101,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 <div className="absolute top-16 right-4 z-20 bg-white p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200">
                   <h4 className="font-bold text-sm text-[#0A1942]">Personalizar Banner</h4>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">Cor de Fundo</label>
+                    <label className="text-xs font-semibold text-muted-foreground">Cor do Painel</label>
                     <div className="flex gap-2">
                       <input 
                         type="color" 
@@ -97,49 +116,21 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">Banner (URL)</label>
-                    <div className="flex gap-2">
-                      <Input 
-                        placeholder="Link do banner..." 
-                        value={bannerImageUrl}
-                        onChange={(e) => setBannerImageUrl(e.target.value)}
-                        className="h-8 text-xs"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">Figurinha/Foto (URL)</label>
-                    <div className="flex gap-2">
-                      <Input 
-                        placeholder="Link da foto..." 
-                        value={avatarUrl}
-                        onChange={(e) => setAvatarUrl(e.target.value)}
-                        className="h-8 text-xs"
-                      />
-                    </div>
-                  </div>
                 </div>
               )}
 
-              {/* Dark Gradient Overlay to ensure text readability if there's an image */}
-              {bannerImageUrl && <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-0"></div>}
+              {/* Solid Background overlay is not needed if no bannerImage, but keeping structure clean */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent z-0 pointer-events-none"></div>
 
               {/* Guardian Info Content */}
               <div className="relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 w-full">
                 {/* Photo */}
                 <div className="relative group cursor-pointer flex-shrink-0">
                   <Avatar 
-                    className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-white overflow-hidden flex items-center justify-center"
-                    style={{ backgroundColor: bannerColor }}
+                    className="h-32 w-32 md:h-40 md:w-40 border-4 border-white/20 shadow-2xl transition-transform group-hover:scale-105 bg-white overflow-hidden flex flex-col justify-end bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC]"
                   >
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="flex items-center justify-center font-bold text-4xl text-white">
-                        {guardianData?.name ? guardianData.name.substring(0, 2).toUpperCase() : "GU"}
-                      </div>
-                    )}
+                    <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-1/3 h-1/3 bg-white rounded-full opacity-80 blur-[2px]"></div>
+                    <div className="w-full h-[40%] bg-[#84CC16] rounded-t-[50%] absolute bottom-0"></div>
                   </Avatar>
                   <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm" onClick={() => setShowSettings(true)}>
                     <ImageIcon className="w-8 h-8 text-white" />
@@ -164,23 +155,61 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
             </div>
 
             {/* Notifications and Results Area (2 columns) */}
-            <div className="flex flex-col md:flex-row min-h-[250px]">
+            <div className="flex flex-col md:flex-row min-h-[300px]">
               {/* Left Column - Notificações (Dark) */}
-              <div className="flex-1 bg-black p-8 text-white flex flex-col">
-                <h3 className="text-xl font-semibold mb-4 tracking-wide">Notificações</h3>
-                <Textarea 
-                  placeholder="Escreva aqui as notificações ou lembretes..." 
-                  className="flex-1 bg-transparent border-transparent resize-none focus-visible:ring-1 focus-visible:ring-white/20 text-white/80 placeholder:text-white/40 p-0 text-sm"
-                />
+              <div className="flex-1 bg-black p-8 text-white flex flex-col h-[400px]">
+                <h3 className="text-xl font-semibold mb-6 tracking-wide text-white border-b border-white/20 pb-4">
+                  Sincronização / Notificações
+                </h3>
+                <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                  {mockNotifications.map((note) => (
+                    <div key={note.id} className="flex gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                      <div className="flex flex-col items-center gap-2 mt-1">
+                        <div className={`w-3 h-3 rounded-full ${note.done ? 'bg-green-500' : 'bg-amber-400'}`}></div>
+                        <div className="w-px h-full bg-white/10"></div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-xs font-bold uppercase tracking-wider text-white/50">{note.type} - {note.ejName}</span>
+                          <span className="text-[10px] text-white/40 bg-white/5 px-2 py-0.5 rounded-full">{note.date}</span>
+                        </div>
+                        <p className="text-sm text-white/90">{note.message}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {mockNotifications.length === 0 && (
+                    <p className="text-sm text-white/40 text-center py-8">Nenhuma notificação sincronizada.</p>
+                  )}
+                </div>
               </div>
 
               {/* Right Column - Resultados (Light) */}
-              <div className="flex-1 bg-[#F5F5F5] p-8 flex flex-col border-l border-border/50">
-                <h3 className="text-xl font-semibold mb-4 tracking-wide text-[#0A1942] uppercase text-center md:text-left">RESULTADO DAS EJ'S</h3>
-                <Textarea 
-                  placeholder="Anotações de resultados e acompanhamentos..." 
-                  className="flex-1 bg-transparent border-transparent resize-none focus-visible:ring-1 focus-visible:ring-primary/20 text-[#0A1942]/80 p-0 text-sm"
-                />
+              <div className="flex-1 bg-[#F5F5F5] p-8 flex flex-col h-[400px] border-l border-border/50">
+                <h3 className="text-xl font-semibold mb-6 tracking-wide text-[#0A1942] uppercase border-b border-[#0A1942]/10 pb-4">
+                  Acompanhamento de Metas
+                </h3>
+                <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                  {mockGoals.map((goal, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-border/40">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-bold text-[#0A1942]">{goal.ejName}</h4>
+                        <span className="text-xs font-bold bg-[#E0F2FE] text-[#0A1942] px-2 py-1 rounded-full">
+                          {goal.completed}/{goal.total} Metas
+                        </span>
+                      </div>
+                      {/* Progress Bar */}
+                      <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+                        <div 
+                          className="bg-primary h-2.5 rounded-full transition-all duration-500" 
+                          style={{ width: `${goal.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                  {mockGoals.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-8">Nenhuma meta associada.</p>
+                  )}
+                </div>
               </div>
             </div>
 

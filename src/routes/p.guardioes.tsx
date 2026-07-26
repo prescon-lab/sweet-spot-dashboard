@@ -68,24 +68,26 @@ function GuardiansPanel() {
             <div 
               key={i}
               onClick={() => handleCardClick(guardian)}
-              className="bg-white border border-border/50 rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:border-primary/20 group"
+              className="rounded-[32px] p-8 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:brightness-110 group relative overflow-hidden h-72"
+              style={{ backgroundColor: config.color || '#0A1942' }}
             >
+              {/* White Circle Avatar Placeholder */}
               <div 
-                className="w-24 h-24 rounded-full mb-4 flex items-center justify-center border-4 border-transparent group-hover:border-primary/10 transition-all shadow-inner overflow-hidden"
-                style={{ backgroundColor: config.color || '#0A1942' }}
+                className="w-32 h-32 rounded-full mb-6 flex items-center justify-center bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] overflow-hidden shadow-lg border-4 border-white/10"
               >
-                {config.avatarUrl ? (
-                  <img src={config.avatarUrl} alt={guardian.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-white text-3xl font-bold">
-                    {guardian.name.substring(0, 2).toUpperCase()}
-                  </span>
-                )}
+                <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-1/3 h-1/3 bg-white rounded-full opacity-80 blur-[2px]"></div>
+                <div className="w-full h-[40%] bg-[#84CC16] rounded-t-[50%] absolute bottom-0"></div>
               </div>
-              <h3 className="text-[#0A1942] font-bold text-sm tracking-wider uppercase truncate w-full">{guardian.name}</h3>
-            <div className="mt-2 bg-muted/50 rounded-full px-3 py-1">
-              <p className="text-muted-foreground text-xs font-semibold uppercase">{guardian.ejCount} {guardian.ejCount === 1 ? 'EJ' : 'EJs'}</p>
-            </div>
+              
+              {/* Guardian Name */}
+              <h3 className="text-white font-bold text-lg tracking-widest uppercase truncate w-full px-2 z-10 drop-shadow-md">
+                {guardian.name}
+              </h3>
+
+              {/* Number of EJs - Discrete badge */}
+              <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                <p className="text-white text-[10px] font-bold uppercase">{guardian.ejCount} {guardian.ejCount === 1 ? 'EJ' : 'EJs'}</p>
+              </div>
           </div>
           );
         })}
