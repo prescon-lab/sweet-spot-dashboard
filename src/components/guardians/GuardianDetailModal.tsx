@@ -55,6 +55,13 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
   const [notifications, setNotifications] = useState(mockNotifications);
 
+  // Sync notifications when modal opens
+  React.useEffect(() => {
+    if (open) {
+      setNotifications(mockNotifications);
+    }
+  }, [open, guardianData?.name]);
+
   const handleClearNotifications = () => {
     setNotifications([]);
   };
@@ -89,18 +96,6 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     }
   };
 
-  // Fetch the EJs for this guardian
-  const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
-
-  // MOCK DATA GENERATION
-  const mockNotifications = guardianEjs.map((ej, idx) => ({
-    id: idx,
-    ejName: ej.name,
-    type: idx % 2 === 0 ? "Daily" : "Funil de Vendas",
-    message: idx % 2 === 0 ? "Saídas da daily registradas." : "Novo lead cadastrado no funil.",
-    date: "Hoje",
-    done: idx % 3 === 0
-  }));
 
   const mockGoals = guardianEjs.map((ej, idx) => {
     const total = 5 + (idx % 3);
@@ -264,7 +259,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                         {/* Delete Button (X) */}
                         <button
                           onClick={(e) => handleDeleteNotification(e, note.id)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/10 opacity-0 group-hover:opacity-100 hover:bg-black/20 transition-all text-sm font-bold"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 opacity-50 hover:opacity-100 hover:bg-black/40 transition-all text-sm font-bold text-white shadow-sm"
                           title="Excluir notificação"
                         >
                           X
