@@ -84,13 +84,13 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] bg-[#F8F9FA] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-2xl">
+        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] bg-[#F8F9FA] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px]">
           
           {/* Main scrollable area */}
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto rounded-[32px]">
             {/* Customizable Banner Area */}
             <div 
-              className="relative w-full min-h-[300px] flex items-end p-8 md:p-12 transition-all duration-300 rounded-t-2xl"
+              className="relative w-full min-h-[300px] flex items-end p-8 md:p-12 transition-all duration-300"
               style={{ 
                 backgroundColor: bannerColor,
               }}
@@ -186,28 +186,38 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
             </div>
 
             {/* Notifications and Results Area (2 columns) */}
-            <div className="flex flex-col md:flex-row min-h-[300px]">
-              {/* Left Column - Notificações (Dark) */}
-              <div className="flex-1 bg-black p-8 text-white flex flex-col h-[400px]">
+            <div className="flex flex-col md:flex-row min-h-[300px] rounded-3xl overflow-hidden mx-4 md:mx-8 mb-8 shadow-sm">
+              {/* Left Column - Notificações (Integrated Color) */}
+              <div 
+                className="flex-1 p-8 text-white flex flex-col h-[400px] transition-colors duration-300"
+                style={{ backgroundColor: bannerColor }}
+              >
                 <h3 className="text-xl font-semibold mb-6 tracking-wide text-white border-b border-white/20 pb-4">
                   Sincronização / Notificações
                 </h3>
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                  {mockNotifications.map((note) => (
-                    <div key={note.id} className="flex gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                      <div className="flex flex-col items-center gap-2 mt-1">
-                        <div className={`w-3 h-3 rounded-full ${note.done ? 'bg-green-500' : 'bg-amber-400'}`}></div>
-                        <div className="w-px h-full bg-white/10"></div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start mb-1">
-                          <span className="text-xs font-bold uppercase tracking-wider text-white/50">{note.type} - {note.ejName}</span>
-                          <span className="text-[10px] text-white/40 bg-white/5 px-2 py-0.5 rounded-full">{note.date}</span>
+                  {mockNotifications.map((note) => {
+                    const linkedEj = guardianEjs.find(ej => ej.name === note.ejName);
+                    return (
+                      <div 
+                        key={note.id} 
+                        onClick={() => linkedEj && handleEjClick(linkedEj)}
+                        className="flex gap-4 p-4 rounded-3xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]"
+                      >
+                        <div className="flex flex-col items-center gap-2 mt-1">
+                          <div className={`w-3 h-3 rounded-full ${note.done ? 'bg-green-500' : 'bg-amber-400'}`}></div>
+                          <div className="w-px h-full bg-white/20"></div>
                         </div>
-                        <p className="text-sm text-white/90">{note.message}</p>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="text-xs font-bold uppercase tracking-wider text-white/70">{note.type} - {note.ejName}</span>
+                            <span className="text-[10px] text-white/60 bg-white/10 px-2 py-0.5 rounded-full">{note.date}</span>
+                          </div>
+                          <p className="text-sm text-white/90">{note.message}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {mockNotifications.length === 0 && (
                     <p className="text-sm text-white/40 text-center py-8">Nenhuma notificação sincronizada.</p>
                   )}
@@ -215,23 +225,23 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               </div>
 
               {/* Right Column - Resultados (Light) */}
-              <div className="flex-1 bg-[#F5F5F5] p-8 flex flex-col h-[400px] border-l border-border/50">
+              <div className="flex-1 bg-white p-8 flex flex-col h-[400px]">
                 <h3 className="text-xl font-semibold mb-6 tracking-wide text-[#0A1942] uppercase border-b border-[#0A1942]/10 pb-4">
                   Acompanhamento de Metas
                 </h3>
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
                   {mockGoals.map((goal, idx) => (
-                    <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-border/40">
+                    <div key={idx} className="bg-[#F5F5F5] p-4 rounded-3xl border border-transparent">
                       <div className="flex justify-between items-center mb-2">
                         <h4 className="font-bold text-[#0A1942]">{goal.ejName}</h4>
-                        <span className="text-xs font-bold bg-[#E0F2FE] text-[#0A1942] px-2 py-1 rounded-full">
+                        <span className="text-xs font-bold bg-[#E0F2FE] text-[#0A1942] px-3 py-1 rounded-full">
                           {goal.completed}/{goal.total} Metas
                         </span>
                       </div>
                       {/* Progress Bar */}
-                      <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+                      <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                         <div 
-                          className="bg-primary h-2.5 rounded-full transition-all duration-500" 
+                          className="bg-primary h-3 rounded-full transition-all duration-500" 
                           style={{ width: `${goal.progress}%` }}
                         ></div>
                       </div>
@@ -281,8 +291,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
           </div>
           
           {/* Bottom Actions Bar (Optional, for saving explicitly) */}
-          <div className="bg-white border-t p-4 flex justify-end">
-            <Button onClick={() => onOpenChange(false)} className="bg-[#0A1942] hover:bg-[#1C2F6A] rounded-full px-8">Salvar e Fechar</Button>
+          <div className="bg-white p-4 flex justify-end z-20">
+            <Button onClick={() => onOpenChange(false)} className="bg-[#0A1942] hover:bg-[#1C2F6A] rounded-full px-8 font-bold">Salvar e Fechar</Button>
           </div>
         </DialogContent>
       </Dialog>
