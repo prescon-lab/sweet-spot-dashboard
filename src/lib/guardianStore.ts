@@ -2,6 +2,7 @@ export interface GuardianCustomization {
   color: string;
   avatarUrl: string; // Figurinha
   bannerUrl: string; // Imagem do fundo
+  quote: string; // Frase do dia
 }
 
 const STORE_KEY = "vertentes_guardian_customizations";
@@ -27,6 +28,7 @@ export const guardianStore = {
       color: "#0A1942",
       avatarUrl: "",
       bannerUrl: "",
+      quote: "FRASE DO DIA",
     };
   },
 

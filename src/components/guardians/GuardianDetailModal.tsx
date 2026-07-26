@@ -25,6 +25,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   // States for customization
   const initialConfig = guardianStore.get(guardianData?.name || "");
   const [bannerColor, setBannerColor] = useState(initialConfig.color);
+  const [quote, setQuote] = useState(initialConfig.quote || "FRASE DO DIA");
   const [showSettings, setShowSettings] = useState(false);
 
   // Sync to store on change
@@ -32,11 +33,12 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     if (guardianData?.name) {
       guardianStore.set(guardianData.name, {
         color: bannerColor,
-        bannerUrl: "", // Removed per user request
-        avatarUrl: ""  // Removed per user request
+        bannerUrl: "",
+        avatarUrl: "",
+        quote: quote
       });
     }
-  }, [bannerColor, guardianData?.name]);
+  }, [bannerColor, quote, guardianData?.name]);
 
   // Fetch the EJs for this guardian
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
@@ -140,11 +142,12 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                     defaultValue={guardianData?.name || "NOME DO GUARDIÃO"}
                     className="text-3xl md:text-4xl font-bold h-14 border-transparent bg-transparent text-white hover:bg-black/10 focus-visible:bg-black/20 focus-visible:ring-white/30 transition-colors px-2 -ml-2 w-full max-w-md uppercase tracking-wider placeholder:text-white/50"
                   />
-                  <div className="inline-block">
+                  <div className="inline-block w-full max-w-lg mt-2">
                     <Input 
                       placeholder="FRASE DO DIA" 
-                      defaultValue="FRASE DO DIA" 
-                      className="h-8 text-xs bg-black/40 text-white font-medium border-transparent w-48 rounded-full px-4 text-center md:text-left focus-visible:ring-white/30 uppercase tracking-widest placeholder:text-white/50" 
+                      value={quote}
+                      onChange={(e) => setQuote(e.target.value)}
+                      className="h-auto py-2 text-sm md:text-base bg-black/40 text-white font-medium border-transparent w-full rounded-2xl px-6 text-center md:text-left focus-visible:ring-white/30 uppercase tracking-widest placeholder:text-white/50" 
                     />
                   </div>
                 </div>

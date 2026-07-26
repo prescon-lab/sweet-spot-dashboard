@@ -11,6 +11,25 @@ export const Route = createFileRoute("/p/guardioes")({
   component: GuardiansPanel,
 });
 
+// Helper function to calculate brightness and return black or white for text contrast
+function getContrastColor(hexColor: string) {
+  if (!hexColor) return '#FFFFFF';
+  
+  // Remove # if present
+  const hex = hexColor.replace('#', '');
+  
+  // Parse RGB
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  // Calculate relative luminance (YIQ)
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  
+  // Return black for bright colors, white for dark colors
+  return (yiq >= 128) ? '#000000' : '#FFFFFF';
+}
+
 function GuardiansPanel() {
   const [searchTerm, setSearchTerm] = useState("");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -71,16 +90,11 @@ function GuardiansPanel() {
               className="rounded-[32px] p-8 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:brightness-110 group relative overflow-hidden h-72"
               style={{ backgroundColor: config.color || '#0A1942' }}
             >
-              {/* White Circle Avatar Placeholder */}
-              <div 
-                className="w-32 h-32 rounded-full mb-6 flex items-center justify-center bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] overflow-hidden shadow-lg border-4 border-white/10"
-              >
-                <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-1/3 h-1/3 bg-white rounded-full opacity-80 blur-[2px]"></div>
-                <div className="w-full h-[40%] bg-[#84CC16] rounded-t-[50%] absolute bottom-0"></div>
-              </div>
-              
               {/* Guardian Name */}
-              <h3 className="text-white font-bold text-lg tracking-widest uppercase truncate w-full px-2 z-10 drop-shadow-md">
+              <h3 
+                className="font-bold text-2xl md:text-3xl tracking-widest uppercase w-full px-2 z-10 drop-shadow-sm leading-tight break-words"
+                style={{ color: getContrastColor(config.color || '#0A1942') }}
+              >
                 {guardian.name}
               </h3>
 
