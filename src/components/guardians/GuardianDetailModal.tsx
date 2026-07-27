@@ -11,6 +11,7 @@ import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy } from "lucide-rea
 import { ejsList } from "@/lib/data";
 import { guardianStore } from "@/lib/guardianStore";
 import { ejDataStore } from "@/lib/ejDataStore";
+import { eventStore } from "@/lib/eventStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { Settings, Image as ImageIcon, Trash2 } from "lucide-react";
 import Cropper from "react-easy-crop";
