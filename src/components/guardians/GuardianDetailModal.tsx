@@ -154,7 +154,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
       256
     );
     
-    const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.9); // High quality JPEG for avatar
+    const compressedDataUrl = canvas.toDataURL("image/png");
     setAvatarUrl(compressedDataUrl);
     setCropModalOpen(false);
     setTempImageUrl(null);

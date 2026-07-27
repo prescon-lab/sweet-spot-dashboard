@@ -116,7 +116,7 @@ function EjsPanel() {
                 )}
               </div>
 
-              <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] mb-4 overflow-hidden border-4 border-transparent group-hover:border-white/20 transition-all flex flex-col justify-center items-center">
+              <div className={`w-24 h-24 rounded-full mb-4 overflow-hidden transition-all flex flex-col justify-center items-center ${ejSavedData?.avatarUrl ? 'bg-transparent' : 'bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC]'}`}>
                 {ejSavedData?.avatarUrl ? (
                   <img src={ejSavedData.avatarUrl} alt={ej.name} className="w-full h-full object-cover" />
                 ) : (
