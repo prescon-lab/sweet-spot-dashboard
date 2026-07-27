@@ -129,7 +129,6 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-bold text-xl text-[#0A1942] uppercase">{event.name}</h3>
-                            <p className="text-sm text-muted-foreground mt-1">Registrado em: {new Date(event.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
                         
