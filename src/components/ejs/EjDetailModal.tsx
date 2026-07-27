@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save, Flame, Trophy, Pencil } from "lucide-react";
+import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save, Flame, Trophy, Pencil, ImageIcon } from "lucide-react";
+import Cropper from "react-easy-crop";
 import { eventStore, AppEvent } from "@/lib/eventStore";
 import { EjLeadFunnelModal } from "./EjLeadFunnelModal";
 import { ejDataStore, EjData, Task, ReuniaoNota } from "@/lib/ejDataStore";
@@ -37,6 +38,13 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [editingReuniaoText, setEditingReuniaoText] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Crop states
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
   
   const [desafio, setDesafio] = useState("");
   const [dores, setDores] = useState("");
@@ -265,10 +273,46 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatarUrl(reader.result as string);
+        setTempImageUrl(reader.result as string);
+        setCropModalOpen(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleSaveCrop = async () => {
+    if (!tempImageUrl || !croppedAreaPixels) return;
+    
+    const img = new Image();
+    img.src = tempImageUrl;
+    await new Promise((resolve) => (img.onload = resolve));
+    
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    ctx.drawImage(
+      img,
+      croppedAreaPixels.x,
+      croppedAreaPixels.y,
+      croppedAreaPixels.width,
+      croppedAreaPixels.height,
+      0,
+      0,
+      256,
+      256
+    );
+    
+    const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.9); // High quality JPEG for avatar
+    setAvatarUrl(compressedDataUrl);
+    setCropModalOpen(false);
+    setTempImageUrl(null);
   };
 
   const activeEventIds = events.map(e => e.id);
@@ -276,13 +320,45 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
 
   return (
     <>
+      {/* Cropper Modal */}
+      <Dialog open={cropModalOpen} onOpenChange={(open) => {
+        setCropModalOpen(open);
+        if (!open) setTempImageUrl(null);
+      }}>
+        <DialogContent className="max-w-md bg-white p-6 rounded-3xl z-[100]">
+          <h3 className="text-xl font-bold mb-4 text-[#0A1942] text-center">Ajustar Foto</h3>
+          <div className="relative w-full h-[300px] bg-black/5 rounded-2xl overflow-hidden mb-6">
+            {tempImageUrl && (
+              <Cropper
+                image={tempImageUrl}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" className="flex-1 rounded-xl" onClick={() => {
+              setCropModalOpen(false);
+              setTempImageUrl(null);
+            }}>Cancelar</Button>
+            <Button className="flex-1 bg-[#0A1942] text-white hover:bg-[#0A1942]/90 rounded-xl" onClick={handleSaveCrop}>Salvar Foto</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-6xl w-[95vw] h-[90vh] bg-[#FAF8F5] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl">
           {/* Header Area */}
           <div className="flex items-center justify-between p-8 bg-white border-b border-border/40">
             <div className="flex items-center gap-6 flex-1">
               <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                <Avatar className="h-28 w-28 border-4 border-primary/10 shadow-sm transition-transform group-hover:scale-105">
+                <Avatar className="h-28 w-28 shadow-sm transition-transform group-hover:scale-105 border-0 bg-black/5">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -297,7 +373,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                  <Pencil className="w-8 h-8 text-white" />
+                  <ImageIcon className="w-8 h-8 text-white" />
                 </div>
                 <input 
                   type="file" 

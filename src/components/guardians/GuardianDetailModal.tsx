@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialConfig.avatarUrl || null);
   const [quote, setQuote] = useState(initialConfig.quote || '');
   const [showSettings, setShowSettings] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Crop states
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -266,9 +267,9 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               {/* Guardian Info Content */}
               <div className="relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 w-full">
                 {/* Photo */}
-                <div className="relative group cursor-pointer flex-shrink-0">
+                <div className="relative group cursor-pointer flex-shrink-0" onClick={() => fileInputRef.current?.click()}>
                   <Avatar 
-                    className="h-40 w-40 md:h-48 md:w-48 border-2 border-white/20 transition-transform group-hover:scale-105 bg-black/5 overflow-hidden flex flex-col items-center justify-center"
+                    className="h-40 w-40 md:h-48 md:w-48 border-0 transition-transform group-hover:scale-105 bg-black/5 overflow-hidden flex flex-col items-center justify-center shadow-md"
                   >
                     {avatarUrl ? (
                       <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -278,9 +279,16 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                       </span>
                     )}
                   </Avatar>
-                  <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm" onClick={() => setShowSettings(true)}>
+                  <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
                     <ImageIcon className="w-8 h-8 text-white" />
                   </div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleImageUpload} 
+                    accept="image/*" 
+                    className="hidden" 
+                  />
                 </div>
 
                 {/* Name and Quote */}
