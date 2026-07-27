@@ -476,7 +476,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                                 />
                                 <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                                   <Flame className="w-3.5 h-3.5" />
-                                  EJ é Aposta
+                                  APOSTA
                                 </span>
                               </label>
                             </div>
