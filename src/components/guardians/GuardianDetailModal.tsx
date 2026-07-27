@@ -560,7 +560,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
           
           {/* Bottom Actions Bar */}
           <div className="bg-black/20 backdrop-blur-md p-4 flex justify-end z-20">
-            <Button onClick={() => onOpenChange(false)} className="bg-white text-black hover:bg-white/90 rounded-full px-8 font-bold shadow-lg">Salvar e Fechar</Button>
+            <Button onClick={() => onOpenChange(false)} className="bg-card text-black hover:bg-white/90 rounded-full px-8 font-bold shadow-lg">Salvar e Fechar</Button>
           </div>
         </DialogContent>
       </Dialog>

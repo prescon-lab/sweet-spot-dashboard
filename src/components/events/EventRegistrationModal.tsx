@@ -99,7 +99,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl w-[95vw] bg-[#FAF8F5] border-border/50 shadow-2xl p-8 rounded-3xl">
         <div className="flex flex-col space-y-8">
-          <h2 className="text-3xl font-bold text-center tracking-tight text-[#0A1942] uppercase">
+          <h2 className="text-3xl font-bold text-center tracking-tight text-foreground uppercase">
             {eventToEdit ? "Editar Evento" : "Cadastro de Evento"}
           </h2>
 
@@ -108,7 +108,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
               placeholder="NOME DO EVENTO: EX: RV DO FAÍSCA" 
-              className="w-full max-w-2xl bg-white border border-border/50 text-foreground placeholder:text-muted-foreground h-14 rounded-2xl px-6 text-center text-lg font-medium shadow-sm"
+              className="w-full max-w-2xl bg-card border border-border/50 text-foreground placeholder:text-muted-foreground h-14 rounded-2xl px-6 text-center text-lg font-medium shadow-sm"
             />
           </div>
 
@@ -126,7 +126,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
               {ejGoals.map((goal) => (
                 <div key={goal.id} className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                   {/* Left - Meta da EJ */}
-                  <div className="relative flex items-center bg-white rounded-2xl h-12 px-4 shadow-sm border border-border/50 transition-all hover:border-primary/30">
+                  <div className="relative flex items-center bg-card rounded-2xl h-12 px-4 shadow-sm border border-border/50 transition-all hover:border-primary/30">
                     <Checkbox 
                       checked={goal.checked}
                       onCheckedChange={(checked) => handleGoalCheck(goal.id, checked as boolean)}
@@ -141,7 +141,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
                   </div>
 
                   {/* Right - Meta do Núcleo */}
-                  <div className="flex items-center bg-white rounded-2xl h-12 shadow-sm border border-border/50 transition-all hover:border-primary/30">
+                  <div className="flex items-center bg-card rounded-2xl h-12 shadow-sm border border-border/50 transition-all hover:border-primary/30">
                     <Input 
                       value={goal.coreText}
                       onChange={(e) => handleGoalChange(goal.id, 'coreText', e.target.value)}

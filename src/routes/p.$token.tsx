@@ -135,8 +135,8 @@ function DashboardPanel() {
                         onClick={() => setSelectedGoal(goal)}
                       >
                         <div className="flex justify-between items-start gap-4">
-                          <p className="text-sm font-semibold leading-tight flex-1 text-[#0A1942]">{goal.text}</p>
-                          <Badge variant="outline" className="shrink-0 bg-white">
+                          <p className="text-sm font-semibold leading-tight flex-1 text-foreground">{goal.text}</p>
+                          <Badge variant="outline" className="shrink-0 bg-card">
                             {x} / {goal.coreText || "-"}
                           </Badge>
                         </div>
@@ -189,7 +189,7 @@ function DashboardPanel() {
                   <div className="flex flex-col gap-4">
                     <div className="text-left">
                       <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Total Provável</p>
-                      <p className="text-3xl font-bold text-[#0A1942]">{formatBRL(total)}</p>
+                      <p className="text-3xl font-bold text-foreground">{formatBRL(total)}</p>
                     </div>
                     <div className="flex flex-wrap gap-3">
                       <div className="bg-red-50 border border-red-100 p-3 rounded-xl text-center flex-1 min-w-[120px]">
@@ -225,7 +225,7 @@ function DashboardPanel() {
                   {mentions.map((mention) => (
                     <div 
                       key={mention.id}
-                      className="bg-white rounded-lg p-3 border border-primary/10 shadow-sm cursor-pointer hover:border-primary/40 transition-colors"
+                      className="bg-card rounded-lg p-3 border border-primary/10 shadow-sm cursor-pointer hover:border-primary/40 transition-colors"
                       onClick={() => {
                         setSelectedEjForDetail({ name: mention.ejName });
                         setDetailModalOpen(true);
@@ -272,7 +272,7 @@ function DashboardPanel() {
                     return (
                       <div 
                         key={ejName}
-                        className="bg-white rounded-xl shadow-sm border border-border/50 overflow-hidden transition-all"
+                        className="bg-card rounded-xl shadow-sm border border-border/50 overflow-hidden transition-all"
                       >
                         {/* Group Header */}
                         <div 
@@ -287,7 +287,7 @@ function DashboardPanel() {
                               <ActivityIcon className="w-4 h-4" />
                             </div>
                             <div>
-                              <h4 className="font-semibold text-sm text-[#0A1942]">{ejName}</h4>
+                              <h4 className="font-semibold text-sm text-foreground">{ejName}</h4>
                               <p className="text-xs text-muted-foreground mt-0.5">
                                 {ejActivities.length} {ejActivities.length === 1 ? 'atualização' : 'atualizações'}
                               </p>
@@ -359,7 +359,7 @@ function DashboardPanel() {
       <Dialog open={!!selectedGoal} onOpenChange={(open) => !open && setSelectedGoal(null)}>
         <DialogContent className="max-w-md bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold tracking-tight text-[#0A1942]">
+            <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
               EJs que concluíram
             </DialogTitle>
           </DialogHeader>
@@ -370,7 +370,7 @@ function DashboardPanel() {
                 <p className="text-sm text-muted-foreground">Nenhuma EJ concluiu esta meta ainda.</p>
               ) : (
                 selectedGoal.checkedBy.map((ejId, idx) => (
-                  <div key={idx} className="flex items-center gap-2 bg-white p-3 rounded-lg border shadow-sm">
+                  <div key={idx} className="flex items-center gap-2 bg-card p-3 rounded-lg border shadow-sm">
                     <ListChecks className="h-4 w-4 text-green-500" />
                     <span className="font-medium text-sm">{ejId}</span>
                   </div>
@@ -385,14 +385,14 @@ function DashboardPanel() {
       <Dialog open={leadsModalOpen} onOpenChange={setLeadsModalOpen}>
         <DialogContent className="max-w-4xl bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold tracking-tight text-[#0A1942] flex items-center gap-2">
+            <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
               Detalhamento de Faturamento
             </DialogTitle>
           </DialogHeader>
           <div className="py-4 max-h-[70vh] overflow-auto">
             {!Array.isArray(leads) || leads.length === 0 ? (
-              <p className="text-center text-muted-foreground p-8 bg-white rounded-xl border">Nenhum lead cadastrado na rede ainda.</p>
+              <p className="text-center text-muted-foreground p-8 bg-card rounded-xl border">Nenhum lead cadastrado na rede ainda.</p>
             ) : (
               <div className="space-y-4">
                 {[...leads].sort((a, b) => {
@@ -400,13 +400,13 @@ function DashboardPanel() {
                   const dateB = b.closingDate ? new Date(b.closingDate).getTime() : 0;
                   return dateA - dateB;
                 }).map(lead => (
-                  <div key={lead.id} className="bg-white p-4 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div key={lead.id} className="bg-card p-4 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary uppercase text-[10px]">
                           {lead.ejId}
                         </Badge>
-                        <span className="font-bold text-[#0A1942]">{lead.name}</span>
+                        <span className="font-bold text-foreground">{lead.name}</span>
                       </div>
                       <p className="text-xs text-muted-foreground">{lead.observations || 'Sem observações detalhadas'}</p>
                     </div>

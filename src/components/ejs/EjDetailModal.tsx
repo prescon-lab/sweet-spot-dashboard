@@ -386,7 +386,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
               <div className="space-y-4 flex-1 max-w-2xl">
                 <Input
                   defaultValue={ejData?.name || "Nova EJ"}
-                  className="text-4xl font-bold h-16 border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-white focus-visible:ring-primary/30 transition-colors px-2 -ml-2"
+                  className="text-4xl font-bold h-16 border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-card focus-visible:ring-primary/30 transition-colors px-2 -ml-2"
                 />
                 <div className="flex gap-6">
                   <div className="flex flex-col">
@@ -454,10 +454,10 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                     </div>
                   ) : (
                     events.map(event => (
-                      <div key={event.id} className="bg-white rounded-xl border border-border/50 p-6 space-y-4 shadow-sm">
+                      <div key={event.id} className="bg-card rounded-xl border border-border/50 p-6 space-y-4 shadow-sm">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h3 className="font-bold text-xl text-[#0A1942] uppercase">{event.name}</h3>
+                            <h3 className="font-bold text-xl text-foreground uppercase">{event.name}</h3>
                           </div>
                         </div>
                         
@@ -509,7 +509,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
 
                 {/* Aba 2: Saídas das Dailys */}
                 <TabsContent value="dailys" className="flex-1 pt-6 outline-none">
-                  <div className="bg-white rounded-xl border border-border/50 p-6 space-y-6">
+                  <div className="bg-card rounded-xl border border-border/50 p-6 space-y-6">
                     <h3 className="font-semibold text-lg text-foreground">Saídas</h3>
                     
                     <div className="flex gap-2">
@@ -521,7 +521,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                           onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
                         />
                         {mentionSearch !== null && (
-                          <div className="absolute top-12 left-0 right-0 bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
+                          <div className="absolute top-12 left-0 right-0 bg-card border rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
                             <div className="px-3 py-2 text-xs font-semibold text-muted-foreground bg-muted/30 border-b">
                               Mencionar Guardião
                             </div>
@@ -595,7 +595,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
 
                 {/* Aba 3: Reunião / Acompanhamento */}
                 <TabsContent value="reuniao" className="flex-1 pt-6 outline-none flex flex-col h-full">
-                  <div className="bg-white rounded-xl border border-border/50 p-6 flex-1 flex flex-col min-h-[400px]">
+                  <div className="bg-card rounded-xl border border-border/50 p-6 flex-1 flex flex-col min-h-[400px]">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="font-semibold text-lg text-foreground">Anotações de Reunião</h3>
                     </div>
@@ -625,9 +625,9 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                         reunioes.map(reuniao => (
                           <div key={reuniao.id} className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-2 relative group">
                             <div className="flex justify-between items-start">
-                              <h4 className="font-semibold text-sm text-[#0A1942]">Anotações</h4>
+                              <h4 className="font-semibold text-sm text-foreground">Anotações</h4>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-medium bg-white px-2 py-1 rounded text-muted-foreground border">
+                                <span className="text-xs font-medium bg-card px-2 py-1 rounded text-muted-foreground border">
                                   {reuniao.date}
                                 </span>
                                 {editingReuniaoId !== reuniao.id && (
@@ -648,7 +648,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                                 <Textarea 
                                   value={editingReuniaoText} 
                                   onChange={(e) => setEditingReuniaoText(e.target.value)}
-                                  className="w-full resize-y min-h-[100px] border-border/50 bg-white"
+                                  className="w-full resize-y min-h-[100px] border-border/50 bg-card"
                                   autoFocus
                                 />
                                 <div className="flex gap-2 justify-end">
@@ -674,7 +674,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 <label className="text-sm font-semibold text-foreground">Desafio do Ciclo</label>
                 <Textarea 
                   placeholder="Ex: Melhorar engajamento..." 
-                  className="bg-white min-h-[100px] resize-y"
+                  className="bg-card min-h-[100px] resize-y"
                   value={desafio}
                   onChange={(e) => setDesafio(e.target.value)}
                 />
@@ -684,7 +684,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 <label className="text-sm font-semibold text-foreground">Dores da EJ</label>
                 <Textarea 
                   placeholder="Ex: Falta de leads..." 
-                  className="bg-white min-h-[100px] resize-y"
+                  className="bg-card min-h-[100px] resize-y"
                   value={dores}
                   onChange={(e) => setDores(e.target.value)}
                 />
@@ -695,7 +695,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 <div className="relative">
                   <Input 
                     type="date" 
-                    className="bg-white pl-10" 
+                    className="bg-card pl-10" 
                     value={proximaReuniao}
                     onChange={(e) => setProximaReuniao(e.target.value)}
                   />
