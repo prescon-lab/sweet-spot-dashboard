@@ -148,8 +148,8 @@ function DashboardPanel() {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {(event.ejGoals || []).map(goal => {
-                    const coreText = goal.coreText || "100";
+                  {(event.ejGoals || []).filter(Boolean).map(goal => {
+                    const coreText = String(goal.coreText || "100");
                     const yMatches = coreText.match(/\d+/);
                     const y = yMatches ? parseInt(yMatches[0], 10) : 100; // default to 100 if no number found
                     const x = goal.checkedBy?.length || 0;
@@ -177,7 +177,7 @@ function DashboardPanel() {
                       </div>
                     );
                   })}
-                  {(event.ejGoals || []).length === 0 && (
+                  {(event.ejGoals || []).filter(Boolean).length === 0 && (
                     <p className="text-sm text-muted-foreground col-span-full">Sem metas específicas cadastradas.</p>
                   )}
                 </div>

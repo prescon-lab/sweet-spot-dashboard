@@ -22,7 +22,7 @@ export const eventStore = {
         const data = localStorage.getItem(STORE_KEY);
         if (data) {
           const parsed = JSON.parse(data);
-          return Array.isArray(parsed) ? parsed : [];
+          return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
         }
       } catch (e) {
         console.error("Failed to load events", e);
