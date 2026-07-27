@@ -67,7 +67,16 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
 
   const handleSave = () => {
     const ejName = ejData?.name || "Nova EJ";
+    const previousData = ejDataStore.getEjData(ejName) || {};
     
+    let hasChanges = false;
+    
+    const truncate = (str: string, length = 40) => {
+      if (!str) return "Vazio";
+      return str.length > length ? str.substring(0, length) + "..." : str;
+    };
+
+    // Salvar primeiro
     ejDataStore.saveEjData(ejName, {
       desafio,
       dores,
@@ -76,11 +85,37 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       tarefas: tasks
     });
 
-    activityStore.addActivity({
-      ejName,
-      description: "Anotações e informações atualizadas",
-      type: "update"
-    });
+    // Registrar atividades específicas para cada alteração
+    if (desafio !== (previousData.desafio || "")) {
+      hasChanges = true;
+      activityStore.addActivity({ ejName, description: `Desafio: "${truncate(desafio)}"`, type: "update" });
+    }
+    if (dores !== (previousData.dores || "")) {
+      hasChanges = true;
+      activityStore.addActivity({ ejName, description: `Dores: "${truncate(dores)}"`, type: "update" });
+    }
+    if (proximaReuniao !== (previousData.proximaReuniao || "")) {
+      hasChanges = true;
+      const dateStr = proximaReuniao ? new Date(proximaReuniao + "T12:00:00").toLocaleDateString('pt-BR') : 'Remarcada';
+      activityStore.addActivity({ ejName, description: `Próxima reunião: ${dateStr}`, type: "update" });
+    }
+    if (notasReuniao !== (previousData.notasReuniao || "")) {
+      hasChanges = true;
+      activityStore.addActivity({ ejName, description: `Anotações: "${truncate(notasReuniao)}"`, type: "update" });
+    }
+    if (JSON.stringify(tasks) !== JSON.stringify(previousData.tarefas || [])) {
+      hasChanges = true;
+      const completedCount = tasks.filter(t => t.completed).length;
+      activityStore.addActivity({ ejName, description: `Tarefas: ${completedCount}/${tasks.length} concluídas`, type: "update" });
+    }
+
+    if (!hasChanges) {
+      activityStore.addActivity({
+        ejName,
+        description: "Revisão geral (nenhum dado alterado)",
+        type: "update"
+      });
+    }
 
     toast.success("Dados salvos com sucesso!");
     onOpenChange(false);
