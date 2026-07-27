@@ -117,22 +117,29 @@ function RootShell({ children }: { children: ReactNode }) {
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden pt-4 md:pt-0">
-          <div className="md:hidden p-4">
-            <SidebarTrigger />
-          </div>
-          <Outlet />
-        </main>
-      </SidebarProvider>
-      <Toaster />
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="light" storageKey="vertentes-theme">
+      <QueryClientProvider client={queryClient}>
+        <SidebarProvider>
+          <AppSidebar />
+          <main className="flex-1 overflow-x-hidden pt-4 md:pt-0 relative">
+            <div className="absolute top-4 right-4 z-50">
+              <ThemeToggle />
+            </div>
+            <div className="md:hidden p-4">
+              <SidebarTrigger />
+            </div>
+            <Outlet />
+          </main>
+        </SidebarProvider>
+        <Toaster />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

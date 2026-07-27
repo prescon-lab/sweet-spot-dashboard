@@ -325,8 +325,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         setCropModalOpen(open);
         if (!open) setTempImageUrl(null);
       }}>
-        <DialogContent className="max-w-md bg-white p-6 rounded-3xl z-[100]">
-          <h3 className="text-xl font-bold mb-4 text-[#0A1942] text-center">Ajustar Foto</h3>
+        <DialogContent className="max-w-md glass-modal p-6 rounded-3xl z-[100] border-none">
+          <h3 className="text-xl font-bold mb-4 text-foreground text-center">Ajustar Foto</h3>
           <div className="relative w-full h-[300px] bg-black/5 rounded-2xl overflow-hidden mb-6">
             {tempImageUrl && (
               <Cropper
@@ -343,19 +343,19 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
             )}
           </div>
           <div className="flex gap-4">
-            <Button variant="outline" className="flex-1 rounded-xl" onClick={() => {
+            <Button variant="outline" className="flex-1 rounded-xl hover:bg-accent" onClick={() => {
               setCropModalOpen(false);
               setTempImageUrl(null);
             }}>Cancelar</Button>
-            <Button className="flex-1 bg-[#0A1942] text-white hover:bg-[#0A1942]/90 rounded-xl" onClick={handleSaveCrop}>Salvar Foto</Button>
+            <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl" onClick={handleSaveCrop}>Salvar Foto</Button>
           </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] bg-[#FAF8F5] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl">
+        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] glass-modal p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl">
           {/* Header Area */}
-          <div className="flex items-center justify-between p-8 bg-white border-b border-border/40">
+          <div className="flex items-center justify-between p-8 bg-card/40 backdrop-blur-md border-b border-border/50">
             <div className="flex items-center gap-6 flex-1">
               <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                 <Avatar className="h-28 w-28 shadow-sm transition-transform group-hover:scale-105 border-0 bg-black/5">
@@ -446,7 +446,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 {/* Aba 1: Apostas & Metas */}
                 <TabsContent value="apostas" className="flex-1 pt-6 outline-none space-y-6">
                   {events.length === 0 ? (
-                    <div className="bg-white rounded-xl border border-border/50 p-6 space-y-4">
+                    <div className="glass-card rounded-xl p-6 space-y-4">
                       <h3 className="font-semibold text-lg text-foreground">Apostas de Eventos</h3>
                       <div className="border border-dashed border-border p-8 rounded-lg text-center text-muted-foreground flex flex-col items-center justify-center gap-4 bg-muted/10">
                         <p>Nenhum evento cadastrado no painel.</p>

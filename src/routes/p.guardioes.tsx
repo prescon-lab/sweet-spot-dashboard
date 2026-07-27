@@ -65,8 +65,18 @@ function GuardiansPanel() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-fade-in space-y-6">
-      
-
+      {/* Top Bar */}
+      <div className="glass-card rounded-2xl p-4 mb-6 shadow-sm">
+        <div className="relative max-w-md w-full">
+          <Input 
+            type="search" 
+            placeholder="BUSCAR POR NOME DO GUARDIÃO" 
+            className="w-full bg-background/50 text-foreground placeholder:text-muted-foreground rounded-full h-10 px-6 font-semibold border border-border/50 focus:border-primary/50 transition-colors"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
       {/* Grid of Guardians */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
@@ -76,12 +86,12 @@ function GuardiansPanel() {
             <div 
               key={i}
               onClick={() => handleCardClick(guardian)}
-              className="rounded-3xl p-4 md:p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl hover:brightness-110 group relative overflow-hidden h-48 md:h-56"
-              style={{ backgroundColor: config.color || '#0A1942' }}
+              className="rounded-3xl p-4 md:p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:brightness-110 group relative overflow-hidden h-48 md:h-56 border border-white/10"
+              style={{ backgroundColor: config.color || 'var(--color-primary)' }}
             >
               {/* Avatar Circle */}
               <div 
-                className="w-24 h-24 md:w-28 md:h-28 rounded-full mb-4 md:mb-5 flex flex-col items-center justify-center bg-black/5 overflow-hidden border-2 border-white/10"
+                className="w-24 h-24 md:w-28 md:h-28 rounded-full mb-4 md:mb-5 flex flex-col items-center justify-center bg-black/10 backdrop-blur-sm overflow-hidden border-2 border-white/20 shadow-inner group-hover:scale-105 transition-transform duration-300"
               >
                 {config.avatarUrl ? (
                   <img src={config.avatarUrl} alt={guardian.name} className="w-full h-full object-cover" />

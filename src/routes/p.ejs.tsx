@@ -47,13 +47,13 @@ function EjsPanel() {
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-fade-in space-y-6">
       
-      {/* Top Bar (Dark Blue) */}
-      <div className="bg-[#0A1942] rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 shadow-lg">
+      {/* Top Bar */}
+      <div className="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4">
         <div className="relative w-full md:w-96">
           <Input 
             type="search" 
             placeholder="BUSCAR POR NOME DE EJ OU GUARDIÃO" 
-            className="w-full bg-white text-[#0A1942] placeholder:text-[#0A1942]/60 rounded-full h-10 px-6 font-semibold border-none"
+            className="w-full bg-background/50 text-foreground placeholder:text-muted-foreground rounded-full h-10 px-6 font-semibold border border-border/50 focus:border-primary/50 transition-colors"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -62,7 +62,7 @@ function EjsPanel() {
         <div className="flex gap-4">
           <div className="relative">
             <select
-              className={`appearance-none outline-none cursor-pointer rounded-full pl-6 pr-10 h-10 font-bold border-2 border-transparent transition-all ${filterGuardian ? 'bg-white text-[#0A1942]' : 'bg-[#152452] text-white hover:bg-[#1C2F6A]'}`}
+              className={`appearance-none outline-none cursor-pointer rounded-full pl-6 pr-10 h-10 font-bold border transition-all ${filterGuardian ? 'bg-primary text-primary-foreground border-primary' : 'bg-background/50 text-foreground border-border/50 hover:border-primary/50 hover:bg-accent/50'}`}
               value={filterGuardian}
               onChange={(e) => setFilterGuardian(e.target.value)}
             >
@@ -71,12 +71,12 @@ function EjsPanel() {
                 <option key={g} value={g}>{g}</option>
               ))}
             </select>
-            <ChevronDown className={`absolute right-3 top-2.5 w-5 h-5 pointer-events-none ${filterGuardian ? 'text-[#0A1942]' : 'text-white'}`} />
+            <ChevronDown className={`absolute right-3 top-2.5 w-5 h-5 pointer-events-none ${filterGuardian ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
           </div>
 
           <Button 
             variant="ghost" 
-            className={`rounded-full px-8 h-10 font-bold border-2 border-transparent transition-all ${filterBets ? 'bg-white text-[#0A1942]' : 'bg-[#152452] text-white hover:bg-[#1C2F6A]'}`}
+            className={`rounded-full px-8 h-10 font-bold border transition-all ${filterBets ? 'bg-primary text-primary-foreground border-primary' : 'bg-background/50 text-foreground border-border/50 hover:border-primary/50 hover:bg-accent/50'}`}
             onClick={() => setFilterBets(!filterBets)}
           >
             APOSTAS
@@ -100,7 +100,7 @@ function EjsPanel() {
             <div 
               key={ej.id}
               onClick={() => handleCardClick(ej)}
-              className="bg-[#0A1942] rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl group relative"
+              className="glass-card rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer group relative"
             >
               {/* Icons Badge Area */}
               <div className="absolute top-3 right-3 flex gap-1 z-10">
@@ -116,15 +116,15 @@ function EjsPanel() {
                 )}
               </div>
 
-              <div className={`w-24 h-24 rounded-full mb-4 overflow-hidden transition-all flex flex-col justify-center items-center ${ejSavedData?.avatarUrl ? 'bg-transparent' : 'bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC]'}`}>
+              <div className={`w-24 h-24 rounded-full mb-5 overflow-hidden transition-all flex flex-col justify-center items-center ring-4 ring-background/50 group-hover:ring-primary/20 ${ejSavedData?.avatarUrl ? 'bg-transparent' : 'bg-gradient-to-br from-primary/20 to-primary/5'}`}>
                 {ejSavedData?.avatarUrl ? (
                   <img src={ejSavedData.avatarUrl} alt={ej.name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-3xl font-bold text-black/20">{ej.name.substring(0, 2).toUpperCase()}</span>
+                  <span className="text-3xl font-bold text-foreground/30">{ej.name.substring(0, 2).toUpperCase()}</span>
                 )}
               </div>
-            <h3 className="text-white font-bold text-sm tracking-wider uppercase truncate w-full">{ej.name}</h3>
-            <p className="text-white/80 text-xs font-semibold uppercase mt-1 truncate w-full">{ej.guardian}</p>
+            <h3 className="text-foreground font-bold text-base tracking-wider uppercase truncate w-full group-hover:text-primary transition-colors">{ej.name}</h3>
+            <p className="text-muted-foreground text-xs font-semibold uppercase mt-1 truncate w-full">{ej.guardian}</p>
           </div>
           );
         })}

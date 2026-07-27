@@ -188,8 +188,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
         setCropModalOpen(open);
         if (!open) setTempImageUrl(null);
       }}>
-        <DialogContent className="max-w-md bg-white p-6 rounded-3xl">
-          <h3 className="text-xl font-bold mb-4 text-[#0A1942] text-center">Ajustar Foto</h3>
+        <DialogContent className="max-w-md glass-modal p-6 rounded-3xl z-[100] border-none">
+          <h3 className="text-xl font-bold mb-4 text-foreground text-center">Ajustar Foto</h3>
           <div className="relative w-full h-[300px] bg-black/5 rounded-2xl overflow-hidden mb-6">
             {tempImageUrl && (
               <Cropper
@@ -206,11 +206,11 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
             )}
           </div>
           <div className="flex gap-4">
-            <Button variant="outline" className="flex-1 rounded-xl" onClick={() => {
+            <Button variant="outline" className="flex-1 rounded-xl hover:bg-accent" onClick={() => {
               setCropModalOpen(false);
               setTempImageUrl(null);
             }}>Cancelar</Button>
-            <Button className="flex-1 bg-[#0A1942] text-white hover:bg-[#0A1942]/90 rounded-xl" onClick={handleSaveCrop}>Salvar Foto</Button>
+            <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl" onClick={handleSaveCrop}>Salvar Foto</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -252,8 +252,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
               {/* Settings Panel (Absolute) */}
               {showSettings && (
-                <div className="absolute top-16 left-4 z-40 bg-white p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200 text-black border border-border/40">
-                  <h4 className="font-bold text-sm text-[#0A1942]">Configurações Visuais</h4>
+                <div className="absolute top-16 left-4 z-40 bg-card/95 backdrop-blur-xl p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200 text-foreground border border-border/40">
+                  <h4 className="font-bold text-sm text-foreground">Configurações Visuais</h4>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground">Cor do Painel</label>
                     <div className="flex gap-2">
