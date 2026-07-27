@@ -58,7 +58,7 @@ function Index() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-12">
+        <div className="grid md:grid-cols-2 max-w-2xl mx-auto gap-6 mt-12">
           <Card className="glass-card cursor-pointer hover:border-primary/50 transition-all group" onClick={() => navigate({ to: "/p/ejs" })}>
             <CardHeader>
               <Building2 className="w-8 h-8 text-primary mb-2 group-hover:scale-110 transition-transform" />
