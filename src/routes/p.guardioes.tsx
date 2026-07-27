@@ -8,6 +8,16 @@ import { GuardianDetailModal } from "@/components/guardians/GuardianDetailModal"
 import React from "react";
 
 export const Route = createFileRoute("/p/guardioes")({
+  head: () => ({
+    meta: [
+      { title: "Painel de Guardiões — Acompanhamento" },
+      { name: "description", content: "Visualize as EJs sob responsabilidade de cada guardião, menções e atualizações recentes." },
+      { property: "og:title", content: "Painel de Guardiões — Acompanhamento" },
+      { property: "og:description", content: "Visualize as EJs sob responsabilidade de cada guardião, menções e atualizações recentes." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: GuardiansPanel,
 });
 

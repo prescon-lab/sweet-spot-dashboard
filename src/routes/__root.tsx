@@ -128,13 +128,11 @@ function RootComponent() {
       <QueryClientProvider client={queryClient}>
         <SidebarProvider>
           <AppSidebar />
-          <main className="flex-1 overflow-x-hidden pt-4 md:pt-0 relative">
-            <div className="absolute top-4 right-4 z-50">
+          <main className="flex-1 overflow-x-hidden min-w-0">
+            <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl">
+              <SidebarTrigger className="h-10 w-10" />
               <ThemeToggle />
-            </div>
-            <div className="absolute top-4 left-4 z-50">
-              <SidebarTrigger className="bg-background/50 backdrop-blur-sm border border-border/50 shadow-sm" />
-            </div>
+            </header>
             <Outlet />
           </main>
         </SidebarProvider>

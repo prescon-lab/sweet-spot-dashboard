@@ -138,7 +138,7 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
               </div>
             ) : (
               leads.map(lead => (
-                <div key={lead.id} className="bg-white p-4 rounded-lg border shadow-sm flex items-center justify-between gap-4">
+                <div key={lead.id} className="bg-card p-4 rounded-lg border shadow-sm flex items-center justify-between gap-4">
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                     <div>
                       <p className="font-semibold">{lead.name}</p>

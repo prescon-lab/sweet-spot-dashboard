@@ -41,15 +41,19 @@ const items = [
     title: "Configurações",
     url: "/p/configuracoes",
     icon: Settings,
+    adminOnly: true,
   },
 ]
 
 import { useEffect, useState } from "react";
 import { linksStore, UsefulLink } from "@/lib/linksStore";
 import { ExternalLink } from "lucide-react";
+import { useAccessRole } from "@/lib/access";
 
 export function AppSidebar() {
   const [groupedLinks, setGroupedLinks] = useState<Record<string, UsefulLink[]>>({});
+  const role = useAccessRole();
+  const visibleItems = items.filter((item) => !item.adminOnly || role === "admin");
 
   useEffect(() => {
     setGroupedLinks(linksStore.getGroupedByCategory());
@@ -68,7 +72,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="mt-4">
-              {items.map((item) => (
+              {visibleItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <a href={item.url}>

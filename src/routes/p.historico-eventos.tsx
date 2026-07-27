@@ -12,6 +12,16 @@ import { ejsList } from "@/lib/data";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/historico-eventos")({
+  head: () => ({
+    meta: [
+      { title: "Histórico de Eventos — Resultados" },
+      { name: "description", content: "Consulte os eventos concluídos, EJs destaque e a pontuação de cada evento da rede." },
+      { property: "og:title", content: "Histórico de Eventos — Resultados" },
+      { property: "og:description", content: "Consulte os eventos concluídos, EJs destaque e a pontuação de cada evento da rede." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: HistoricoEventos,
 });
 
@@ -42,7 +52,7 @@ function HistoricoEventos() {
   if (completedEvents.length === 0) {
     return (
       <div className="p-6 md:p-10 max-w-7xl mx-auto flex flex-col space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight text-[#0A1942]">Histórico de Eventos</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Histórico de Eventos</h1>
         <div className="text-center py-20 bg-muted/20 rounded-3xl border border-dashed">
           <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
           <h3 className="text-2xl font-bold text-foreground">Nenhum evento concluído ainda</h3>
@@ -55,7 +65,7 @@ function HistoricoEventos() {
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto flex flex-col space-y-8 fade-in">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[#0A1942]">Histórico de Eventos</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Histórico de Eventos</h1>
         <p className="text-muted-foreground mt-2">Métricas e resultados de EJs que bateram metas.</p>
       </div>
 
@@ -99,10 +109,10 @@ function HistoricoEventos() {
 
           return (
             <Card key={event.id} className="overflow-hidden glass-card print:shadow-none print:border-none">
-              <CardHeader className="bg-[#0A1942]/5 pb-8 print:bg-transparent">
+              <CardHeader className="bg-primary/5 pb-8 print:bg-transparent">
                 <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
                   <div>
-                    <CardTitle className="text-2xl text-[#0A1942] uppercase font-bold">{event.name}</CardTitle>
+                    <CardTitle className="text-2xl text-foreground uppercase font-bold">{event.name}</CardTitle>
                     <CardDescription className="flex items-center mt-2 text-sm font-medium">
                       <CalendarIcon className="w-4 h-4 mr-2" />
                       Concluído em: {event.completedAt ? format(parseISO(event.completedAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : 'Data desconhecida'}
@@ -172,7 +182,7 @@ function HistoricoEventos() {
                     <h4 className="text-sm font-semibold text-muted-foreground mt-8 mb-4 uppercase tracking-wider">EJs que Alcançaram o Resultado</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {Object.entries(completionDates).map(([ejName, dateIso]) => (
-                        <div key={ejName} className="bg-white p-4 rounded-xl border border-border/50 shadow-sm flex items-center gap-3">
+                        <div key={ejName} className="bg-card p-4 rounded-xl border border-border/50 shadow-sm flex items-center gap-3">
                           <div className="bg-yellow-500/10 p-2 rounded-lg text-yellow-600">
                             <Trophy className="w-5 h-5" />
                           </div>
@@ -188,7 +198,7 @@ function HistoricoEventos() {
 
                 {/* Relatório Detalhado (Para Impressão/PDF) */}
                 <div className="mt-12 border-t pt-8">
-                  <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-[#0A1942]">
+                  <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-foreground">
                     <Flame className="w-6 h-6 text-orange-500" />
                     Relatório de EJs Apostas
                   </h3>
@@ -196,7 +206,7 @@ function HistoricoEventos() {
                     {apostasEjs.length > 0 ? apostasEjs.map(ej => (
                       <div key={ej.name} className="bg-muted/10 p-5 rounded-xl border border-border/60">
                         <div className="flex justify-between items-center mb-2">
-                          <p className="font-bold text-lg text-[#0A1942]">{ej.name}</p>
+                          <p className="font-bold text-lg text-foreground">{ej.name}</p>
                           <span className="text-sm font-semibold bg-primary/10 text-primary px-3 py-1 rounded-full">
                             Metas: {ej.goals.length}/{event.ejGoals.length}
                           </span>
@@ -211,12 +221,12 @@ function HistoricoEventos() {
                 </div>
 
                 <div className="mt-8 border-t pt-8">
-                  <h3 className="text-2xl font-bold mb-6 text-[#0A1942]">Outras EJs que pontuaram</h3>
+                  <h3 className="text-2xl font-bold mb-6 text-foreground">Outras EJs que pontuaram</h3>
                   <div className="space-y-4">
                     {nonApostasEjs.length > 0 ? nonApostasEjs.map(ej => (
                       <div key={ej.name} className="bg-muted/10 p-5 rounded-xl border border-border/60">
                         <div className="flex justify-between items-center mb-2">
-                          <p className="font-bold text-lg text-[#0A1942]">{ej.name}</p>
+                          <p className="font-bold text-lg text-foreground">{ej.name}</p>
                           <span className="text-sm font-semibold bg-secondary text-secondary-foreground px-3 py-1 rounded-full">
                             Metas: {ej.goals.length}/{event.ejGoals.length}
                           </span>
