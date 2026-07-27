@@ -70,7 +70,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
 
   const handleSave = () => {
     const ejName = ejData?.name || "Nova EJ";
-    const previousData = ejDataStore.getEjData(ejName) || {};
+    const previousData: Partial<EjData> = ejDataStore.getEjData(ejName) || {};
     
     let hasChanges = false;
     
