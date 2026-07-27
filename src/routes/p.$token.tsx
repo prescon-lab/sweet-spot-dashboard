@@ -7,6 +7,7 @@ import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pe
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
+import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
 import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { leadStore, Lead } from "@/lib/leadStore";
 import { Progress } from "@/components/ui/progress";

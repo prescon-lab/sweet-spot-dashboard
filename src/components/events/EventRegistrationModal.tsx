@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { eventStore, AppEvent } from "@/lib/eventStore";
+import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
@@ -15,7 +15,7 @@ interface EventRegistrationModalProps {
 
 export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: EventRegistrationModalProps) {
   const [eventName, setEventName] = useState("");
-  const [ejGoals, setEjGoals] = useState([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
+  const [ejGoals, setEjGoals] = useState<EventGoal[]>([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
 
   React.useEffect(() => {
     if (open && eventToEdit) {

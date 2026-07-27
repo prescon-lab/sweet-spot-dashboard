@@ -89,7 +89,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
       guardianStore.set(guardianData.name, {
         color: bannerColor,
         bannerUrl: "",
-        avatarUrl: avatarUrl,
+        avatarUrl: avatarUrl || "",
         quote: quote
       });
     }
