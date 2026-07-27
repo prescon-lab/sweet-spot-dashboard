@@ -88,7 +88,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         
         let loadedReunioes = data?.reunioes || [];
         if (loadedReunioes.length === 0 && data?.notasReuniao) {
-          loadedReunioes = [{ id: 1, date: "Histórico", text: data.notasReuniao }];
+          loadedReunioes = [{ id: 1, date: new Date().toLocaleDateString('pt-BR'), text: data.notasReuniao }];
         }
         setReunioes(loadedReunioes);
         
@@ -283,7 +283,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   </div>
                   <div className="flex flex-col">
                     <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-32 text-center" />
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">Cluster / CM</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">CM</span>
                   </div>
                 </div>
               </div>

@@ -455,6 +455,57 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
             </div>
           </div>
           
+          {/* Event Tracking Area */}
+          {eventStore.getEvents().filter(e => e.status !== 'completed').length > 0 && (
+            <div 
+              className="p-8 md:p-12 mx-4 md:mx-8 mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
+              style={{ color: getContrastColor(bannerColor) }}
+            >
+              <div className="mb-6">
+                <h3 className="text-xl font-bold">Acompanhamento de Eventos</h3>
+                <p className="opacity-70 text-sm">Metas batidas pelas EJs sob sua responsabilidade.</p>
+              </div>
+              
+              <div className="space-y-6">
+                {eventStore.getEvents().filter(e => e.status !== 'completed').map(event => (
+                  <div key={event.id} className="bg-black/10 rounded-2xl p-6 border border-transparent">
+                    <h4 className="font-bold text-lg mb-4 uppercase">{event.name}</h4>
+                    {event.ejGoals.length === 0 ? (
+                      <p className="text-sm opacity-70">Nenhuma meta cadastrada para este evento.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {guardianEjs.map(ej => {
+                          const completedGoals = event.ejGoals.filter(g => g.checkedBy?.includes(ej.name) || g.checked);
+                          return (
+                            <div key={ej.name} className="bg-white/5 rounded-xl p-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="font-bold">{ej.name}</span>
+                                <span className="text-xs font-bold px-2 py-1 bg-black/20 rounded-full">
+                                  {completedGoals.length}/{event.ejGoals.length}
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                {event.ejGoals.map(g => {
+                                  const isCompleted = g.checkedBy?.includes(ej.name) || g.checked;
+                                  return (
+                                    <div key={g.id} className={`text-xs flex items-center gap-2 ${isCompleted ? 'opacity-100' : 'opacity-40'}`}>
+                                      {isCompleted ? <Check className="w-3 h-3 text-green-400" /> : <div className="w-3 h-3 rounded-full border border-current" />}
+                                      <span className={isCompleted ? 'line-through' : ''}>{g.text}</span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Bottom Actions Bar */}
           <div className="bg-black/20 backdrop-blur-md p-4 flex justify-end z-20">
             <Button onClick={() => onOpenChange(false)} className="bg-white text-black hover:bg-white/90 rounded-full px-8 font-bold shadow-lg">Salvar e Fechar</Button>
