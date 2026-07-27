@@ -43,9 +43,12 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   const initialConfig = guardianStore.get(guardianData?.name || "");
   const [bannerColor, setBannerColor] = useState(initialConfig.color || '#0A1942');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialConfig.avatarUrl || null);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(initialConfig.bannerUrl || null);
+  const [bannerOpacity, setBannerOpacity] = useState(initialConfig.bannerOpacity ?? 0.2);
   const [quote, setQuote] = useState(initialConfig.quote || '');
   const [showSettings, setShowSettings] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   // Crop states
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -53,6 +56,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
 
   // Fetch the EJs for this guardian
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
@@ -71,6 +75,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
       const config = guardianStore.get(guardianData.name);
       setBannerColor(config.color || '#0A1942');
       setAvatarUrl(config.avatarUrl || null);
+      setBannerUrl(config.bannerUrl || null);
+      setBannerOpacity(config.bannerOpacity ?? 0.2);
       setQuote(config.quote || '');
     }
     
@@ -104,21 +110,23 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     if (guardianData?.name) {
       guardianStore.set(guardianData.name, {
         color: bannerColor,
-        bannerUrl: "",
+        bannerUrl: bannerUrl || "",
+        bannerOpacity: bannerOpacity,
         avatarUrl: avatarUrl || "",
         quote: quote
       });
     }
-  }, [bannerColor, quote, avatarUrl, guardianData?.name]);
+  }, [bannerColor, bannerUrl, bannerOpacity, quote, avatarUrl, guardianData?.name]);
 
   if (!guardianData) return null;
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setTempImageUrl(reader.result as string);
+        setCropType(type);
         setCropModalOpen(true);
       };
       reader.readAsDataURL(file);
@@ -155,7 +163,11 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     );
     
     const compressedDataUrl = canvas.toDataURL("image/png");
-    setAvatarUrl(compressedDataUrl);
+    if (cropType === 'avatar') {
+      setAvatarUrl(compressedDataUrl);
+    } else {
+      setBannerUrl(compressedDataUrl);
+    }
     setCropModalOpen(false);
     setTempImageUrl(null);
   };
@@ -184,8 +196,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 image={tempImageUrl}
                 crop={crop}
                 zoom={zoom}
-                aspect={1}
-                cropShape="round"
+                aspect={cropType === 'avatar' ? 1 : undefined}
+                cropShape={cropType === 'avatar' ? "round" : "rect"}
                 showGrid={false}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
@@ -208,15 +220,26 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
           className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px] transition-colors duration-300"
           style={{ backgroundColor: bannerColor }}
         >
+          {bannerUrl && (
+            <div 
+              className="absolute inset-0 pointer-events-none z-0" 
+              style={{ 
+                backgroundImage: `url(${bannerUrl})`, 
+                backgroundSize: 'cover', 
+                backgroundPosition: 'center',
+                opacity: bannerOpacity 
+              }} 
+            />
+          )}
           
           {/* Main scrollable area */}
-          <div className="flex-1 overflow-auto rounded-[32px] custom-scrollbar">
+          <div className="flex-1 overflow-auto rounded-[32px] custom-scrollbar relative z-10">
             {/* Customizable Banner Area */}
             <div 
-              className="relative w-full min-h-[250px] flex items-end p-8 md:p-12"
+              className="relative w-full min-h-[250px] flex items-end p-8 md:p-12 z-20"
             >
               {/* Settings Toggle Button */}
-              <div className="absolute top-4 right-4 z-20">
+              <div className="absolute top-4 left-4 z-30">
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -229,8 +252,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
               {/* Settings Panel (Absolute) */}
               {showSettings && (
-                <div className="absolute top-16 right-4 z-20 bg-white p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200 text-black">
-                  <h4 className="font-bold text-sm text-[#0A1942]">Personalizar Banner</h4>
+                <div className="absolute top-16 left-4 z-40 bg-white p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200 text-black border border-border/40">
+                  <h4 className="font-bold text-sm text-[#0A1942]">Configurações Visuais</h4>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground">Cor do Painel</label>
                     <div className="flex gap-2">
@@ -247,18 +270,37 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                       />
                     </div>
                   </div>
+                  
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">Foto do Guardião</label>
+                    <label className="text-xs font-semibold text-muted-foreground">Foto de fundo</label>
                     <Input 
                       type="file" 
                       accept="image/*"
-                      onChange={handleImageUpload}
+                      onChange={(e) => handleImageUpload(e, 'banner')}
                       className="text-xs file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                     />
-                    {avatarUrl && (
-                      <Button variant="ghost" size="sm" onClick={() => setAvatarUrl("")} className="w-full text-xs text-red-500 h-6">
-                        Remover Foto
-                      </Button>
+                    
+                    {bannerUrl && (
+                      <div className="space-y-3 mt-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between items-center">
+                            <label className="text-xs font-semibold text-muted-foreground">Opacidade</label>
+                            <span className="text-[10px] text-muted-foreground font-mono">{Math.round(bannerOpacity * 100)}%</span>
+                          </div>
+                          <input 
+                            type="range" 
+                            min="0.05" 
+                            max="1" 
+                            step="0.05"
+                            value={bannerOpacity}
+                            onChange={(e) => setBannerOpacity(parseFloat(e.target.value))}
+                            className="w-full accent-primary h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                          />
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => setBannerUrl(null)} className="w-full text-xs text-red-500 h-7 bg-red-50 hover:bg-red-100 hover:text-red-600">
+                          Remover Fundo
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -285,7 +327,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                   <input 
                     type="file" 
                     ref={fileInputRef} 
-                    onChange={handleImageUpload} 
+                    onChange={(e) => handleImageUpload(e, 'avatar')} 
                     accept="image/*" 
                     className="hidden" 
                   />

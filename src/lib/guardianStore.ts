@@ -2,6 +2,7 @@ export interface GuardianCustomization {
   color: string;
   avatarUrl: string; // Figurinha
   bannerUrl: string; // Imagem do fundo
+  bannerOpacity: number; // Opacidade do fundo
   quote: string; // Frase do dia
 }
 
@@ -28,6 +29,7 @@ export const guardianStore = {
       color: "#0A1942",
       avatarUrl: "",
       bannerUrl: "",
+      bannerOpacity: 0.2, // Default opacity
       quote: "FRASE DO DIA",
     };
   },
