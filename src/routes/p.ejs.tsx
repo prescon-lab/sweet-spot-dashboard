@@ -26,7 +26,10 @@ function EjsPanel() {
 
   const filteredEjs = ejsList.filter((ej) => {
     const ejSavedData = ejDataStore.getEjData(ej.name);
-    const isAposta = Object.values(ejSavedData?.apostas || {}).some(v => v === true);
+    const allEvents = eventStore.getEvents().filter(e => e.status !== 'completed');
+    const activeEventIds = allEvents.map(e => e.id);
+    const isAposta = Object.entries(ejSavedData?.apostas || {})
+      .some(([eventId, isTrue]) => isTrue && activeEventIds.includes(eventId));
 
     const matchesSearch = ej.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           ej.guardian.toLowerCase().includes(searchTerm.toLowerCase());
@@ -85,9 +88,11 @@ function EjsPanel() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
         {filteredEjs.map((ej) => {
           const ejSavedData = ejDataStore.getEjData(ej.name);
-          const isAposta = Object.values(ejSavedData?.apostas || {}).some(v => v === true);
-          
           const allEvents = eventStore.getEvents().filter(e => e.status !== 'completed');
+          const activeEventIds = allEvents.map(e => e.id);
+          const isAposta = Object.entries(ejSavedData?.apostas || {})
+            .some(([eventId, isTrue]) => isTrue && activeEventIds.includes(eventId));
+          
           const allGoals = allEvents.flatMap(e => e.ejGoals || []);
           const allGoalsMet = allGoals.length > 0 && allGoals.every(g => g.checkedBy?.includes(ej.name) || g.checked);
 
