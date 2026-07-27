@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2 } from "lucide-react";
 import { eventStore, AppEvent } from "@/lib/eventStore";
+import { EjLeadFunnelModal } from "./EjLeadFunnelModal";
 
 interface EjDetailModalProps {
   open: boolean;
@@ -255,29 +256,11 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         </DialogContent>
       </Dialog>
 
-      {/* Funnel Sub-Modal */}
-      <Dialog open={funnelModalOpen} onOpenChange={setFunnelModalOpen}>
-        <DialogContent className="max-w-3xl glass-modal">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Briefcase className="text-primary w-5 h-5" />
-              Funil de Vendas e Leads
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-6 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Cadastre aqui as informações de faturamentos próximos e novos leads em negociação.
-            </p>
-            <div className="border rounded-lg p-8 text-center text-muted-foreground bg-muted/30">
-              (Interface do Funil de Vendas - Em construção)
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setFunnelModalOpen(false)}>Fechar</Button>
-              <Button>Adicionar Lead</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EjLeadFunnelModal 
+        open={funnelModalOpen}
+        onOpenChange={setFunnelModalOpen}
+        ejId={ejData?.name || ''}
+      />
     </>
   );
 }

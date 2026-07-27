@@ -7,8 +7,8 @@ import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pe
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
-import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
 import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
+import { leadStore, Lead } from "@/lib/leadStore";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -24,11 +24,22 @@ function DashboardPanel() {
   const [eventToEdit, setEventToEdit] = useState<AppEvent | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<EventGoal | null>(null);
 
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [leadsModalOpen, setLeadsModalOpen] = useState(false);
+
   useEffect(() => {
     setEvents(eventStore.getEvents());
-    const handleUpdate = () => setEvents(eventStore.getEvents());
+    setLeads(leadStore.getLeads());
+    const handleUpdate = () => {
+      setEvents(eventStore.getEvents());
+      setLeads(leadStore.getLeads());
+    };
     window.addEventListener('eventsUpdated', handleUpdate);
-    return () => window.removeEventListener('eventsUpdated', handleUpdate);
+    window.addEventListener('leadsUpdated', handleUpdate);
+    return () => {
+      window.removeEventListener('eventsUpdated', handleUpdate);
+      window.removeEventListener('leadsUpdated', handleUpdate);
+    };
   }, []);
 
   const handlePrint = () => {
@@ -62,6 +73,52 @@ function DashboardPanel() {
           </Button>
         </div>
       </div>
+
+      {/* Global Revenue Card */}
+      {(() => {
+        const total = leads.reduce((acc, lead) => acc + lead.expectedValue, 0);
+        const quente = leads.filter(l => l.status === 'quente').reduce((acc, lead) => acc + lead.expectedValue, 0);
+        const morno = leads.filter(l => l.status === 'morno').reduce((acc, lead) => acc + lead.expectedValue, 0);
+        const frio = leads.filter(l => l.status === 'frio').reduce((acc, lead) => acc + lead.expectedValue, 0);
+        const formatBRL = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+        return (
+          <Card 
+            className="glass-card cursor-pointer hover:shadow-lg transition-all border-primary/20"
+            onClick={() => setLeadsModalOpen(true)}
+          >
+            <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
+              <CardTitle className="text-xl uppercase tracking-wider text-primary flex items-center gap-2">
+                <TrendingUp className="h-6 w-6" />
+                Previsão de Faturamento da Rede
+              </CardTitle>
+              <CardDescription>Soma de todos os funis de vendas das EJs</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="text-center md:text-left flex-1">
+                  <p className="text-sm text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Total Provável</p>
+                  <p className="text-4xl font-bold text-[#0A1942]">{formatBRL(total)}</p>
+                </div>
+                <div className="flex gap-4">
+                  <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center min-w-[120px]">
+                    <p className="text-xs font-bold text-red-600 uppercase mb-1">Quente</p>
+                    <p className="text-lg font-bold text-red-700">{formatBRL(quente)}</p>
+                  </div>
+                  <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl text-center min-w-[120px]">
+                    <p className="text-xs font-bold text-orange-600 uppercase mb-1">Morno</p>
+                    <p className="text-lg font-bold text-orange-700">{formatBRL(morno)}</p>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center min-w-[120px]">
+                    <p className="text-xs font-bold text-blue-600 uppercase mb-1">Frio</p>
+                    <p className="text-lg font-bold text-blue-700">{formatBRL(frio)}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* KPI Cards (Grid) -> Replaced by Goal Progress Charts */}
       <div className="grid grid-cols-1 gap-6">
@@ -213,6 +270,60 @@ function DashboardPanel() {
                 ))
               )}
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Global Leads Modal */}
+      <Dialog open={leadsModalOpen} onOpenChange={setLeadsModalOpen}>
+        <DialogContent className="max-w-4xl bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold tracking-tight text-[#0A1942] flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Detalhamento de Faturamento
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 max-h-[70vh] overflow-auto">
+            {leads.length === 0 ? (
+              <p className="text-center text-muted-foreground p-8 bg-white rounded-xl border">Nenhum lead cadastrado na rede ainda.</p>
+            ) : (
+              <div className="space-y-4">
+                {[...leads].sort((a, b) => new Date(a.closingDate).getTime() - new Date(b.closingDate).getTime()).map(lead => (
+                  <div key={lead.id} className="bg-white p-4 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary uppercase text-[10px]">
+                          {lead.ejId}
+                        </Badge>
+                        <span className="font-bold text-[#0A1942]">{lead.name}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{lead.observations || 'Sem observações detalhadas'}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="font-bold text-primary text-lg">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lead.expectedValue)}
+                        </p>
+                      </div>
+                      <div className="w-24 text-center">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase ${
+                          lead.status === 'quente' ? 'bg-red-500 text-white' : 
+                          lead.status === 'morno' ? 'bg-orange-500 text-white' : 'bg-blue-500 text-white'
+                        }`}>
+                          {lead.status}
+                        </span>
+                      </div>
+                      <div className="w-28 text-right">
+                        <p className="text-xs text-muted-foreground uppercase font-semibold">Vencimento</p>
+                        <p className="text-sm font-medium">
+                          {lead.closingDate ? new Date(lead.closingDate).toLocaleDateString() : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
