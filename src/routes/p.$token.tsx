@@ -76,10 +76,11 @@ function DashboardPanel() {
 
       {/* Global Revenue Card */}
       {(() => {
-        const total = leads.reduce((acc, lead) => acc + lead.expectedValue, 0);
-        const quente = leads.filter(l => l.status === 'quente').reduce((acc, lead) => acc + lead.expectedValue, 0);
-        const morno = leads.filter(l => l.status === 'morno').reduce((acc, lead) => acc + lead.expectedValue, 0);
-        const frio = leads.filter(l => l.status === 'frio').reduce((acc, lead) => acc + lead.expectedValue, 0);
+        const safeLeads = Array.isArray(leads) ? leads : [];
+        const total = safeLeads.reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
+        const quente = safeLeads.filter(l => l?.status === 'quente').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
+        const morno = safeLeads.filter(l => l?.status === 'morno').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
+        const frio = safeLeads.filter(l => l?.status === 'frio').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
         const formatBRL = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
         return (
@@ -284,11 +285,15 @@ function DashboardPanel() {
             </DialogTitle>
           </DialogHeader>
           <div className="py-4 max-h-[70vh] overflow-auto">
-            {leads.length === 0 ? (
+            {!Array.isArray(leads) || leads.length === 0 ? (
               <p className="text-center text-muted-foreground p-8 bg-white rounded-xl border">Nenhum lead cadastrado na rede ainda.</p>
             ) : (
               <div className="space-y-4">
-                {[...leads].sort((a, b) => new Date(a.closingDate).getTime() - new Date(b.closingDate).getTime()).map(lead => (
+                {[...leads].sort((a, b) => {
+                  const dateA = a.closingDate ? new Date(a.closingDate).getTime() : 0;
+                  const dateB = b.closingDate ? new Date(b.closingDate).getTime() : 0;
+                  return dateA - dateB;
+                }).map(lead => (
                   <div key={lead.id} className="bg-white p-4 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
