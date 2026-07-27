@@ -3,7 +3,9 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, Flame, Trophy } from "lucide-react";
+import { ejDataStore } from "@/lib/ejDataStore";
+import { eventStore } from "@/lib/eventStore";
 
 export const Route = createFileRoute("/p/ejs")({
   component: EjsPanel,
@@ -23,10 +25,13 @@ function EjsPanel() {
   const uniqueGuardians = Array.from(new Set(ejsList.map(ej => ej.guardian))).sort();
 
   const filteredEjs = ejsList.filter((ej) => {
+    const ejSavedData = ejDataStore.getEjData(ej.name);
+    const isAposta = Object.values(ejSavedData?.apostas || {}).some(v => v === true);
+
     const matchesSearch = ej.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           ej.guardian.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGuardian = filterGuardian ? ej.guardian === filterGuardian : true;
-    const matchesBets = filterBets ? ej.isBet : true;
+    const matchesBets = filterBets ? isAposta : true;
     
     return matchesSearch && matchesGuardian && matchesBets;
   });
@@ -78,13 +83,35 @@ function EjsPanel() {
 
       {/* Grid of EJs */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-        {filteredEjs.map((ej) => (
-          <div 
-            key={ej.id}
-            onClick={() => handleCardClick(ej)}
-            className="bg-[#0A1942] rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl group"
-          >
-            <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] mb-4 overflow-hidden border-4 border-transparent group-hover:border-white/20 transition-all flex flex-col justify-end">
+        {filteredEjs.map((ej) => {
+          const ejSavedData = ejDataStore.getEjData(ej.name);
+          const isAposta = Object.values(ejSavedData?.apostas || {}).some(v => v === true);
+          
+          const allEvents = eventStore.getEvents();
+          const allGoals = allEvents.flatMap(e => e.ejGoals || []);
+          const allGoalsMet = allGoals.length > 0 && allGoals.every(g => g.checkedBy?.includes(ej.name) || g.checked);
+
+          return (
+            <div 
+              key={ej.id}
+              onClick={() => handleCardClick(ej)}
+              className="bg-[#0A1942] rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl group relative"
+            >
+              {/* Icons Badge Area */}
+              <div className="absolute top-3 right-3 flex gap-1 z-10">
+                {isAposta && (
+                  <div className="bg-orange-500 text-white p-1.5 rounded-full shadow-md" title="EJ é Aposta">
+                    <Flame className="w-4 h-4" />
+                  </div>
+                )}
+                {allGoalsMet && (
+                  <div className="bg-yellow-500 text-white p-1.5 rounded-full shadow-md" title="Bateu todas as metas">
+                    <Trophy className="w-4 h-4" />
+                  </div>
+                )}
+              </div>
+
+              <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] mb-4 overflow-hidden border-4 border-transparent group-hover:border-white/20 transition-all flex flex-col justify-end">
               {/* Fallback image style as in mockup (light blue sky, green hill) */}
               <div className="w-full h-full bg-[#E0F2FE] relative overflow-hidden flex flex-col justify-end">
                 <div className="w-full h-[40%] bg-[#84CC16] rounded-t-[50%] absolute bottom-0 translate-y-2 group-hover:translate-y-1 transition-transform"></div>
@@ -93,7 +120,8 @@ function EjsPanel() {
             <h3 className="text-white font-bold text-sm tracking-wider uppercase truncate w-full">{ej.name}</h3>
             <p className="text-white/80 text-xs font-semibold uppercase mt-1 truncate w-full">{ej.guardian}</p>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {filteredEjs.length === 0 && (
