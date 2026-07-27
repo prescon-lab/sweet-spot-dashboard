@@ -15,7 +15,7 @@ interface EventRegistrationModalProps {
 
 export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: EventRegistrationModalProps) {
   const [eventName, setEventName] = useState("");
-  const [ejGoals, setEjGoals] = useState([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
+  const [ejGoals, setEjGoals] = useState<EventGoal[]>([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
 
   React.useEffect(() => {
     if (open && eventToEdit) {
