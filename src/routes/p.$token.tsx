@@ -7,6 +7,7 @@ import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer } f
 import { useState } from "react";
 import { toast } from "sonner";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
+import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
 
 export const Route = createFileRoute("/p/$token")({
   component: DashboardPanel,
@@ -14,17 +15,15 @@ export const Route = createFileRoute("/p/$token")({
 
 function DashboardPanel() {
   const { token } = Route.useParams();
-  const [searchTerm, setSearchTerm] = useState("");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [eventModalOpen, setEventModalOpen] = useState(false);
 
   const handlePrint = () => {
     window.print();
   };
 
   const handleAddBet = () => {
-    toast.info("Abrindo modal para adicionar nova aposta...", {
-      description: "Esta funcionalidade será integrada à API em breve."
-    });
+    setEventModalOpen(true);
   };
 
   return (
@@ -33,27 +32,14 @@ function DashboardPanel() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Painel de Acompanhamento</h1>
-          <p className="text-muted-foreground mt-1">
-            Visualizando dados do painel: <code className="bg-muted px-1.5 py-0.5 rounded text-sm">{token}</code>
-          </p>
         </div>
         <div className="flex w-full md:w-auto items-center gap-2">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar por EJ, Guardião..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
           <Button variant="outline" size="icon" onClick={handlePrint} title="Imprimir Relatório">
             <Printer className="h-4 w-4" />
           </Button>
           <Button onClick={handleAddBet}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Adicionar aposta
+            Adicionar Evento
           </Button>
         </div>
       </div>
@@ -140,16 +126,6 @@ function DashboardPanel() {
               </CardContent>
             </Card>
 
-            {/* Empty State */}
-            {searchTerm && (
-              <div className="text-center p-12 border-2 border-dashed rounded-xl bg-muted/30">
-                <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold">Nenhuma EJ encontrada</h3>
-                <p className="text-sm text-muted-foreground">
-                  Tente buscar por outro nome ou termo.
-                </p>
-              </div>
-            )}
           </div>
         </div>
 
@@ -172,6 +148,10 @@ function DashboardPanel() {
       <EjDetailModal 
         open={detailModalOpen} 
         onOpenChange={setDetailModalOpen} 
+      />
+      <EventRegistrationModal
+        open={eventModalOpen}
+        onOpenChange={setEventModalOpen}
       />
     </div>
   );

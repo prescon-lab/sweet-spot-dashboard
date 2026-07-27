@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2 } from "lucide-react";
+import { eventStore, AppEvent } from "@/lib/eventStore";
 
 interface EjDetailModalProps {
   open: boolean;
@@ -21,10 +22,24 @@ interface EjDetailModalProps {
 
 export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps) {
   const [funnelModalOpen, setFunnelModalOpen] = useState(false);
+  const [events, setEvents] = useState<AppEvent[]>([]);
   const [tasks, setTasks] = useState([
     { id: 1, text: "Exemplo de tarefa cadastrada", completed: false, date: "10/05/2026" }
   ]);
   const [newTaskText, setNewTaskText] = useState("");
+
+  React.useEffect(() => {
+    if (open) {
+      setEvents(eventStore.getEvents());
+    }
+
+    const handleUpdate = () => {
+      setEvents(eventStore.getEvents());
+    };
+    
+    window.addEventListener('eventsUpdated', handleUpdate);
+    return () => window.removeEventListener('eventsUpdated', handleUpdate);
+  }, [open]);
 
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
@@ -100,17 +115,51 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 </TabsList>
 
                 {/* Aba 1: Apostas & Metas */}
-                <TabsContent value="apostas" className="flex-1 pt-6 outline-none">
-                  <div className="bg-white rounded-xl border border-border/50 p-6 space-y-4">
-                    <h3 className="font-semibold text-lg text-foreground">Aposta Livre (Custom)</h3>
-                    <div className="border border-dashed border-border p-8 rounded-lg text-center text-muted-foreground flex flex-col items-center justify-center gap-4 bg-muted/10">
-                      <p>Nenhuma aposta cadastrada.</p>
-                      <Button variant="outline" size="sm">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar nova aposta (Evento)
-                      </Button>
+                <TabsContent value="apostas" className="flex-1 pt-6 outline-none space-y-6">
+                  {events.length === 0 ? (
+                    <div className="bg-white rounded-xl border border-border/50 p-6 space-y-4">
+                      <h3 className="font-semibold text-lg text-foreground">Apostas de Eventos</h3>
+                      <div className="border border-dashed border-border p-8 rounded-lg text-center text-muted-foreground flex flex-col items-center justify-center gap-4 bg-muted/10">
+                        <p>Nenhum evento cadastrado no painel.</p>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    events.map(event => (
+                      <div key={event.id} className="bg-white rounded-xl border border-border/50 p-6 space-y-4 shadow-sm">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-bold text-xl text-[#0A1942] uppercase">{event.name}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">Registrado em: {new Date(event.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          {event.coreGoal && (
+                            <div className="bg-primary/10 px-4 py-2 rounded-lg border border-primary/20">
+                              <span className="text-xs font-semibold text-primary uppercase block mb-1">Meta do Núcleo</span>
+                              <span className="text-sm font-bold text-[#0A1942]">{event.coreGoal}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="pt-4 border-t space-y-3">
+                          <h4 className="text-sm font-semibold uppercase text-muted-foreground mb-3">Metas da EJ ({ejData?.name})</h4>
+                          {event.ejGoals.map(goal => (
+                            <div key={goal.id} className="flex items-start gap-3 bg-muted/20 p-3 rounded-lg hover:bg-muted/40 transition-colors">
+                              <Checkbox 
+                                checked={goal.checked}
+                                onCheckedChange={() => eventStore.toggleGoal(event.id, goal.id)}
+                                className="mt-1 border-gray-400 data-[state=checked]:bg-primary data-[state=checked]:text-white"
+                              />
+                              <p className={`text-sm ${goal.checked ? 'line-through text-muted-foreground' : 'text-foreground font-medium'}`}>
+                                {goal.text}
+                              </p>
+                            </div>
+                          ))}
+                          {event.ejGoals.length === 0 && (
+                            <p className="text-sm text-muted-foreground">Nenhuma meta específica definida.</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </TabsContent>
 
                 {/* Aba 2: Saídas das Dailys */}
