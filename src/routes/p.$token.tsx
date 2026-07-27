@@ -145,7 +145,7 @@ function DashboardPanel() {
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6">
           {/* Global Revenue Card */}
           {(() => {
             const safeLeads = Array.isArray(leads) ? leads : [];
@@ -161,30 +161,30 @@ function DashboardPanel() {
                 onClick={() => setLeadsModalOpen(true)}
               >
                 <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
-                  <CardTitle className="text-xl uppercase tracking-wider text-primary flex items-center gap-2">
-                    <TrendingUp className="h-6 w-6" />
+                  <CardTitle className="text-lg uppercase tracking-wider text-primary flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
                     Previsão de Faturamento da Rede
                   </CardTitle>
                   <CardDescription>Soma de todos os funis de vendas das EJs</CardDescription>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="flex flex-col gap-6">
+                <CardContent className="p-5">
+                  <div className="flex flex-col gap-4">
                     <div className="text-left">
-                      <p className="text-sm text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Total Provável</p>
-                      <p className="text-4xl font-bold text-[#0A1942]">{formatBRL(total)}</p>
+                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Total Provável</p>
+                      <p className="text-3xl font-bold text-[#0A1942]">{formatBRL(total)}</p>
                     </div>
-                    <div className="flex flex-wrap gap-4">
-                      <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center flex-1 min-w-[120px]">
+                    <div className="flex flex-wrap gap-3">
+                      <div className="bg-red-50 border border-red-100 p-3 rounded-xl text-center flex-1 min-w-[120px]">
                         <p className="text-xs font-bold text-red-600 uppercase mb-1">Quente</p>
-                        <p className="text-lg font-bold text-red-700">{formatBRL(quente)}</p>
+                        <p className="text-base font-bold text-red-700">{formatBRL(quente)}</p>
                       </div>
-                      <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl text-center flex-1 min-w-[120px]">
+                      <div className="bg-orange-50 border border-orange-100 p-3 rounded-xl text-center flex-1 min-w-[120px]">
                         <p className="text-xs font-bold text-orange-600 uppercase mb-1">Morno</p>
-                        <p className="text-lg font-bold text-orange-700">{formatBRL(morno)}</p>
+                        <p className="text-base font-bold text-orange-700">{formatBRL(morno)}</p>
                       </div>
-                      <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center flex-1 min-w-[120px]">
+                      <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl text-center flex-1 min-w-[120px]">
                         <p className="text-xs font-bold text-blue-600 uppercase mb-1">Frio</p>
-                        <p className="text-lg font-bold text-blue-700">{formatBRL(frio)}</p>
+                        <p className="text-base font-bold text-blue-700">{formatBRL(frio)}</p>
                       </div>
                     </div>
                   </div>
