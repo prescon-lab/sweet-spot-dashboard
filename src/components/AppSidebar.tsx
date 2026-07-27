@@ -48,9 +48,12 @@ const items = [
 import { useEffect, useState } from "react";
 import { linksStore, UsefulLink } from "@/lib/linksStore";
 import { ExternalLink } from "lucide-react";
+import { useAccessRole } from "@/lib/access";
 
 export function AppSidebar() {
   const [groupedLinks, setGroupedLinks] = useState<Record<string, UsefulLink[]>>({});
+  const role = useAccessRole();
+  const visibleItems = items.filter((item) => !item.adminOnly || role === "admin");
 
   useEffect(() => {
     setGroupedLinks(linksStore.getGroupedByCategory());
