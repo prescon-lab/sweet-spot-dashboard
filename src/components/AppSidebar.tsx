@@ -1,4 +1,5 @@
 import { Calendar, Home, Inbox, Search, Settings, Users, BarChart2 } from "lucide-react"
+import { Link } from "@tanstack/react-router"
 import {
   Sidebar,
   SidebarContent,
@@ -75,10 +76,10 @@ export function AppSidebar() {
               {visibleItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <a href={item.url}>
+                    <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
