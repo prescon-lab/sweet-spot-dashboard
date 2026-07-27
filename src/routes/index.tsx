@@ -41,49 +41,48 @@ function Index() {
             <Sparkles className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            Bem-vindo ao Sweet Spot Dashboard
+            Bem-vindo ao Painel de Acompanhamento
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            O centro de controle definitivo para acompanhar as metas, saúde e apostas das suas Empresas Juniores (EJs).
+            O centro de controle para gerenciar, visualizar e acompanhar de perto todas as informações, metas, dailys e saúde das suas Empresas Juniores (EJs) e Guardiões.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mt-12">
-          <Card className="glass-card">
+          <Card className="glass-card cursor-pointer hover:border-primary/50 transition-all group" onClick={() => navigate({ to: "/p/ejs" })}>
             <CardHeader>
-              <Building2 className="w-6 h-6 text-primary mb-2" />
-              <CardTitle>Gestão Centralizada</CardTitle>
+              <Building2 className="w-8 h-8 text-primary mb-2 group-hover:scale-110 transition-transform" />
+              <CardTitle>Painel de EJs</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Acompanhe o progresso de múltiplas EJs em um único lugar, com indicadores de saúde e status em tempo real.
+                Acompanhe o progresso individual de cada EJ, incluindo metas cumpridas, apostas, anotações de reuniões e dailys.
               </CardDescription>
             </CardContent>
-          </Card>
-
-          <Card className="glass-card">
-            <CardHeader>
-              <BarChart3 className="w-6 h-6 text-primary mb-2" />
-              <CardTitle>Métricas de Valor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
-                Visualize apostas cumpridas, leads no funil e atualizações recentes de forma clara e objetiva.
-              </CardDescription>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card flex items-center justify-center p-6 text-center border-dashed border-2 bg-muted/30">
-            <div className="space-y-4">
-              <h3 className="font-semibold">Nenhum painel configurado ainda.</h3>
-              <p className="text-sm text-muted-foreground">
-                Crie seu primeiro painel de controle e comece a acompanhar os resultados hoje mesmo.
-              </p>
-              <Button onClick={handleStart} disabled={isLoading} className="w-full">
-                {isLoading ? "Configurando..." : "Criar primeiro painel"}
-                {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}
+            <CardFooter>
+              <Button variant="ghost" className="w-full justify-between group-hover:bg-primary group-hover:text-primary-foreground">
+                Acessar EJs
+                <ArrowRight className="w-4 h-4" />
               </Button>
-            </div>
+            </CardFooter>
+          </Card>
+
+          <Card className="glass-card cursor-pointer hover:border-primary/50 transition-all group" onClick={() => navigate({ to: "/p/guardioes" })}>
+            <CardHeader>
+              <BarChart3 className="w-8 h-8 text-primary mb-2 group-hover:scale-110 transition-transform" />
+              <CardTitle>Painel de Guardiões</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Visualize as atualizações recentes de cada guardião, gerencie menções e acompanhe as EJs sob a responsabilidade de cada um.
+              </CardDescription>
+            </CardContent>
+            <CardFooter>
+              <Button variant="ghost" className="w-full justify-between group-hover:bg-primary group-hover:text-primary-foreground">
+                Acessar Guardiões
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </CardFooter>
           </Card>
         </div>
       </div>

@@ -39,19 +39,35 @@ const items = [
   },
   {
     title: "Configurações",
-    url: "#",
+    url: "/p/configuracoes",
     icon: Settings,
   },
 ]
 
+import { useEffect, useState } from "react";
+import { linksStore, UsefulLink } from "@/lib/linksStore";
+import { ExternalLink } from "lucide-react";
+
 export function AppSidebar() {
+  const [groupedLinks, setGroupedLinks] = useState<Record<string, UsefulLink[]>>({});
+
+  useEffect(() => {
+    setGroupedLinks(linksStore.getGroupedByCategory());
+    
+    const handleUpdate = () => {
+      setGroupedLinks(linksStore.getGroupedByCategory());
+    };
+    
+    window.addEventListener('linksStoreUpdated', handleUpdate);
+    return () => window.removeEventListener('linksStoreUpdated', handleUpdate);
+  }, []);
+
   return (
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Sweet Spot</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="mt-4">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
@@ -65,6 +81,30 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {Object.keys(groupedLinks).length > 0 && (
+          <div className="mt-4">
+            {Object.entries(groupedLinks).map(([category, links]) => (
+              <SidebarGroup key={category}>
+                <SidebarGroupLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{category}</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {links.map((link) => (
+                      <SidebarMenuItem key={link.id}>
+                        <SidebarMenuButton asChild tooltip={link.title}>
+                          <a href={link.url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="w-4 h-4" />
+                            <span>{link.title}</span>
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ))}
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   )

@@ -132,8 +132,8 @@ function RootComponent() {
             <div className="absolute top-4 right-4 z-50">
               <ThemeToggle />
             </div>
-            <div className="md:hidden p-4">
-              <SidebarTrigger />
+            <div className="absolute top-4 left-4 z-50">
+              <SidebarTrigger className="bg-background/50 backdrop-blur-sm border border-border/50 shadow-sm" />
             </div>
             <Outlet />
           </main>
