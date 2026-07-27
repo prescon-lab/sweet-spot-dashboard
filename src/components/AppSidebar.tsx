@@ -41,6 +41,7 @@ const items = [
     title: "Configurações",
     url: "/p/configuracoes",
     icon: Settings,
+    adminOnly: true,
   },
 ]
 
