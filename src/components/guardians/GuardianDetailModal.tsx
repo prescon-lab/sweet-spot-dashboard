@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy } from "lucide-react";
 import { ejsList } from "@/lib/data";
 import { guardianStore } from "@/lib/guardianStore";
+import { ejDataStore } from "@/lib/ejDataStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { Settings, Image as ImageIcon, Trash2 } from "lucide-react";
 import Cropper from "react-easy-crop";
