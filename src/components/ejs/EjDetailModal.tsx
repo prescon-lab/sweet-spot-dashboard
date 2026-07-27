@@ -38,7 +38,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
 
   React.useEffect(() => {
     if (open) {
-      setEvents(eventStore.getEvents());
+      setEvents(eventStore.getEvents().filter(e => e.status !== 'completed'));
       
       // Load saved data for this EJ
       const ejName = ejData?.name || "";
@@ -61,7 +61,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     }
 
     const handleUpdate = () => {
-      setEvents(eventStore.getEvents());
+      setEvents(eventStore.getEvents().filter(e => e.status !== 'completed'));
     };
     
     window.addEventListener('eventsUpdated', handleUpdate);

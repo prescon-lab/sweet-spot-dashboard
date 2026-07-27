@@ -407,7 +407,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                   const ejSavedData = ejDataStore.getEjData(ej.name);
                   const isAposta = Object.values(ejSavedData?.apostas || {}).some(v => v === true);
                   
-                  const allEvents = eventStore.getEvents();
+                  const allEvents = eventStore.getEvents().filter(e => e.status !== 'completed');
                   const allGoals = allEvents.flatMap(e => e.ejGoals || []);
                   const allGoalsMet = allGoals.length > 0 && allGoals.every(g => g.checkedBy?.includes(ej.name) || g.checked);
 

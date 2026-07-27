@@ -5,7 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trophy, Calendar as CalendarIcon } from "lucide-react";
+import { Trophy, Calendar as CalendarIcon, Printer, Trash2, Flame } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ejDataStore } from "@/lib/ejDataStore";
+import { ejsList } from "@/lib/data";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/historico-eventos")({
   component: HistoricoEventos,
@@ -24,6 +28,16 @@ function HistoricoEventos() {
     window.addEventListener('eventsUpdated', loadEvents);
     return () => window.removeEventListener('eventsUpdated', loadEvents);
   }, []);
+
+  const handleDeleteEvent = (eventId: string) => {
+    const confirmText = window.prompt("Digite APAGAR para confirmar a exclusão deste evento do histórico:");
+    if (confirmText === "APAGAR") {
+      eventStore.deleteEvent(eventId);
+      toast.success("Evento excluído com sucesso.");
+    } else if (confirmText !== null) {
+      toast.error("Exclusão cancelada. Confirmação incorreta.");
+    }
+  };
 
   if (completedEvents.length === 0) {
     return (
@@ -66,9 +80,26 @@ function HistoricoEventos() {
 
           const totalEjsMet = Object.keys(completionDates).length;
 
+          const allEjs = ejsList.map(ej => ej.name);
+          const apostasEjs: { name: string, goals: string[] }[] = [];
+          const nonApostasEjs: { name: string, goals: string[] }[] = [];
+
+          allEjs.forEach(ejName => {
+            const ejData = ejDataStore.getEjData(ejName);
+            const isAposta = ejData?.apostas?.[event.id] === true;
+            
+            const achievedGoals = event.ejGoals.filter(g => g.checkedBy?.includes(ejName) || g.checked).map(g => g.text);
+            
+            if (isAposta) {
+              apostasEjs.push({ name: ejName, goals: achievedGoals });
+            } else if (achievedGoals.length > 0) {
+              nonApostasEjs.push({ name: ejName, goals: achievedGoals });
+            }
+          });
+
           return (
-            <Card key={event.id} className="overflow-hidden glass-card">
-              <CardHeader className="bg-[#0A1942]/5 pb-8">
+            <Card key={event.id} className="overflow-hidden glass-card print:shadow-none print:border-none">
+              <CardHeader className="bg-[#0A1942]/5 pb-8 print:bg-transparent">
                 <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
                   <div>
                     <CardTitle className="text-2xl text-[#0A1942] uppercase font-bold">{event.name}</CardTitle>
@@ -77,9 +108,21 @@ function HistoricoEventos() {
                       Concluído em: {event.completedAt ? format(parseISO(event.completedAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : 'Data desconhecida'}
                     </CardDescription>
                   </div>
-                  <div className="bg-yellow-500/10 text-yellow-600 px-4 py-2 rounded-xl flex items-center gap-2 font-bold shadow-sm">
-                    <Trophy className="w-5 h-5" />
-                    {totalEjsMet} {totalEjsMet === 1 ? 'EJ Bateu' : 'EJs Bateram'} Metas
+                  <div className="flex items-center gap-4">
+                    <div className="bg-yellow-500/10 text-yellow-600 px-4 py-2 rounded-xl flex items-center gap-2 font-bold shadow-sm print:hidden">
+                      <Trophy className="w-5 h-5" />
+                      {totalEjsMet} {totalEjsMet === 1 ? 'EJ Bateu' : 'EJs Bateram'} Metas
+                    </div>
+                    <div className="flex gap-2 print:hidden">
+                      <Button variant="outline" size="sm" onClick={() => window.print()}>
+                        <Printer className="w-4 h-4 mr-2" />
+                        Gerar PDF
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDeleteEvent(event.id)}>
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Excluir
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
@@ -125,7 +168,7 @@ function HistoricoEventos() {
                 )}
                 
                 {chartData.length > 0 && (
-                  <>
+                  <div className="print:hidden">
                     <h4 className="text-sm font-semibold text-muted-foreground mt-8 mb-4 uppercase tracking-wider">EJs que Alcançaram o Resultado</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {Object.entries(completionDates).map(([ejName, dateIso]) => (
@@ -140,8 +183,52 @@ function HistoricoEventos() {
                         </div>
                       ))}
                     </div>
-                  </>
+                  </div>
                 )}
+
+                {/* Relatório Detalhado (Para Impressão/PDF) */}
+                <div className="mt-12 border-t pt-8">
+                  <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-[#0A1942]">
+                    <Flame className="w-6 h-6 text-orange-500" />
+                    Relatório de EJs Apostas
+                  </h3>
+                  <div className="space-y-4">
+                    {apostasEjs.length > 0 ? apostasEjs.map(ej => (
+                      <div key={ej.name} className="bg-muted/10 p-5 rounded-xl border border-border/60">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="font-bold text-lg text-[#0A1942]">{ej.name}</p>
+                          <span className="text-sm font-semibold bg-primary/10 text-primary px-3 py-1 rounded-full">
+                            Metas: {ej.goals.length}/{event.ejGoals.length}
+                          </span>
+                        </div>
+                        <ul className="list-disc list-inside mt-3 space-y-1">
+                          {ej.goals.map((g, i) => <li key={i} className="text-sm text-green-700 font-medium">{g}</li>)}
+                          {ej.goals.length === 0 && <li className="text-sm text-muted-foreground italic">Nenhuma meta alcançada.</li>}
+                        </ul>
+                      </div>
+                    )) : <p className="text-muted-foreground">Nenhuma aposta foi registrada para este evento.</p>}
+                  </div>
+                </div>
+
+                <div className="mt-8 border-t pt-8">
+                  <h3 className="text-2xl font-bold mb-6 text-[#0A1942]">Outras EJs que pontuaram</h3>
+                  <div className="space-y-4">
+                    {nonApostasEjs.length > 0 ? nonApostasEjs.map(ej => (
+                      <div key={ej.name} className="bg-muted/10 p-5 rounded-xl border border-border/60">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="font-bold text-lg text-[#0A1942]">{ej.name}</p>
+                          <span className="text-sm font-semibold bg-secondary text-secondary-foreground px-3 py-1 rounded-full">
+                            Metas: {ej.goals.length}/{event.ejGoals.length}
+                          </span>
+                        </div>
+                        <ul className="list-disc list-inside mt-3 space-y-1">
+                          {ej.goals.map((g, i) => <li key={i} className="text-sm text-green-700 font-medium">{g}</li>)}
+                        </ul>
+                      </div>
+                    )) : <p className="text-muted-foreground">Nenhuma outra EJ pontuou neste evento.</p>}
+                  </div>
+                </div>
+
               </CardContent>
             </Card>
           );
