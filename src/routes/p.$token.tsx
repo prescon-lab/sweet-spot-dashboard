@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pencil, ListChecks } from "lucide-react";
+import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pencil, ListChecks, ChevronDown, ChevronRight, Activity as ActivityIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
@@ -30,6 +30,7 @@ function DashboardPanel() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadsModalOpen, setLeadsModalOpen] = useState(false);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [expandedEjUpdates, setExpandedEjUpdates] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setEvents(eventStore.getEvents());
@@ -246,27 +247,80 @@ function DashboardPanel() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {activities.map((activity) => (
-                    <div 
-                      key={activity.id}
-                      onClick={() => {
-                        setSelectedEjForDetail({ name: activity.ejName });
-                        setDetailModalOpen(true);
-                      }}
-                      className="bg-white p-4 rounded-xl shadow-sm border border-border/50 cursor-pointer hover:border-primary/30 hover:shadow-md transition-all flex items-start gap-3"
-                    >
-                      <div className="bg-primary/10 p-2 rounded-lg text-primary mt-1">
-                        <PlusCircle className="w-4 h-4" />
+                  {Object.entries(
+                    activities.reduce((acc, activity) => {
+                      if (!acc[activity.ejName]) {
+                        acc[activity.ejName] = [];
+                      }
+                      acc[activity.ejName].push(activity);
+                      return acc;
+                    }, {} as Record<string, Activity[]>)
+                  ).map(([ejName, ejActivities]) => {
+                    const isExpanded = expandedEjUpdates[ejName];
+                    const mostRecent = ejActivities[0]; // Already sorted by timestamp desc
+                    
+                    return (
+                      <div 
+                        key={ejName}
+                        className="bg-white rounded-xl shadow-sm border border-border/50 overflow-hidden transition-all"
+                      >
+                        {/* Group Header */}
+                        <div 
+                          className="p-4 cursor-pointer hover:bg-muted/10 transition-colors flex items-center justify-between"
+                          onClick={() => {
+                            setSelectedEjForDetail({ name: ejName });
+                            setDetailModalOpen(true);
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="bg-primary/10 p-2 rounded-lg text-primary">
+                              <ActivityIcon className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm text-[#0A1942]">{ejName}</h4>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {ejActivities.length} {ejActivities.length === 1 ? 'atualização' : 'atualizações'}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div 
+                            className="p-2 hover:bg-muted/20 rounded-full transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedEjUpdates(prev => ({
+                                ...prev,
+                                [ejName]: !prev[ejName]
+                              }));
+                            }}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Collapsed Content */}
+                        {isExpanded && (
+                          <div className="border-t border-border/50 bg-muted/5 p-4 space-y-3">
+                            {ejActivities.map(activity => (
+                              <div key={activity.id} className="flex items-start gap-2 relative before:absolute before:left-[3px] before:top-4 before:bottom-[-16px] before:w-[2px] before:bg-border last:before:hidden">
+                                <div className="w-2 h-2 rounded-full bg-primary/40 mt-1.5 relative z-10 shrink-0" />
+                                <div>
+                                  <p className="text-xs text-foreground/80">{activity.description}</p>
+                                  <p className="text-[10px] text-muted-foreground/60 mt-0.5 font-medium uppercase">
+                                    {new Date(activity.timestamp).toLocaleString('pt-BR')}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-sm text-[#0A1942]">{activity.ejName}</h4>
-                        <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>
-                        <p className="text-[10px] text-muted-foreground/70 mt-2 font-medium uppercase tracking-wider">
-                          {new Date(activity.timestamp).toLocaleString('pt-BR')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
