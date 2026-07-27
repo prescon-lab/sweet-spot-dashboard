@@ -75,52 +75,6 @@ function DashboardPanel() {
         </div>
       </div>
 
-      {/* Global Revenue Card */}
-      {(() => {
-        const safeLeads = Array.isArray(leads) ? leads : [];
-        const total = safeLeads.reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
-        const quente = safeLeads.filter(l => l?.status === 'quente').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
-        const morno = safeLeads.filter(l => l?.status === 'morno').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
-        const frio = safeLeads.filter(l => l?.status === 'frio').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
-        const formatBRL = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-
-        return (
-          <Card 
-            className="glass-card cursor-pointer hover:shadow-lg transition-all border-primary/20"
-            onClick={() => setLeadsModalOpen(true)}
-          >
-            <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
-              <CardTitle className="text-xl uppercase tracking-wider text-primary flex items-center gap-2">
-                <TrendingUp className="h-6 w-6" />
-                Previsão de Faturamento da Rede
-              </CardTitle>
-              <CardDescription>Soma de todos os funis de vendas das EJs</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="text-center md:text-left flex-1">
-                  <p className="text-sm text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Total Provável</p>
-                  <p className="text-4xl font-bold text-[#0A1942]">{formatBRL(total)}</p>
-                </div>
-                <div className="flex gap-4">
-                  <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center min-w-[120px]">
-                    <p className="text-xs font-bold text-red-600 uppercase mb-1">Quente</p>
-                    <p className="text-lg font-bold text-red-700">{formatBRL(quente)}</p>
-                  </div>
-                  <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl text-center min-w-[120px]">
-                    <p className="text-xs font-bold text-orange-600 uppercase mb-1">Morno</p>
-                    <p className="text-lg font-bold text-orange-700">{formatBRL(morno)}</p>
-                  </div>
-                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center min-w-[120px]">
-                    <p className="text-xs font-bold text-blue-600 uppercase mb-1">Frio</p>
-                    <p className="text-lg font-bold text-blue-700">{formatBRL(frio)}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })()}
 
       {/* KPI Cards (Grid) -> Replaced by Goal Progress Charts */}
       <div className="grid grid-cols-1 gap-6">
@@ -187,6 +141,53 @@ function DashboardPanel() {
           ))
         )}
       </div>
+
+      {/* Global Revenue Card */}
+      {(() => {
+        const safeLeads = Array.isArray(leads) ? leads : [];
+        const total = safeLeads.reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
+        const quente = safeLeads.filter(l => l?.status === 'quente').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
+        const morno = safeLeads.filter(l => l?.status === 'morno').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
+        const frio = safeLeads.filter(l => l?.status === 'frio').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
+        const formatBRL = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+        return (
+          <Card 
+            className="glass-card cursor-pointer hover:shadow-lg transition-all border-primary/20"
+            onClick={() => setLeadsModalOpen(true)}
+          >
+            <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
+              <CardTitle className="text-xl uppercase tracking-wider text-primary flex items-center gap-2">
+                <TrendingUp className="h-6 w-6" />
+                Previsão de Faturamento da Rede
+              </CardTitle>
+              <CardDescription>Soma de todos os funis de vendas das EJs</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-6">
+                <div className="text-left">
+                  <p className="text-sm text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Total Provável</p>
+                  <p className="text-4xl font-bold text-[#0A1942]">{formatBRL(total)}</p>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center flex-1 min-w-[120px]">
+                    <p className="text-xs font-bold text-red-600 uppercase mb-1">Quente</p>
+                    <p className="text-lg font-bold text-red-700">{formatBRL(quente)}</p>
+                  </div>
+                  <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl text-center flex-1 min-w-[120px]">
+                    <p className="text-xs font-bold text-orange-600 uppercase mb-1">Morno</p>
+                    <p className="text-lg font-bold text-orange-700">{formatBRL(morno)}</p>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center flex-1 min-w-[120px]">
+                    <p className="text-xs font-bold text-blue-600 uppercase mb-1">Frio</p>
+                    <p className="text-lg font-bold text-blue-700">{formatBRL(frio)}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
