@@ -2,7 +2,8 @@ export interface EventGoal {
   id: string;
   text: string;
   coreText: string;
-  checked: boolean;
+  checked?: boolean; // legacy
+  checkedBy?: string[];
 }
 
 export interface AppEvent {
@@ -38,8 +39,8 @@ export const eventStore = {
       }
     }
   },
-  // To toggle goals globally across all EJs
-  toggleGoal: (eventId: string, goalId: string) => {
+  // To toggle goals for specific EJs
+  toggleGoal: (eventId: string, goalId: string, ejId: string) => {
     if (typeof window !== 'undefined') {
       try {
         const current = eventStore.getEvents();
@@ -47,7 +48,16 @@ export const eventStore = {
         if (event) {
           const goal = event.ejGoals.find(g => g.id === goalId);
           if (goal) {
-            goal.checked = !goal.checked;
+            if (!goal.checkedBy) {
+              goal.checkedBy = [];
+              // migrate legacy
+              if (goal.checked) goal.checkedBy.push(ejId);
+            }
+            if (goal.checkedBy.includes(ejId)) {
+              goal.checkedBy = goal.checkedBy.filter(id => id !== ejId);
+            } else {
+              goal.checkedBy.push(ejId);
+            }
             localStorage.setItem(STORE_KEY, JSON.stringify(current));
             window.dispatchEvent(new Event('eventsUpdated'));
           }

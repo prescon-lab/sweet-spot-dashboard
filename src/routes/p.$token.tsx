@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
+import { eventStore, AppEvent } from "@/lib/eventStore";
+import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/p/$token")({
   component: DashboardPanel,
@@ -17,6 +19,14 @@ function DashboardPanel() {
   const { token } = Route.useParams();
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [events, setEvents] = useState<AppEvent[]>([]);
+
+  useEffect(() => {
+    setEvents(eventStore.getEvents());
+    const handleUpdate = () => setEvents(eventStore.getEvents());
+    window.addEventListener('eventsUpdated', handleUpdate);
+    return () => window.removeEventListener('eventsUpdated', handleUpdate);
+  }, []);
 
   const handlePrint = () => {
     window.print();
@@ -44,56 +54,60 @@ function DashboardPanel() {
         </div>
       </div>
 
-      {/* KPI Cards (Grid) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Score de Saúde</CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">92/100</div>
-            <p className="text-xs text-muted-foreground">
-              +4% em relação ao último mês
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Apostas Cumpridas</CardTitle>
-            <Target className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">14</div>
-            <p className="text-xs text-muted-foreground">
-              3 pendentes nesta semana
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">EJs Acompanhadas</CardTitle>
-            <Users className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">
-              Todas com guardião ativo
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="glass-card border-destructive/20 bg-destructive/5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-destructive">Atenção</CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">2</div>
-            <p className="text-xs text-destructive/80">
-              EJs sem atualização há +7 dias
-            </p>
-          </CardContent>
-        </Card>
+      {/* KPI Cards (Grid) -> Replaced by Goal Progress Charts */}
+      <div className="grid grid-cols-1 gap-6">
+        {events.length === 0 ? (
+          <Card className="glass-card">
+            <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center">
+              <Target className="h-8 w-8 mb-4 opacity-50" />
+              <p>Nenhum evento cadastrado para acompanhamento.</p>
+              <p className="text-sm">Clique em "Adicionar Evento" para começar a traçar metas.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          events.map(event => (
+            <Card key={event.id} className="glass-card overflow-hidden">
+              <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
+                <CardTitle className="text-lg uppercase tracking-wider text-primary flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  {event.name}
+                </CardTitle>
+                <CardDescription>Acompanhamento de metas deste evento</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {event.ejGoals.map(goal => {
+                    const yMatches = goal.coreText.match(/\d+/);
+                    const y = yMatches ? parseInt(yMatches[0], 10) : 100; // default to 100 if no number found
+                    const x = goal.checkedBy?.length || 0;
+                    const pct = Math.min(Math.round((x / y) * 100), 100);
+
+                    return (
+                      <div key={goal.id} className="space-y-3 bg-muted/10 p-4 rounded-xl border border-border/50">
+                        <div className="flex justify-between items-start gap-4">
+                          <p className="text-sm font-semibold leading-tight flex-1 text-[#0A1942]">{goal.text}</p>
+                          <Badge variant="outline" className="shrink-0 bg-white">
+                            {x} / {goal.coreText}
+                          </Badge>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Progresso</span>
+                            <span className="font-medium text-primary">{pct}%</span>
+                          </div>
+                          <Progress value={pct} className="h-2" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {event.ejGoals.length === 0 && (
+                    <p className="text-sm text-muted-foreground col-span-full">Sem metas específicas cadastradas.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {/* Main Content Area */}
