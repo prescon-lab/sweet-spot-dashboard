@@ -16,6 +16,7 @@ import { activityStore, Activity } from "@/lib/activityStore";
 import { mentionStore, Mention } from "@/lib/mentionStore";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAccessRole } from "@/lib/access";
 
 export const Route = createFileRoute("/p/$token")({
   component: DashboardPanel,
@@ -23,6 +24,8 @@ export const Route = createFileRoute("/p/$token")({
 
 function DashboardPanel() {
   const { token } = Route.useParams();
+  const role = useAccessRole();
+  const canEditEvents = role === "admin";
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedEjForDetail, setSelectedEjForDetail] = useState<{name: string} | null>(null);
   const [eventModalOpen, setEventModalOpen] = useState(false);
@@ -86,10 +89,12 @@ function DashboardPanel() {
           <Button variant="outline" size="icon" onClick={handlePrint} title="Imprimir Relatório">
             <Printer className="h-4 w-4" />
           </Button>
-          <Button onClick={handleAddBet}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Adicionar Evento
-          </Button>
+          {canEditEvents && (
+            <Button onClick={handleAddBet}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Adicionar Evento
+            </Button>
+          )}
         </div>
       </div>
 
@@ -101,7 +106,7 @@ function DashboardPanel() {
             <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center">
               <Target className="h-8 w-8 mb-4 opacity-50" />
               <p>Nenhum evento cadastrado para acompanhamento.</p>
-              <p className="text-sm">Clique em "Adicionar Evento" para começar a traçar metas.</p>
+              {canEditEvents && <p className="text-sm">Clique em "Adicionar Evento" para começar a traçar metas.</p>}
             </CardContent>
           </Card>
         ) : (
@@ -115,9 +120,11 @@ function DashboardPanel() {
                   </CardTitle>
                   <CardDescription>Acompanhamento de metas deste evento</CardDescription>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => handleEditEvent(event)}>
-                  <Pencil className="h-4 w-4 text-muted-foreground" />
-                </Button>
+                {canEditEvents && (
+                  <Button variant="ghost" size="icon" onClick={() => handleEditEvent(event)}>
+                    <Pencil className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                )}
               </CardHeader>
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
