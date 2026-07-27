@@ -33,6 +33,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [newTaskText, setNewTaskText] = useState("");
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editingTaskText, setEditingTaskText] = useState("");
+  const [editingReuniaoId, setEditingReuniaoId] = useState<number | null>(null);
+  const [editingReuniaoText, setEditingReuniaoText] = useState("");
   
   const [desafio, setDesafio] = useState("");
   const [dores, setDores] = useState("");
@@ -230,6 +232,29 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     setEditingTaskText("");
   };
 
+  const removeReuniao = (id: number) => {
+    if (window.confirm("Ação não pode ser desfeita. Tem certeza que deseja apagar essa anotação?")) {
+      const novasReunioes = reunioes.filter(r => r.id !== id);
+      setReunioes(novasReunioes);
+      ejDataStore.saveEjData(ejData?.name || "Nova EJ", { reunioes: novasReunioes });
+    }
+  };
+
+  const saveEditedReuniao = (id: number) => {
+    const novasReunioes = reunioes.map(r => r.id === id ? { ...r, text: editingReuniaoText } : r);
+    setReunioes(novasReunioes);
+    ejDataStore.saveEjData(ejData?.name || "Nova EJ", { reunioes: novasReunioes });
+    setEditingReuniaoId(null);
+    setEditingReuniaoText("");
+  };
+
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (a.completed !== b.completed) {
+      return a.completed ? 1 : -1;
+    }
+    return b.id - a.id;
+  });
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -264,10 +289,15 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Button onClick={handleSave} className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                Salvar e Fechar
-              </Button>
+              <div className="flex gap-4">
+                <Button variant="ghost" className="text-muted-foreground hover:bg-muted/50" onClick={() => onOpenChange(false)}>
+                  Fechar sem Salvar
+                </Button>
+                <Button className="font-semibold text-white px-8" onClick={handleSave}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Dados
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -364,7 +394,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 {/* Aba 2: Saídas das Dailys */}
                 <TabsContent value="dailys" className="flex-1 pt-6 outline-none">
                   <div className="bg-white rounded-xl border border-border/50 p-6 space-y-6">
-                    <h3 className="font-semibold text-lg text-foreground">Tarefas e Checklist</h3>
+                    <h3 className="font-semibold text-lg text-foreground">Saídas</h3>
                     
                     <div className="flex gap-2">
                       <div className="relative flex-1">
@@ -398,7 +428,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                     </div>
 
                     <div className="space-y-3">
-                      {tasks.map(task => (
+                      {sortedTasks.map(task => (
                         <div key={task.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors group">
                           <Checkbox 
                             checked={task.completed}
@@ -477,14 +507,42 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                         </div>
                       ) : (
                         reunioes.map(reuniao => (
-                          <div key={reuniao.id} className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-2">
+                          <div key={reuniao.id} className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-2 relative group">
                             <div className="flex justify-between items-start">
                               <h4 className="font-semibold text-sm text-[#0A1942]">Anotações</h4>
-                              <span className="text-xs font-medium bg-white px-2 py-1 rounded text-muted-foreground border">
-                                {reuniao.date}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium bg-white px-2 py-1 rounded text-muted-foreground border">
+                                  {reuniao.date}
+                                </span>
+                                {editingReuniaoId !== reuniao.id && (
+                                  <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={() => { setEditingReuniaoId(reuniao.id); setEditingReuniaoText(reuniao.text); }}>
+                                      <Pencil className="w-3 h-3" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => removeReuniao(reuniao.id)}>
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <p className="text-sm text-foreground/90 whitespace-pre-wrap">{reuniao.text}</p>
+                            
+                            {editingReuniaoId === reuniao.id ? (
+                              <div className="space-y-2 mt-2">
+                                <Textarea 
+                                  value={editingReuniaoText} 
+                                  onChange={(e) => setEditingReuniaoText(e.target.value)}
+                                  className="w-full resize-y min-h-[100px] border-border/50 bg-white"
+                                  autoFocus
+                                />
+                                <div className="flex gap-2 justify-end">
+                                  <Button size="sm" variant="outline" onClick={() => setEditingReuniaoId(null)}>Cancelar</Button>
+                                  <Button size="sm" onClick={() => saveEditedReuniao(reuniao.id)}>Salvar</Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-foreground/90 whitespace-pre-wrap">{reuniao.text}</p>
+                            )}
                           </div>
                         ))
                       )}

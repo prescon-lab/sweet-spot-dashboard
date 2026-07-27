@@ -56,11 +56,15 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
 
   const [mentions, setMentions] = useState<Mention[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
 
   // Sync mentions and config when modal opens
   React.useEffect(() => {
     if (open && guardianData?.name) {
-      setMentions(mentionStore.getMentions().filter(m => m.guardianName === guardianData.name).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      setMentions(mentionStore.getMentions().filter(m => m.guardianName === guardianData.name && !m.read).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      
+      const guardianEjNames = ejsList.filter(ej => ej.guardian === guardianData.name).map(ej => ej.name);
+      setActivities(activityStore.getActivities().filter(a => guardianEjNames.includes(a.ejName)));
       
       const config = guardianStore.get(guardianData.name);
       setBannerColor(config.color || '#0A1942');
@@ -70,12 +74,18 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     
     const handleUpdate = () => {
       if (guardianData?.name) {
-        setMentions(mentionStore.getMentions().filter(m => m.guardianName === guardianData.name).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+        setMentions(mentionStore.getMentions().filter(m => m.guardianName === guardianData.name && !m.read).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+        const guardianEjNames = ejsList.filter(ej => ej.guardian === guardianData.name).map(ej => ej.name);
+        setActivities(activityStore.getActivities().filter(a => guardianEjNames.includes(a.ejName)));
       }
     };
     
     window.addEventListener('mentionsUpdated', handleUpdate);
-    return () => window.removeEventListener('mentionsUpdated', handleUpdate);
+    window.addEventListener('activitiesUpdated', handleUpdate);
+    return () => {
+      window.removeEventListener('mentionsUpdated', handleUpdate);
+      window.removeEventListener('activitiesUpdated', handleUpdate);
+    };
   }, [open, guardianData?.name]);
 
   const handleClearMentions = () => {
@@ -149,16 +159,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   };
 
 
-  const mockGoals = guardianEjs.map((ej, idx) => {
-    const total = 5 + (idx % 3);
-    const completed = 2 + (idx % 4);
-    return {
-      ejName: ej.name,
-      total,
-      completed,
-      progress: Math.round((completed / total) * 100)
-    };
-  });
+  // We no longer need mockGoals
+
 
   const handleEjClick = (ej: any) => {
     setSelectedEj(ej);
@@ -333,10 +335,10 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                             if (linkedEj) handleEjClick(linkedEj);
                             mentionStore.markAsRead(mention.id);
                           }}
-                          className={`flex gap-4 p-4 rounded-3xl bg-black/10 border transition-all cursor-pointer hover:scale-[1.02] relative group ${mention.read ? 'opacity-60 border-transparent' : 'border-white/20'}`}
+                          className={`flex gap-4 p-4 rounded-3xl bg-black/10 border transition-all cursor-pointer hover:scale-[1.02] relative group border-white/20`}
                         >
                           <div className="flex flex-col items-center gap-2 mt-1">
-                            <div className={`w-3 h-3 rounded-full ${mention.read ? 'bg-transparent border border-current' : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'}`}></div>
+                            <div className="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"></div>
                             <div className="w-px h-full bg-black/20" style={{ backgroundColor: `${getContrastColor(bannerColor)}33` }}></div>
                           </div>
                           <div className="flex-1">
@@ -361,37 +363,28 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 </div>
               </div>
 
-              {/* Right Column - Resultados (Light) */}
+              {/* Right Column - Atualizações (Light) */}
               <div 
                 className="flex-1 p-8 flex flex-col h-[400px] rounded-3xl bg-white/20 backdrop-blur-md"
                 style={{ color: getContrastColor(bannerColor) }}
               >
-                <h3 className="text-xl font-semibold mb-6 tracking-wide uppercase border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
-                  Acompanhamento de Metas
+                <h3 className="text-xl font-semibold mb-6 tracking-wide border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
+                  Atualizações das EJs
                 </h3>
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                  {mockGoals.map((goal, idx) => (
-                    <div key={idx} className="bg-black/10 p-4 rounded-3xl border border-transparent">
-                      <div className="flex justify-between items-center mb-2">
-                        <h4 className="font-bold">{goal.ejName}</h4>
-                        <span className="text-xs font-bold bg-black/20 px-3 py-1 rounded-full">
-                          {goal.completed}/{goal.total} Metas
+                  {activities.map((activity) => (
+                    <div key={activity.id} className="bg-black/10 p-4 rounded-3xl border border-transparent">
+                      <div className="flex justify-between items-center mb-1">
+                        <h4 className="font-bold text-sm">{activity.ejName}</h4>
+                        <span className="text-[10px] font-semibold opacity-70">
+                          {new Date(activity.date).toLocaleDateString('pt-BR')}
                         </span>
                       </div>
-                      {/* Progress Bar */}
-                      <div className="w-full bg-black/20 rounded-full h-3 overflow-hidden">
-                        <div 
-                          className="h-3 rounded-full transition-all duration-500 shadow-sm" 
-                          style={{ 
-                            width: `${goal.progress}%`,
-                            backgroundColor: getContrastColor(bannerColor)
-                          }}
-                        ></div>
-                      </div>
+                      <p className="text-sm opacity-90">{activity.description}</p>
                     </div>
                   ))}
-                  {mockGoals.length === 0 && (
-                    <p className="text-sm opacity-50 text-center py-8">Nenhuma meta associada.</p>
+                  {activities.length === 0 && (
+                    <p className="text-sm opacity-50 text-center py-8">Nenhuma atualização recente.</p>
                   )}
                 </div>
               </div>
