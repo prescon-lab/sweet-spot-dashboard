@@ -434,7 +434,11 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
                       {/* Pill Avatar */}
                       <div className="w-16 h-16 rounded-full bg-black/10 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-inner">
-                        <span className="text-xl font-bold opacity-50">{ej.name.substring(0, 2).toUpperCase()}</span>
+                        {ejSavedData?.avatarUrl ? (
+                          <img src={ejSavedData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xl font-bold opacity-50">{ej.name.substring(0, 2).toUpperCase()}</span>
+                        )}
                       </div>
                       
                       {/* Text */}
@@ -461,7 +465,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                 style={{ color: getContrastColor(bannerColor) }}
               >
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold">Acompanhamento de Eventos</h3>
+                  <h3 className="text-xl font-bold">VISÃO GERAL</h3>
                   <p className="opacity-70 text-sm">Progresso das metas pelas EJs sob sua responsabilidade.</p>
                 </div>
                 

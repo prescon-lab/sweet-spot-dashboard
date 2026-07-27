@@ -116,12 +116,13 @@ function EjsPanel() {
                 )}
               </div>
 
-              <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] mb-4 overflow-hidden border-4 border-transparent group-hover:border-white/20 transition-all flex flex-col justify-end">
-              {/* Fallback image style as in mockup (light blue sky, green hill) */}
-              <div className="w-full h-full bg-[#E0F2FE] relative overflow-hidden flex flex-col justify-end">
-                <div className="w-full h-[40%] bg-[#84CC16] rounded-t-[50%] absolute bottom-0 translate-y-2 group-hover:translate-y-1 transition-transform"></div>
+              <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#E0F2FE] to-[#86EFAC] mb-4 overflow-hidden border-4 border-transparent group-hover:border-white/20 transition-all flex flex-col justify-center items-center">
+                {ejSavedData?.avatarUrl ? (
+                  <img src={ejSavedData.avatarUrl} alt={ej.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl font-bold text-black/20">{ej.name.substring(0, 2).toUpperCase()}</span>
+                )}
               </div>
-            </div>
             <h3 className="text-white font-bold text-sm tracking-wider uppercase truncate w-full">{ej.name}</h3>
             <p className="text-white/80 text-xs font-semibold uppercase mt-1 truncate w-full">{ej.guardian}</p>
           </div>

@@ -35,6 +35,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [editingTaskText, setEditingTaskText] = useState("");
   const [editingReuniaoId, setEditingReuniaoId] = useState<number | null>(null);
   const [editingReuniaoText, setEditingReuniaoText] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [desafio, setDesafio] = useState("");
   const [dores, setDores] = useState("");
@@ -93,6 +95,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         setReunioes(loadedReunioes);
         
         setApostas(data?.apostas || {});
+        setAvatarUrl(data?.avatarUrl || null);
       } else {
         setTasks([]);
         setDesafio("");
@@ -100,6 +103,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         setProximaReuniao("");
         setReunioes([]);
         setApostas({});
+        setAvatarUrl(null);
       }
     }
 
@@ -128,7 +132,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       proximaReuniao,
       reunioes,
       tarefas: tasks,
-      apostas
+      apostas,
+      avatarUrl: avatarUrl || undefined
     });
 
     // Registrar atividades específicas para cada alteração
@@ -255,6 +260,20 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     return b.id - a.id;
   });
 
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const activeEventIds = events.map(e => e.id);
+  const isAposta = Object.entries(apostas).some(([eventId, isTrue]) => isTrue && activeEventIds.includes(eventId));
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -262,11 +281,32 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
           {/* Header Area */}
           <div className="flex items-center justify-between p-8 bg-white border-b border-border/40">
             <div className="flex items-center gap-6 flex-1">
-              <Avatar className="h-28 w-28 border-4 border-primary/10 shadow-sm">
-                <AvatarFallback className="bg-muted text-4xl font-bold">
-                  {ejData?.name ? ejData.name.substring(0, 2).toUpperCase() : "NO"}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                <Avatar className="h-28 w-28 border-4 border-primary/10 shadow-sm transition-transform group-hover:scale-105">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <AvatarFallback className="bg-muted text-4xl font-bold">
+                      {ejData?.name ? ejData.name.substring(0, 2).toUpperCase() : "NO"}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                {isAposta && (
+                  <div className="absolute -top-2 -right-2 bg-orange-500 text-white p-2 rounded-full shadow-md z-10" title="EJ é Aposta">
+                    <Flame className="w-5 h-5" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <Pencil className="w-8 h-8 text-white" />
+                </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleAvatarUpload} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+              </div>
               <div className="space-y-4 flex-1 max-w-2xl">
                 <Input
                   defaultValue={ejData?.name || "Nova EJ"}
@@ -275,7 +315,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 <div className="flex gap-6">
                   <div className="flex flex-col">
                     <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-48" />
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider">Guardião da EJ</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider">Guardiã(o) da EJ</span>
                   </div>
                   <div className="flex flex-col">
                     <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-32 text-center" />
