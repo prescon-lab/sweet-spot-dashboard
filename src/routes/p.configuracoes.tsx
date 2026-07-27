@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { linksStore, UsefulLink } from "@/lib/linksStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash, Edit, Save, X } from "lucide-react";
+import { Plus, Trash, Edit, Save, X, ShieldCheck, Copy } from "lucide-react";
+import { useAccessRole, buildGuardianLink } from "@/lib/access";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/configuracoes")({
@@ -11,6 +12,9 @@ export const Route = createFileRoute("/p/configuracoes")({
 });
 
 function Configuracoes() {
+  const role = useAccessRole();
+  const [guardianLink, setGuardianLink] = useState("");
+  useEffect(() => setGuardianLink(buildGuardianLink()), []);
   const [links, setLinks] = useState<UsefulLink[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   
