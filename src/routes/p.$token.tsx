@@ -13,6 +13,7 @@ import { leadStore, Lead } from "@/lib/leadStore";
 import { ejDataStore } from "@/lib/ejDataStore";
 import { ejsList } from "@/lib/data";
 import { activityStore, Activity } from "@/lib/activityStore";
+import { mentionStore, Mention } from "@/lib/mentionStore";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -32,26 +33,31 @@ function DashboardPanel() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadsModalOpen, setLeadsModalOpen] = useState(false);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [mentions, setMentions] = useState<Mention[]>([]);
   const [expandedEjUpdates, setExpandedEjUpdates] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setEvents(eventStore.getEvents().filter(e => e.status !== 'completed'));
     setLeads(leadStore.getLeads());
     setActivities(activityStore.getActivities());
+    setMentions(mentionStore.getMentions().filter(m => !m.read).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     
     const handleUpdate = () => {
       setEvents(eventStore.getEvents().filter(e => e.status !== 'completed'));
       setLeads(leadStore.getLeads());
       setActivities(activityStore.getActivities());
+      setMentions(mentionStore.getMentions().filter(m => !m.read).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     };
     window.addEventListener('eventsUpdated', handleUpdate);
     window.addEventListener('leadsUpdated', handleUpdate);
     window.addEventListener('activitiesUpdated', handleUpdate);
+    window.addEventListener('mentionsUpdated', handleUpdate);
     
     return () => {
       window.removeEventListener('eventsUpdated', handleUpdate);
       window.removeEventListener('leadsUpdated', handleUpdate);
       window.removeEventListener('activitiesUpdated', handleUpdate);
+      window.removeEventListener('mentionsUpdated', handleUpdate);
     };
   }, []);
 
@@ -208,9 +214,39 @@ function DashboardPanel() {
         </div>
 
         {/* Sidebar Widgets (Feed) */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold tracking-tight">Últimas Atualizações</h2>
-          <Card className="glass-card bg-muted/30 border-none shadow-inner h-[500px] overflow-auto">
+        <div className="space-y-6">
+          
+          {/* Mentions Widget */}
+          {mentions.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold tracking-tight text-primary">Menções Recentes</h2>
+              <Card className="glass-card bg-primary/5 border-primary/20 shadow-sm max-h-[300px] overflow-auto">
+                <CardContent className="p-4 space-y-3">
+                  {mentions.map((mention) => (
+                    <div 
+                      key={mention.id}
+                      className="bg-white rounded-lg p-3 border border-primary/10 shadow-sm cursor-pointer hover:border-primary/40 transition-colors"
+                      onClick={() => {
+                        setSelectedEjForDetail({ name: mention.ejName });
+                        setDetailModalOpen(true);
+                        mentionStore.markAsRead(mention.id);
+                      }}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-semibold text-sm text-primary">@{mention.guardianName}</span>
+                        <span className="text-xs text-muted-foreground">{new Date(mention.date).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">Mencionado em <span className="font-medium text-foreground">{mention.ejName}</span> ({mention.source})</p>
+                      <p className="text-sm italic text-foreground bg-muted/30 p-2 rounded line-clamp-2">"{mention.contextText}"</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <h2 className="text-xl font-semibold tracking-tight mt-6">Últimas Atualizações</h2>
+          <Card className="glass-card bg-muted/30 border-none shadow-inner h-[400px] overflow-auto">
             <CardContent className="p-6">
               {activities.length === 0 ? (
                 <div className="text-center space-y-4 mt-8">

@@ -3,6 +3,7 @@ export interface Task {
   text: string;
   completed: boolean;
   date: string;
+  completedAt?: string;
 }
 
 export interface EjData {

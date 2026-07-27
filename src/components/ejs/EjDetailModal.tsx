@@ -11,11 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save, Flame, Trophy } from "lucide-react";
+import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save, Flame, Trophy, Pencil } from "lucide-react";
 import { eventStore, AppEvent } from "@/lib/eventStore";
 import { EjLeadFunnelModal } from "./EjLeadFunnelModal";
 import { ejDataStore, EjData, Task } from "@/lib/ejDataStore";
 import { activityStore } from "@/lib/activityStore";
+import { mentionStore } from "@/lib/mentionStore";
+import { ejsList } from "@/lib/data";
 import { toast } from "sonner";
 
 interface EjDetailModalProps {
@@ -29,12 +31,44 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskText, setNewTaskText] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const [editingTaskText, setEditingTaskText] = useState("");
   
   const [desafio, setDesafio] = useState("");
   const [dores, setDores] = useState("");
   const [proximaReuniao, setProximaReuniao] = useState("");
   const [notasReuniao, setNotasReuniao] = useState("");
   const [apostas, setApostas] = useState<Record<string, boolean>>({});
+  
+  const [mentionSearch, setMentionSearch] = useState<string | null>(null);
+  const uniqueGuardians = Array.from(new Set(ejsList.map(ej => ej.guardian))).sort();
+
+  const handleNotasChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setNotasReuniao(val);
+    
+    const cursor = e.target.selectionStart;
+    const textBeforeCursor = val.slice(0, cursor);
+    const lastAt = textBeforeCursor.lastIndexOf('@');
+    
+    if (lastAt !== -1 && (lastAt === 0 || textBeforeCursor[lastAt - 1] === ' ' || textBeforeCursor[lastAt - 1] === '\n')) {
+      const textAfterAt = textBeforeCursor.slice(lastAt + 1);
+      if (textAfterAt.length < 30 && !textAfterAt.includes('\n')) {
+        setMentionSearch(textAfterAt.toLowerCase());
+        return;
+      }
+    }
+    setMentionSearch(null);
+  };
+
+  const insertMention = (guardianName: string) => {
+    const cursor = notasReuniao.lastIndexOf('@');
+    if (cursor !== -1) {
+      const newNotas = notasReuniao.slice(0, cursor) + `@${guardianName} ` + notasReuniao.slice(notasReuniao.length);
+      setNotasReuniao(newNotas);
+    }
+    setMentionSearch(null);
+  };
 
   React.useEffect(() => {
     if (open) {
@@ -124,8 +158,26 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     onOpenChange(false);
   };
 
+  const handleSaveReuniao = () => {
+    const ejName = ejData?.name || "Nova EJ";
+    const previousData = ejDataStore.getEjData(ejName) || {};
+    
+    ejDataStore.saveEjData(ejName, { notasReuniao });
+    
+    if (notasReuniao !== (previousData.notasReuniao || "")) {
+      activityStore.addActivity({ ejName, description: "Anotações de acompanhamento atualizadas", type: "update" });
+    }
+    
+    mentionStore.extractAndSaveMentions(notasReuniao, ejName, "Reunião");
+    toast.success("Anotações da reunião salvas com sucesso!");
+  };
+
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
+    
+    const ejName = ejData?.name || "Nova EJ";
+    mentionStore.extractAndSaveMentions(newTaskText, ejName, "Dailys");
+    
     setTasks([
       ...tasks,
       {
@@ -139,7 +191,29 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   };
 
   const toggleTask = (id: number) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    setTasks(tasks.map(t => {
+      if (t.id === id) {
+        const isNowCompleted = !t.completed;
+        return { 
+          ...t, 
+          completed: isNowCompleted,
+          completedAt: isNowCompleted ? new Date().toLocaleString('pt-BR') : undefined
+        };
+      }
+      return t;
+    }));
+  };
+
+  const removeTask = (id: number) => {
+    if (window.confirm("Ação não pode ser desfeita. Tem certeza que deseja apagar essa tarefa?")) {
+      setTasks(tasks.filter(t => t.id !== id));
+    }
+  };
+
+  const saveEditedTask = (id: number) => {
+    setTasks(tasks.map(t => t.id === id ? { ...t, text: editingTaskText } : t));
+    setEditingTaskId(null);
+    setEditingTaskText("");
   };
 
   return (
@@ -290,17 +364,45 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
 
                     <div className="space-y-3">
                       {tasks.map(task => (
-                        <div key={task.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                        <div key={task.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors group">
                           <Checkbox 
                             checked={task.completed}
                             onCheckedChange={() => toggleTask(task.id)}
                           />
                           <div className="flex-1">
-                            <p className={`text-sm ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                              {task.text}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">Registrado em: {task.date}</p>
+                            {editingTaskId === task.id ? (
+                              <div className="flex items-center gap-2">
+                                <Input 
+                                  value={editingTaskText} 
+                                  onChange={(e) => setEditingTaskText(e.target.value)}
+                                  onKeyDown={(e) => e.key === 'Enter' && saveEditedTask(task.id)}
+                                  autoFocus
+                                  className="h-8 text-sm"
+                                />
+                                <Button size="sm" onClick={() => saveEditedTask(task.id)}><Check className="w-4 h-4" /></Button>
+                              </div>
+                            ) : (
+                              <>
+                                <p className={`text-sm ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                                  {task.text}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Registrado em: {task.date}
+                                  {task.completedAt && ` • Concluído em: ${task.completedAt}`}
+                                </p>
+                              </>
+                            )}
                           </div>
+                          {editingTaskId !== task.id && (
+                            <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => { setEditingTaskId(task.id); setEditingTaskText(task.text); }}>
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removeTask(task.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       ))}
                       {tasks.length === 0 && (
@@ -313,13 +415,39 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 {/* Aba 3: Reunião / Acompanhamento */}
                 <TabsContent value="reuniao" className="flex-1 pt-6 outline-none flex flex-col h-full">
                   <div className="bg-white rounded-xl border border-border/50 p-6 flex-1 flex flex-col min-h-[400px]">
-                    <h3 className="font-semibold text-lg text-foreground mb-4">Bloco de Notas da Reunião</h3>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-semibold text-lg text-foreground">Bloco de Notas da Reunião</h3>
+                      <Button size="sm" variant="outline" onClick={handleSaveReuniao} className="text-primary border-primary/20 hover:bg-primary/5">
+                        <Save className="w-4 h-4 mr-2" />
+                        Salvar Anotações
+                      </Button>
+                    </div>
                     <Textarea 
-                      placeholder="Comece a digitar as anotações do acompanhamento..." 
+                      placeholder="Comece a digitar as anotações do acompanhamento... Digite @ para mencionar guardiões" 
                       className="flex-1 resize-none border-none shadow-none focus-visible:ring-0 text-base p-0"
                       value={notasReuniao}
-                      onChange={(e) => setNotasReuniao(e.target.value)}
+                      onChange={handleNotasChange}
                     />
+                    
+                    {mentionSearch !== null && (
+                      <div className="absolute bottom-6 left-6 right-6 bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
+                        <div className="px-3 py-2 text-xs font-semibold text-muted-foreground bg-muted/30 border-b">
+                          Mencionar Guardião
+                        </div>
+                        {uniqueGuardians.filter(g => g.toLowerCase().includes(mentionSearch)).map(g => (
+                          <div 
+                            key={g} 
+                            className="px-4 py-3 hover:bg-primary/5 cursor-pointer text-sm font-medium transition-colors"
+                            onClick={() => insertMention(g)}
+                          >
+                            <span className="text-primary mr-1">@</span>{g}
+                          </div>
+                        ))}
+                        {uniqueGuardians.filter(g => g.toLowerCase().includes(mentionSearch)).length === 0 && (
+                          <div className="px-4 py-3 text-sm text-muted-foreground">Nenhum guardião encontrado... (você pode continuar digitando)</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>

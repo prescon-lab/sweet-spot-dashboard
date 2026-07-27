@@ -12,6 +12,7 @@ import { ejsList } from "@/lib/data";
 import { guardianStore } from "@/lib/guardianStore";
 import { ejDataStore } from "@/lib/ejDataStore";
 import { eventStore } from "@/lib/eventStore";
+import { mentionStore, Mention } from "@/lib/mentionStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { Settings, Image as ImageIcon, Trash2 } from "lucide-react";
 import Cropper from "react-easy-crop";
@@ -54,36 +55,36 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   // Fetch the EJs for this guardian
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
 
-  // MOCK DATA GENERATION
-  const mockNotifications = guardianEjs.map((ej, idx) => ({
-    id: idx,
-    ejName: ej.name,
-    type: idx % 2 === 0 ? "Daily" : "Funil de Vendas",
-    message: idx % 2 === 0 ? "Saídas da daily registradas." : "Novo lead cadastrado no funil.",
-    date: "Hoje",
-    done: idx % 3 === 0
-  }));
+  const [mentions, setMentions] = useState<Mention[]>([]);
 
-  const [notifications, setNotifications] = useState(mockNotifications);
-
-  // Sync notifications and config when modal opens
+  // Sync mentions and config when modal opens
   React.useEffect(() => {
-    if (open) {
-      setNotifications(mockNotifications);
-      const config = guardianStore.get(guardianData?.name || "");
+    if (open && guardianData?.name) {
+      setMentions(mentionStore.getMentions().filter(m => m.guardianName === guardianData.name).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      
+      const config = guardianStore.get(guardianData.name);
       setBannerColor(config.color || '#0A1942');
       setAvatarUrl(config.avatarUrl || null);
       setQuote(config.quote || '');
     }
+    
+    const handleUpdate = () => {
+      if (guardianData?.name) {
+        setMentions(mentionStore.getMentions().filter(m => m.guardianName === guardianData.name).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      }
+    };
+    
+    window.addEventListener('mentionsUpdated', handleUpdate);
+    return () => window.removeEventListener('mentionsUpdated', handleUpdate);
   }, [open, guardianData?.name]);
 
-  const handleClearNotifications = () => {
-    setNotifications([]);
+  const handleClearMentions = () => {
+    mentions.forEach(m => mentionStore.markAsRead(m.id));
   };
 
-  const handleDeleteNotification = (e: React.MouseEvent, id: number) => {
+  const handleDeleteMention = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    mentionStore.markAsRead(id);
   };
 
   // Sync to store on change
@@ -301,57 +302,61 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
             {/* Notifications and Results Area (2 columns) */}
             <div className="flex flex-col md:flex-row min-h-[300px] rounded-3xl overflow-hidden mx-4 md:mx-8 mb-8 gap-4">
-              {/* Left Column - Notificações (Integrated Color) */}
+              {/* Left Column - Menções (Integrated Color) */}
               <div 
                 className="flex-1 p-8 flex flex-col h-[400px] rounded-3xl bg-black/10 backdrop-blur-md"
                 style={{ color: getContrastColor(bannerColor) }}
               >
                 <div className="flex justify-between items-center mb-6 border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
                   <h3 className="text-xl font-semibold tracking-wide">
-                    Notificações
+                    Menções
                   </h3>
-                  {notifications.length > 0 && (
+                  {mentions.length > 0 && (
                     <button 
-                      onClick={handleClearNotifications}
+                      onClick={handleClearMentions}
                       className="text-xs font-bold uppercase tracking-wider opacity-70 hover:opacity-100 transition-opacity bg-black/10 px-3 py-1.5 rounded-full"
                     >
-                      Limpar Notificações
+                      Limpar Lidas
                     </button>
                   )}
                 </div>
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                  {notifications.map((note) => {
-                    const linkedEj = guardianEjs.find(ej => ej.name === note.ejName);
-                    return (
-                      <div 
-                        key={note.id} 
-                        onClick={() => linkedEj && handleEjClick(linkedEj)}
-                        className="flex gap-4 p-4 rounded-3xl bg-black/10 border border-transparent hover:bg-black/20 transition-all cursor-pointer hover:scale-[1.02] relative group"
-                      >
-                        <div className="flex flex-col items-center gap-2 mt-1">
-                          <div className={`w-3 h-3 rounded-full ${note.done ? 'bg-green-500' : 'bg-amber-400'}`}></div>
-                          <div className="w-px h-full bg-black/20" style={{ backgroundColor: `${getContrastColor(bannerColor)}33` }}></div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex flex-col items-start mb-1">
-                            <span className="text-[10px] opacity-60 font-semibold tracking-widest mb-0.5">{note.date}</span>
-                            <span className="text-xs font-bold uppercase tracking-wider opacity-70">{note.type} - {note.ejName}</span>
-                          </div>
-                          <p className="text-sm opacity-90 pr-6">{note.message}</p>
-                        </div>
-                        {/* Delete Button (Trash) */}
-                        <button
-                          onClick={(e) => handleDeleteNotification(e, note.id)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 opacity-50 hover:opacity-100 hover:bg-black/40 transition-all text-white shadow-sm"
-                          title="Excluir notificação"
+                  {mentions.length === 0 ? (
+                    <p className="text-sm opacity-70 text-center py-4">Nenhuma menção para você no momento.</p>
+                  ) : (
+                    mentions.map((mention) => {
+                      const linkedEj = ejsList.find(ej => ej.name === mention.ejName);
+                      return (
+                        <div 
+                          key={mention.id} 
+                          onClick={() => {
+                            if (linkedEj) handleEjClick(linkedEj);
+                            mentionStore.markAsRead(mention.id);
+                          }}
+                          className={`flex gap-4 p-4 rounded-3xl bg-black/10 border transition-all cursor-pointer hover:scale-[1.02] relative group ${mention.read ? 'opacity-60 border-transparent' : 'border-white/20'}`}
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                  {notifications.length === 0 && (
-                    <p className="text-sm opacity-50 text-center py-8">Nenhuma notificação sincronizada.</p>
+                          <div className="flex flex-col items-center gap-2 mt-1">
+                            <div className={`w-3 h-3 rounded-full ${mention.read ? 'bg-transparent border border-current' : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'}`}></div>
+                            <div className="w-px h-full bg-black/20" style={{ backgroundColor: `${getContrastColor(bannerColor)}33` }}></div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex flex-col items-start mb-1">
+                              <span className="text-[10px] opacity-60 font-semibold tracking-widest mb-0.5">{new Date(mention.date).toLocaleDateString('pt-BR')}</span>
+                              <span className="text-xs font-bold uppercase tracking-wider opacity-70">{mention.source} - {mention.ejName}</span>
+                            </div>
+                            <p className="text-sm opacity-90 pr-6 italic line-clamp-2">"{mention.contextText}"</p>
+                          </div>
+                          {/* Delete Button (Trash) */}
+                          <button
+                            onClick={(e) => handleDeleteMention(e, mention.id)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 opacity-50 hover:opacity-100 hover:bg-black/40 transition-all text-white shadow-sm"
+                            title="Marcar como lida"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
