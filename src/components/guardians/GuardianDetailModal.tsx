@@ -13,6 +13,7 @@ import { guardianStore } from "@/lib/guardianStore";
 import { ejDataStore } from "@/lib/ejDataStore";
 import { eventStore } from "@/lib/eventStore";
 import { mentionStore, Mention } from "@/lib/mentionStore";
+import { activityStore, Activity } from "@/lib/activityStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { Settings, Image as ImageIcon, Trash2 } from "lucide-react";
 import Cropper from "react-easy-crop";
