@@ -11,9 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2 } from "lucide-react";
+import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save } from "lucide-react";
 import { eventStore, AppEvent } from "@/lib/eventStore";
 import { EjLeadFunnelModal } from "./EjLeadFunnelModal";
+import { ejDataStore, EjData, Task } from "@/lib/ejDataStore";
+import { activityStore } from "@/lib/activityStore";
+import { toast } from "sonner";
 
 interface EjDetailModalProps {
   open: boolean;
@@ -24,14 +27,34 @@ interface EjDetailModalProps {
 export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps) {
   const [funnelModalOpen, setFunnelModalOpen] = useState(false);
   const [events, setEvents] = useState<AppEvent[]>([]);
-  const [tasks, setTasks] = useState([
-    { id: 1, text: "Exemplo de tarefa cadastrada", completed: false, date: "10/05/2026" }
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskText, setNewTaskText] = useState("");
+  
+  const [desafio, setDesafio] = useState("");
+  const [dores, setDores] = useState("");
+  const [proximaReuniao, setProximaReuniao] = useState("");
+  const [notasReuniao, setNotasReuniao] = useState("");
 
   React.useEffect(() => {
     if (open) {
       setEvents(eventStore.getEvents());
+      
+      // Load saved data for this EJ
+      const ejName = ejData?.name || "";
+      if (ejName) {
+        const data = ejDataStore.getEjData(ejName);
+        setTasks(data?.tarefas || []);
+        setDesafio(data?.desafio || "");
+        setDores(data?.dores || "");
+        setProximaReuniao(data?.proximaReuniao || "");
+        setNotasReuniao(data?.notasReuniao || "");
+      } else {
+        setTasks([]);
+        setDesafio("");
+        setDores("");
+        setProximaReuniao("");
+        setNotasReuniao("");
+      }
     }
 
     const handleUpdate = () => {
@@ -40,7 +63,28 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     
     window.addEventListener('eventsUpdated', handleUpdate);
     return () => window.removeEventListener('eventsUpdated', handleUpdate);
-  }, [open]);
+  }, [open, ejData?.name]);
+
+  const handleSave = () => {
+    const ejName = ejData?.name || "Nova EJ";
+    
+    ejDataStore.saveEjData(ejName, {
+      desafio,
+      dores,
+      proximaReuniao,
+      notasReuniao,
+      tarefas: tasks
+    });
+
+    activityStore.addActivity({
+      ejName,
+      description: "Anotações e informações atualizadas",
+      type: "update"
+    });
+
+    toast.success("Dados salvos com sucesso!");
+    onOpenChange(false);
+  };
 
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
@@ -85,7 +129,10 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Button onClick={() => onOpenChange(false)}>Salvar e Fechar</Button>
+              <Button onClick={handleSave} className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Salvar e Fechar
+              </Button>
             </div>
           </div>
 
@@ -209,6 +256,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                     <Textarea 
                       placeholder="Comece a digitar as anotações do acompanhamento..." 
                       className="flex-1 resize-none border-none shadow-none focus-visible:ring-0 text-base p-0"
+                      value={notasReuniao}
+                      onChange={(e) => setNotasReuniao(e.target.value)}
                     />
                   </div>
                 </TabsContent>
@@ -222,6 +271,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 <Textarea 
                   placeholder="Ex: Melhorar engajamento..." 
                   className="bg-white min-h-[100px] resize-y"
+                  value={desafio}
+                  onChange={(e) => setDesafio(e.target.value)}
                 />
               </div>
 
@@ -230,13 +281,20 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 <Textarea 
                   placeholder="Ex: Falta de leads..." 
                   className="bg-white min-h-[100px] resize-y"
+                  value={dores}
+                  onChange={(e) => setDores(e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground">Próxima Reunião</label>
                 <div className="relative">
-                  <Input type="date" className="bg-white pl-10" />
+                  <Input 
+                    type="date" 
+                    className="bg-white pl-10" 
+                    value={proximaReuniao}
+                    onChange={(e) => setProximaReuniao(e.target.value)}
+                  />
                   <CalendarIcon className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                 </div>
               </div>

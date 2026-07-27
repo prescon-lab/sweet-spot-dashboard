@@ -10,6 +10,7 @@ import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
 import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { leadStore, Lead } from "@/lib/leadStore";
+import { activityStore, Activity } from "@/lib/activityStore";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/p/$token")({
 function DashboardPanel() {
   const { token } = Route.useParams();
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedEjForDetail, setSelectedEjForDetail] = useState<{name: string} | null>(null);
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [eventToEdit, setEventToEdit] = useState<AppEvent | null>(null);
@@ -27,19 +29,26 @@ function DashboardPanel() {
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadsModalOpen, setLeadsModalOpen] = useState(false);
+  const [activities, setActivities] = useState<Activity[]>([]);
 
   useEffect(() => {
     setEvents(eventStore.getEvents());
     setLeads(leadStore.getLeads());
+    setActivities(activityStore.getActivities());
+    
     const handleUpdate = () => {
       setEvents(eventStore.getEvents());
       setLeads(leadStore.getLeads());
+      setActivities(activityStore.getActivities());
     };
     window.addEventListener('eventsUpdated', handleUpdate);
     window.addEventListener('leadsUpdated', handleUpdate);
+    window.addEventListener('activitiesUpdated', handleUpdate);
+    
     return () => {
       window.removeEventListener('eventsUpdated', handleUpdate);
       window.removeEventListener('leadsUpdated', handleUpdate);
+      window.removeEventListener('activitiesUpdated', handleUpdate);
     };
   }, []);
 
@@ -228,12 +237,38 @@ function DashboardPanel() {
           <h2 className="text-xl font-semibold tracking-tight">Últimas Atualizações</h2>
           <Card className="glass-card bg-muted/30 border-none shadow-inner h-[500px] overflow-auto">
             <CardContent className="p-6">
-              <div className="text-center space-y-4 mt-8">
-                <p className="text-muted-foreground">
-                  Nada de novo por aqui. O que você quer acompanhar hoje?
-                </p>
-                <Button variant="outline" size="sm">Adicionar nova atividade</Button>
-              </div>
+              {activities.length === 0 ? (
+                <div className="text-center space-y-4 mt-8">
+                  <p className="text-muted-foreground">
+                    Nada de novo por aqui. O que você quer acompanhar hoje?
+                  </p>
+                  <Button variant="outline" size="sm">Adicionar nova atividade</Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {activities.map((activity) => (
+                    <div 
+                      key={activity.id}
+                      onClick={() => {
+                        setSelectedEjForDetail({ name: activity.ejName });
+                        setDetailModalOpen(true);
+                      }}
+                      className="bg-white p-4 rounded-xl shadow-sm border border-border/50 cursor-pointer hover:border-primary/30 hover:shadow-md transition-all flex items-start gap-3"
+                    >
+                      <div className="bg-primary/10 p-2 rounded-lg text-primary mt-1">
+                        <PlusCircle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#0A1942]">{activity.ejName}</h4>
+                        <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>
+                        <p className="text-[10px] text-muted-foreground/70 mt-2 font-medium uppercase tracking-wider">
+                          {new Date(activity.timestamp).toLocaleString('pt-BR')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -241,7 +276,11 @@ function DashboardPanel() {
 
       <EjDetailModal 
         open={detailModalOpen} 
-        onOpenChange={setDetailModalOpen} 
+        onOpenChange={(open) => {
+          setDetailModalOpen(open);
+          if (!open) setSelectedEjForDetail(null);
+        }}
+        ejData={selectedEjForDetail}
       />
       <EventRegistrationModal
         open={eventModalOpen}
