@@ -205,58 +205,6 @@ function DashboardPanel() {
             );
           })()}
 
-          <h2 className="text-xl font-semibold tracking-tight">EJs Recentes</h2>
-          
-          {/* List of EJs - Stacked Cards */}
-          <div className="space-y-4">
-            {ejsList.slice(0, 3).map((ej, idx) => {
-              const ejSavedData = ejDataStore.getEjData(ej.name);
-              const isAposta = Object.values(ejSavedData?.apostas || {}).some(v => v === true);
-              
-              const allGoals = events.flatMap(e => e.ejGoals || []);
-              const allGoalsMet = allGoals.length > 0 && allGoals.every(g => g.checkedBy?.includes(ej.name) || g.checked);
-
-              return (
-                <Card key={idx} className="glass-card hover:-translate-y-1 hover:shadow-md transition-all duration-300 relative overflow-visible">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-3">
-                          <h3 className="font-semibold text-lg">{ej.name}</h3>
-                          
-                          <div className="flex items-center gap-1.5">
-                            {isAposta && !allGoalsMet && (
-                              <div className="bg-orange-500 text-white p-1 rounded-full shadow-sm" title="EJ é Aposta">
-                                <Flame className="w-3.5 h-3.5" />
-                              </div>
-                            )}
-                            {allGoalsMet && (
-                              <div className="bg-yellow-500 text-white p-1 rounded-full shadow-sm" title="Bateu todas as metas">
-                                <Trophy className="w-3.5 h-3.5" />
-                              </div>
-                            )}
-                            <Badge variant="default" className="badge-pulse bg-green-500/10 text-green-600 hover:bg-green-500/20 border-green-500/20 ml-1">
-                              Saudável
-                            </Badge>
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Guardião: {ej.guardian} • Última daily há {(idx * 2) + 1} dias
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">Registrar reunião</Button>
-                        <Button variant="secondary" size="sm" onClick={() => {
-                          setSelectedEjForDetail({ name: ej.name });
-                          setDetailModalOpen(true);
-                        }}>Ver detalhes</Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
         </div>
 
         {/* Sidebar Widgets (Feed) */}
