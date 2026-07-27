@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PTokenRouteImport } from './routes/p.$token'
 import { Route as PEjsRouteImport } from './routes/p.ejs'
 import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
+import { Route as PHistoricoEventosRouteImport } from './routes/p.historico-eventos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const PGuardioesRoute = PGuardioesRouteImport.update({
   path: '/p/guardioes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
+  id: '/p/historico-eventos',
+  path: '/p/historico-eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/p/$token': typeof PTokenRoute
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
+  '/p/historico-eventos': typeof PHistoricoEventosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/p/$token': typeof PTokenRoute
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
+  '/p/historico-eventos': typeof PHistoricoEventosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,21 @@ export interface FileRoutesById {
   '/p/$token': typeof PTokenRoute
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
+  '/p/historico-eventos': typeof PHistoricoEventosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/p/$token' | '/p/ejs' | '/p/guardioes'
+  fullPaths:
+    '/' | '/p/$token' | '/p/ejs' | '/p/guardioes' | '/p/historico-eventos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/p/$token' | '/p/ejs' | '/p/guardioes'
-  id: '__root__' | '/' | '/p/$token' | '/p/ejs' | '/p/guardioes'
+  to: '/' | '/p/$token' | '/p/ejs' | '/p/guardioes' | '/p/historico-eventos'
+  id:
+    | '__root__'
+    | '/'
+    | '/p/$token'
+    | '/p/ejs'
+    | '/p/guardioes'
+    | '/p/historico-eventos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +83,7 @@ export interface RootRouteChildren {
   PTokenRoute: typeof PTokenRoute
   PEjsRoute: typeof PEjsRoute
   PGuardioesRoute: typeof PGuardioesRoute
+  PHistoricoEventosRoute: typeof PHistoricoEventosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +116,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PGuardioesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/historico-eventos': {
+      id: '/p/historico-eventos'
+      path: '/p/historico-eventos'
+      fullPath: '/p/historico-eventos'
+      preLoaderRoute: typeof PHistoricoEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +131,7 @@ const rootRouteChildren: RootRouteChildren = {
   PTokenRoute: PTokenRoute,
   PEjsRoute: PEjsRoute,
   PGuardioesRoute: PGuardioesRoute,
+  PHistoricoEventosRoute: PHistoricoEventosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -35,12 +35,12 @@ function DashboardPanel() {
   const [expandedEjUpdates, setExpandedEjUpdates] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    setEvents(eventStore.getEvents());
+    setEvents(eventStore.getEvents().filter(e => e.status !== 'completed'));
     setLeads(leadStore.getLeads());
     setActivities(activityStore.getActivities());
     
     const handleUpdate = () => {
-      setEvents(eventStore.getEvents());
+      setEvents(eventStore.getEvents().filter(e => e.status !== 'completed'));
       setLeads(leadStore.getLeads());
       setActivities(activityStore.getActivities());
     };

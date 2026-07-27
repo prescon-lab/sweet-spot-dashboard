@@ -11,6 +11,9 @@ export interface AppEvent {
   name: string;
   ejGoals: EventGoal[];
   createdAt: string;
+  status?: 'active' | 'completed';
+  completedAt?: string;
+  completionDates?: Record<string, string>; // Maps ejName to ISO date string of when they completed all goals
 }
 
 const STORE_KEY = 'sweet_spot_events';
@@ -66,6 +69,18 @@ export const eventStore = {
       }
     }
   },
+  deleteEvent: (eventId: string) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const current = eventStore.getEvents();
+        const updated = current.filter(e => e.id !== eventId);
+        localStorage.setItem(STORE_KEY, JSON.stringify(updated));
+        window.dispatchEvent(new Event('eventsUpdated'));
+      } catch (e) {
+        console.error("Failed to delete event", e);
+      }
+    }
+  },
   // To toggle goals for specific EJs
   toggleGoal: (eventId: string, goalId: string, ejId: string) => {
     if (typeof window !== 'undefined') {
@@ -85,6 +100,26 @@ export const eventStore = {
             } else {
               goal.checkedBy.push(ejId);
             }
+            
+            // Re-evaluate if this EJ completed all goals for the event
+            const allGoalsMet = event.ejGoals.every(g => g.checkedBy?.includes(ejId) || g.checked);
+            
+            if (!event.completionDates) {
+              event.completionDates = {};
+            }
+            
+            if (allGoalsMet) {
+              // Record the date if it's the first time they completed it, or just keep it
+              if (!event.completionDates[ejId]) {
+                event.completionDates[ejId] = new Date().toISOString();
+              }
+            } else {
+              // Remove the completion date if they unchecked a goal
+              if (event.completionDates[ejId]) {
+                delete event.completionDates[ejId];
+              }
+            }
+            
             localStorage.setItem(STORE_KEY, JSON.stringify(current));
             window.dispatchEvent(new Event('eventsUpdated'));
           }

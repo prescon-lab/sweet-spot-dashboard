@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Trash2, CheckCircle2 } from "lucide-react";
 
 interface EventRegistrationModalProps {
   open: boolean;
@@ -69,6 +69,30 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
     // Reset form
     setEventName("");
     setEjGoals([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
+  };
+
+  const handleDelete = () => {
+    if (eventToEdit) {
+      if (confirm("Tem certeza que deseja excluir este evento? Esta ação não pode ser desfeita.")) {
+        eventStore.deleteEvent(eventToEdit.id);
+        toast.success("Evento excluído com sucesso!");
+        onOpenChange(false);
+      }
+    }
+  };
+
+  const handleComplete = () => {
+    if (eventToEdit) {
+      if (confirm("Deseja concluir este evento? Ele será movido para o histórico.")) {
+        eventStore.updateEvent({
+          ...eventToEdit,
+          status: 'completed',
+          completedAt: new Date().toISOString()
+        });
+        toast.success("Evento concluído com sucesso!");
+        onOpenChange(false);
+      }
+    }
   };
 
   return (
@@ -139,10 +163,29 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
             </Button>
           </div>
 
-          <div className="flex justify-center pt-8 border-t border-border/30">
-            <Button onClick={handleSave} className="w-full h-12 text-base font-semibold rounded-2xl shadow-sm hover:shadow-md transition-all">
-              {eventToEdit ? "Salvar Alterações" : "Cadastrar Evento"}
-            </Button>
+          <div className="flex justify-between items-center pt-8 border-t border-border/30 gap-4">
+            {eventToEdit ? (
+              <>
+                <Button variant="destructive" size="icon" onClick={handleDelete} title="Excluir Evento" className="h-12 w-12 rounded-2xl">
+                  <Trash2 className="w-5 h-5" />
+                </Button>
+                
+                <div className="flex gap-4 flex-1">
+                  <Button variant="outline" onClick={handleComplete} className="flex-1 h-12 text-base font-semibold border-green-500 text-green-600 hover:bg-green-50 rounded-2xl">
+                    <CheckCircle2 className="w-5 h-5 mr-2" />
+                    Concluir Evento
+                  </Button>
+                  
+                  <Button onClick={handleSave} className="flex-1 h-12 text-base font-semibold rounded-2xl shadow-sm hover:shadow-md transition-all">
+                    Salvar Alterações
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <Button onClick={handleSave} className="w-full h-12 text-base font-semibold rounded-2xl shadow-sm hover:shadow-md transition-all">
+                Cadastrar Evento
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, Search, Settings, Users } from "lucide-react"
+import { Calendar, Home, Inbox, Search, Settings, Users, BarChart2 } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +31,11 @@ const items = [
     title: "Painel de Guardiões",
     url: "/p/guardioes",
     icon: Users,
+  },
+  {
+    title: "Histórico de Eventos",
+    url: "/p/historico-eventos",
+    icon: BarChart2,
   },
   {
     title: "Configurações",
