@@ -225,7 +225,7 @@ function DashboardPanel() {
                           <h3 className="font-semibold text-lg">{ej.name}</h3>
                           
                           <div className="flex items-center gap-1.5">
-                            {isAposta && (
+                            {isAposta && !allGoalsMet && (
                               <div className="bg-orange-500 text-white p-1 rounded-full shadow-sm" title="EJ é Aposta">
                                 <Flame className="w-3.5 h-3.5" />
                               </div>

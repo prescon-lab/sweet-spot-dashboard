@@ -417,7 +417,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                     >
                       {/* Icons Badge Area */}
                       <div className="absolute -top-2 -right-2 flex gap-1 z-10">
-                        {isAposta && (
+                        {isAposta && !allGoalsMet && (
                           <div className="bg-orange-500 text-white p-1.5 rounded-full shadow-md" title="EJ é Aposta">
                             <Flame className="w-4 h-4" />
                           </div>

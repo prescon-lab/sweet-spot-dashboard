@@ -99,7 +99,7 @@ function EjsPanel() {
             >
               {/* Icons Badge Area */}
               <div className="absolute top-3 right-3 flex gap-1 z-10">
-                {isAposta && (
+                {isAposta && !allGoalsMet && (
                   <div className="bg-orange-500 text-white p-1.5 rounded-full shadow-md" title="EJ é Aposta">
                     <Flame className="w-4 h-4" />
                   </div>
