@@ -6,12 +6,19 @@ export interface Task {
   completedAt?: string;
 }
 
+export interface ReuniaoNota {
+  id: number;
+  date: string;
+  text: string;
+}
+
 export interface EjData {
   ejName: string;
   desafio?: string;
   dores?: string;
   proximaReuniao?: string;
-  notasReuniao?: string;
+  notasReuniao?: string; // Legacy
+  reunioes?: ReuniaoNota[];
   tarefas?: Task[];
   apostas?: Record<string, boolean>;
 }

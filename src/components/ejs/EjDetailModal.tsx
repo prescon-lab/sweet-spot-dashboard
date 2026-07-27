@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save, Flame, Trophy, Pencil } from "lucide-react";
 import { eventStore, AppEvent } from "@/lib/eventStore";
 import { EjLeadFunnelModal } from "./EjLeadFunnelModal";
-import { ejDataStore, EjData, Task } from "@/lib/ejDataStore";
+import { ejDataStore, EjData, Task, ReuniaoNota } from "@/lib/ejDataStore";
 import { activityStore } from "@/lib/activityStore";
 import { mentionStore } from "@/lib/mentionStore";
 import { ejsList } from "@/lib/data";
@@ -37,23 +37,24 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [desafio, setDesafio] = useState("");
   const [dores, setDores] = useState("");
   const [proximaReuniao, setProximaReuniao] = useState("");
-  const [notasReuniao, setNotasReuniao] = useState("");
+  const [reunioes, setReunioes] = useState<ReuniaoNota[]>([]);
+  const [novaReuniao, setNovaReuniao] = useState("");
   const [apostas, setApostas] = useState<Record<string, boolean>>({});
   
   const [mentionSearch, setMentionSearch] = useState<string | null>(null);
   const uniqueGuardians = Array.from(new Set(ejsList.map(ej => ej.guardian))).sort();
 
-  const handleNotasChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    setNotasReuniao(val);
+    setNewTaskText(val);
     
-    const cursor = e.target.selectionStart;
+    const cursor = e.target.selectionStart || 0;
     const textBeforeCursor = val.slice(0, cursor);
     const lastAt = textBeforeCursor.lastIndexOf('@');
     
     if (lastAt !== -1 && (lastAt === 0 || textBeforeCursor[lastAt - 1] === ' ' || textBeforeCursor[lastAt - 1] === '\n')) {
       const textAfterAt = textBeforeCursor.slice(lastAt + 1);
-      if (textAfterAt.length < 30 && !textAfterAt.includes('\n')) {
+      if (textAfterAt.length < 30 && !textAfterAt.includes(' ')) {
         setMentionSearch(textAfterAt.toLowerCase());
         return;
       }
@@ -62,10 +63,10 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   };
 
   const insertMention = (guardianName: string) => {
-    const cursor = notasReuniao.lastIndexOf('@');
+    const cursor = newTaskText.lastIndexOf('@');
     if (cursor !== -1) {
-      const newNotas = notasReuniao.slice(0, cursor) + `@${guardianName} ` + notasReuniao.slice(notasReuniao.length);
-      setNotasReuniao(newNotas);
+      const newText = newTaskText.slice(0, cursor) + `@${guardianName} ` + newTaskText.slice(newTaskText.length);
+      setNewTaskText(newText);
     }
     setMentionSearch(null);
   };
@@ -82,14 +83,20 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         setDesafio(data?.desafio || "");
         setDores(data?.dores || "");
         setProximaReuniao(data?.proximaReuniao || "");
-        setNotasReuniao(data?.notasReuniao || "");
+        
+        let loadedReunioes = data?.reunioes || [];
+        if (loadedReunioes.length === 0 && data?.notasReuniao) {
+          loadedReunioes = [{ id: 1, date: "Histórico", text: data.notasReuniao }];
+        }
+        setReunioes(loadedReunioes);
+        
         setApostas(data?.apostas || {});
       } else {
         setTasks([]);
         setDesafio("");
         setDores("");
         setProximaReuniao("");
-        setNotasReuniao("");
+        setReunioes([]);
         setApostas({});
       }
     }
@@ -117,7 +124,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       desafio,
       dores,
       proximaReuniao,
-      notasReuniao,
+      reunioes,
       tarefas: tasks,
       apostas
     });
@@ -136,9 +143,9 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       const dateStr = proximaReuniao ? new Date(proximaReuniao + "T12:00:00").toLocaleDateString('pt-BR') : 'Remarcada';
       activityStore.addActivity({ ejName, description: `Próxima reunião: ${dateStr}`, type: "update" });
     }
-    if (notasReuniao !== (previousData.notasReuniao || "")) {
+    if (JSON.stringify(reunioes) !== JSON.stringify(previousData.reunioes || [])) {
       hasChanges = true;
-      activityStore.addActivity({ ejName, description: `Anotações: "${truncate(notasReuniao)}"`, type: "update" });
+      activityStore.addActivity({ ejName, description: `Anotações de reunião atualizadas`, type: "update" });
     }
     if (JSON.stringify(tasks) !== JSON.stringify(previousData.tarefas || [])) {
       hasChanges = true;
@@ -159,17 +166,24 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   };
 
   const handleSaveReuniao = () => {
+    if (!novaReuniao.trim()) return;
+    
     const ejName = ejData?.name || "Nova EJ";
-    const previousData = ejDataStore.getEjData(ejName) || {};
     
-    ejDataStore.saveEjData(ejName, { notasReuniao });
+    const novaNota = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString("pt-BR"),
+      text: novaReuniao
+    };
     
-    if (notasReuniao !== (previousData.notasReuniao || "")) {
-      activityStore.addActivity({ ejName, description: "Anotações de acompanhamento atualizadas", type: "update" });
-    }
+    const novasReunioes = [novaNota, ...reunioes];
+    setReunioes(novasReunioes);
     
-    mentionStore.extractAndSaveMentions(notasReuniao, ejName, "Reunião");
-    toast.success("Anotações da reunião salvas com sucesso!");
+    ejDataStore.saveEjData(ejName, { reunioes: novasReunioes });
+    activityStore.addActivity({ ejName, description: "Nova anotação de reunião adicionada", type: "update" });
+    
+    setNovaReuniao("");
+    toast.success("Anotação da reunião salva com sucesso!");
   };
 
   const handleAddTask = () => {
@@ -353,12 +367,33 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                     <h3 className="font-semibold text-lg text-foreground">Tarefas e Checklist</h3>
                     
                     <div className="flex gap-2">
-                      <Input 
-                        placeholder="Adicionar nova tarefa..." 
-                        value={newTaskText}
-                        onChange={(e) => setNewTaskText(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-                      />
+                      <div className="relative flex-1">
+                        <Input 
+                          placeholder="Adicionar nova tarefa... Digite @ para mencionar guardiões" 
+                          value={newTaskText}
+                          onChange={handleTaskChange}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+                        />
+                        {mentionSearch !== null && (
+                          <div className="absolute top-12 left-0 right-0 bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
+                            <div className="px-3 py-2 text-xs font-semibold text-muted-foreground bg-muted/30 border-b">
+                              Mencionar Guardião
+                            </div>
+                            {uniqueGuardians.filter(g => g.toLowerCase().includes(mentionSearch)).map(g => (
+                              <div 
+                                key={g} 
+                                className="px-4 py-3 hover:bg-primary/5 cursor-pointer text-sm font-medium transition-colors"
+                                onClick={() => insertMention(g)}
+                              >
+                                <span className="text-primary mr-1">@</span>{g}
+                              </div>
+                            ))}
+                            {uniqueGuardians.filter(g => g.toLowerCase().includes(mentionSearch)).length === 0 && (
+                              <div className="px-4 py-3 text-sm text-muted-foreground">Nenhum guardião encontrado... (você pode continuar digitando)</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                       <Button onClick={handleAddTask}>Adicionar</Button>
                     </div>
 
@@ -416,38 +451,44 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 <TabsContent value="reuniao" className="flex-1 pt-6 outline-none flex flex-col h-full">
                   <div className="bg-white rounded-xl border border-border/50 p-6 flex-1 flex flex-col min-h-[400px]">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="font-semibold text-lg text-foreground">Bloco de Notas da Reunião</h3>
-                      <Button size="sm" variant="outline" onClick={handleSaveReuniao} className="text-primary border-primary/20 hover:bg-primary/5">
-                        <Save className="w-4 h-4 mr-2" />
-                        Salvar Anotações
-                      </Button>
+                      <h3 className="font-semibold text-lg text-foreground">Anotações de Reunião</h3>
                     </div>
-                    <Textarea 
-                      placeholder="Comece a digitar as anotações do acompanhamento... Digite @ para mencionar guardiões" 
-                      className="flex-1 resize-none border-none shadow-none focus-visible:ring-0 text-base p-0"
-                      value={notasReuniao}
-                      onChange={handleNotasChange}
-                    />
                     
-                    {mentionSearch !== null && (
-                      <div className="absolute bottom-6 left-6 right-6 bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
-                        <div className="px-3 py-2 text-xs font-semibold text-muted-foreground bg-muted/30 border-b">
-                          Mencionar Guardião
-                        </div>
-                        {uniqueGuardians.filter(g => g.toLowerCase().includes(mentionSearch)).map(g => (
-                          <div 
-                            key={g} 
-                            className="px-4 py-3 hover:bg-primary/5 cursor-pointer text-sm font-medium transition-colors"
-                            onClick={() => insertMention(g)}
-                          >
-                            <span className="text-primary mr-1">@</span>{g}
-                          </div>
-                        ))}
-                        {uniqueGuardians.filter(g => g.toLowerCase().includes(mentionSearch)).length === 0 && (
-                          <div className="px-4 py-3 text-sm text-muted-foreground">Nenhum guardião encontrado... (você pode continuar digitando)</div>
-                        )}
+                    <div className="space-y-4 mb-6">
+                      <div className="relative">
+                        <Textarea 
+                          placeholder="Comece a digitar uma nova anotação..." 
+                          className="w-full resize-y min-h-[100px] border-border/50 focus-visible:ring-primary/20 bg-muted/5 p-4 rounded-xl"
+                          value={novaReuniao}
+                          onChange={(e) => setNovaReuniao(e.target.value)}
+                        />
+                        <Button size="sm" onClick={handleSaveReuniao} className="absolute bottom-3 right-3 text-white">
+                          <Plus className="w-4 h-4 mr-1" />
+                          Adicionar Anotação
+                        </Button>
                       </div>
-                    )}
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                      {reunioes.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                          <p className="text-sm">Nenhuma reunião salva no histórico.</p>
+                        </div>
+                      ) : (
+                        reunioes.map(reuniao => (
+                          <div key={reuniao.id} className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-2">
+                            <div className="flex justify-between items-start">
+                              <h4 className="font-semibold text-sm text-[#0A1942]">Anotações</h4>
+                              <span className="text-xs font-medium bg-white px-2 py-1 rounded text-muted-foreground border">
+                                {reuniao.date}
+                              </span>
+                            </div>
+                            <p className="text-sm text-foreground/90 whitespace-pre-wrap">{reuniao.text}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>
