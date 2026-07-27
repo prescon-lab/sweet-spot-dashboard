@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save } from "lucide-react";
+import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save, Flame, Trophy } from "lucide-react";
 import { eventStore, AppEvent } from "@/lib/eventStore";
 import { EjLeadFunnelModal } from "./EjLeadFunnelModal";
 import { ejDataStore, EjData, Task } from "@/lib/ejDataStore";
@@ -34,6 +34,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [dores, setDores] = useState("");
   const [proximaReuniao, setProximaReuniao] = useState("");
   const [notasReuniao, setNotasReuniao] = useState("");
+  const [apostas, setApostas] = useState<Record<string, boolean>>({});
 
   React.useEffect(() => {
     if (open) {
@@ -48,12 +49,14 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         setDores(data?.dores || "");
         setProximaReuniao(data?.proximaReuniao || "");
         setNotasReuniao(data?.notasReuniao || "");
+        setApostas(data?.apostas || {});
       } else {
         setTasks([]);
         setDesafio("");
         setDores("");
         setProximaReuniao("");
         setNotasReuniao("");
+        setApostas({});
       }
     }
 
@@ -76,13 +79,13 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       return str.length > length ? str.substring(0, length) + "..." : str;
     };
 
-    // Salvar primeiro
     ejDataStore.saveEjData(ejName, {
       desafio,
       dores,
       proximaReuniao,
       notasReuniao,
-      tarefas: tasks
+      tarefas: tasks,
+      apostas
     });
 
     // Registrar atividades específicas para cada alteração
@@ -144,22 +147,31 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-6xl w-[95vw] h-[90vh] bg-[#FAF8F5] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl">
           {/* Header Area */}
-          <div className="flex items-center justify-between p-6 bg-white border-b border-border/40">
-            <div className="flex items-center gap-4 flex-1">
-              <Avatar className="h-16 w-16 border-2 border-primary/10">
-                <AvatarFallback className="bg-muted text-lg font-bold">
+          <div className="flex items-center justify-between p-8 bg-white border-b border-border/40">
+            <div className="flex items-center gap-6 flex-1">
+              <Avatar className="h-28 w-28 border-4 border-primary/10 shadow-sm">
+                <AvatarFallback className="bg-muted text-4xl font-bold">
                   {ejData?.name ? ejData.name.substring(0, 2).toUpperCase() : "NO"}
                 </AvatarFallback>
               </Avatar>
-              <div className="space-y-2 flex-1 max-w-xl">
+              <div className="space-y-4 flex-1 max-w-2xl">
                 <Input
                   defaultValue={ejData?.name || "Nova EJ"}
-                  className="text-2xl font-bold h-12 border-primary/20 bg-primary/5 focus-visible:ring-primary/30"
+                  className="text-4xl font-bold h-16 border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-white focus-visible:ring-primary/30 transition-colors px-2 -ml-2"
                 />
-                <div className="flex gap-2">
-                  <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-8 text-sm bg-muted/30 border-transparent" />
-                  <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-8 text-sm bg-muted/30 border-transparent" />
-                  <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-8 text-sm bg-muted/30 border-transparent" />
+                <div className="flex gap-6">
+                  <div className="flex flex-col">
+                    <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-48" />
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider">Guardião da EJ</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-32 text-center" />
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">Grupo</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-32 text-center" />
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">Cluster / CM</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -219,6 +231,20 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                           <div className="space-y-4">
                             <div className="flex justify-between items-center mb-4">
                               <h4 className="text-xs font-semibold uppercase text-muted-foreground">Meta da EJ ({ejData?.name})</h4>
+                              
+                              <label className="flex items-center gap-2 cursor-pointer bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full hover:bg-orange-100 transition-colors border border-orange-200">
+                                <Checkbox 
+                                  checked={!!apostas[event.id]}
+                                  onCheckedChange={(checked) => {
+                                    setApostas(prev => ({...prev, [event.id]: !!checked}));
+                                  }}
+                                  className="border-orange-400 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                                />
+                                <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                                  <Flame className="w-3.5 h-3.5" />
+                                  EJ é Aposta
+                                </span>
+                              </label>
                             </div>
                             {event.ejGoals.map(goal => {
                               const isChecked = goal.checkedBy ? goal.checkedBy.includes(ejData?.name || 'unknown') : !!goal.checked;

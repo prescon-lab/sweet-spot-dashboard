@@ -12,6 +12,7 @@ export interface EjData {
   proximaReuniao?: string;
   notasReuniao?: string;
   tarefas?: Task[];
+  apostas?: Record<string, boolean>;
 }
 
 const STORE_KEY = 'sweet_spot_ej_data';

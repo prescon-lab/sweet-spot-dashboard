@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy } from "lucide-react";
 import { ejsList } from "@/lib/data";
 import { guardianStore } from "@/lib/guardianStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
@@ -400,24 +401,47 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {guardianEjs.map(ej => (
-                  <div 
-                    key={ej.id}
-                    onClick={() => handleEjClick(ej)}
-                    className="bg-black/10 rounded-3xl p-4 pr-6 flex items-center gap-5 cursor-pointer shadow-sm hover:bg-black/20 hover:scale-[1.02] transition-all border border-transparent group"
-                  >
-                    {/* Pill Avatar */}
-                    <div className="w-16 h-16 rounded-full bg-black/10 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-inner">
-                      <span className="text-xl font-bold opacity-50">{ej.name.substring(0, 2).toUpperCase()}</span>
+                {guardianEjs.map(ej => {
+                  const ejSavedData = ejDataStore.getEjData(ej.name);
+                  const isAposta = Object.values(ejSavedData?.apostas || {}).some(v => v === true);
+                  
+                  const allEvents = eventStore.getEvents();
+                  const allGoals = allEvents.flatMap(e => e.ejGoals || []);
+                  const allGoalsMet = allGoals.length > 0 && allGoals.every(g => g.checkedBy?.includes(ej.name) || g.checked);
+
+                  return (
+                    <div 
+                      key={ej.id}
+                      onClick={() => handleEjClick(ej)}
+                      className="bg-black/10 rounded-3xl p-4 pr-6 flex items-center gap-5 cursor-pointer shadow-sm hover:bg-black/20 hover:scale-[1.02] transition-all border border-transparent group relative"
+                    >
+                      {/* Icons Badge Area */}
+                      <div className="absolute -top-2 -right-2 flex gap-1 z-10">
+                        {isAposta && (
+                          <div className="bg-orange-500 text-white p-1.5 rounded-full shadow-md" title="EJ é Aposta">
+                            <Flame className="w-4 h-4" />
+                          </div>
+                        )}
+                        {allGoalsMet && (
+                          <div className="bg-yellow-500 text-white p-1.5 rounded-full shadow-md" title="Bateu todas as metas">
+                            <Trophy className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Pill Avatar */}
+                      <div className="w-16 h-16 rounded-full bg-black/10 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-inner">
+                        <span className="text-xl font-bold opacity-50">{ej.name.substring(0, 2).toUpperCase()}</span>
+                      </div>
+                      
+                      {/* Text */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-lg truncate group-hover:opacity-80 transition-opacity">{ej.name}</h4>
+                        <p className="text-[10px] uppercase mt-0.5 tracking-wider font-semibold opacity-70">Acompanhamento</p>
+                      </div>
                     </div>
-                    
-                    {/* Text */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-lg truncate group-hover:opacity-80 transition-opacity">{ej.name}</h4>
-                      <p className="text-[10px] uppercase mt-0.5 tracking-wider font-semibold opacity-70">Acompanhamento</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 
                 {guardianEjs.length === 0 && (
                   <div className="col-span-full text-center py-12 border-2 border-dashed border-black/20 rounded-3xl bg-black/5">
