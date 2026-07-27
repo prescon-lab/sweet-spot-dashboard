@@ -12,6 +12,16 @@ import { ejsList } from "@/lib/data";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/historico-eventos")({
+  head: () => ({
+    meta: [
+      { title: "Histórico de Eventos — Resultados" },
+      { name: "description", content: "Consulte os eventos concluídos, EJs destaque e a pontuação de cada evento da rede." },
+      { property: "og:title", content: "Histórico de Eventos — Resultados" },
+      { property: "og:description", content: "Consulte os eventos concluídos, EJs destaque e a pontuação de cada evento da rede." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: HistoricoEventos,
 });
 

@@ -7,6 +7,16 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Painel de Acompanhamento de EJs e Guardiões" },
+      { name: "description", content: "Centro de controle para acompanhar metas, dailys, apostas e a saúde das Empresas Juniores e seus Guardiões." },
+      { property: "og:title", content: "Painel de Acompanhamento de EJs e Guardiões" },
+      { property: "og:description", content: "Centro de controle para acompanhar metas, dailys, apostas e a saúde das Empresas Juniores e seus Guardiões." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 

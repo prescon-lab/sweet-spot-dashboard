@@ -8,6 +8,16 @@ import { ejDataStore } from "@/lib/ejDataStore";
 import { eventStore } from "@/lib/eventStore";
 
 export const Route = createFileRoute("/p/ejs")({
+  head: () => ({
+    meta: [
+      { title: "Painel de EJs — Progresso e Apostas" },
+      { name: "description", content: "Veja o progresso individual de cada Empresa Júnior: metas cumpridas, apostas, reuniões e dailys." },
+      { property: "og:title", content: "Painel de EJs — Progresso e Apostas" },
+      { property: "og:description", content: "Veja o progresso individual de cada Empresa Júnior: metas cumpridas, apostas, reuniões e dailys." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: EjsPanel,
 });
 

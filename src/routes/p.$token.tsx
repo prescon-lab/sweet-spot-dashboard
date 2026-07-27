@@ -19,6 +19,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useAccessRole } from "@/lib/access";
 
 export const Route = createFileRoute("/p/$token")({
+  head: () => ({
+    meta: [
+      { title: "Painel Geral — Metas e Faturamento da Rede" },
+      { name: "description", content: "Acompanhe metas dos eventos, previsão de faturamento e as últimas atualizações de todas as EJs da rede." },
+      { property: "og:title", content: "Painel Geral — Metas e Faturamento da Rede" },
+      { property: "og:description", content: "Acompanhe metas dos eventos, previsão de faturamento e as últimas atualizações de todas as EJs da rede." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: DashboardPanel,
 });
 

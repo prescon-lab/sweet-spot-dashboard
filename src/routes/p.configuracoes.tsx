@@ -8,6 +8,16 @@ import { useAccessRole, buildGuardianLink } from "@/lib/access";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/configuracoes")({
+  head: () => ({
+    meta: [
+      { title: "Configurações — Links e Acessos" },
+      { name: "description", content: "Gerencie os links úteis do menu lateral e o link exclusivo de acesso para guardiões." },
+      { property: "og:title", content: "Configurações — Links e Acessos" },
+      { property: "og:description", content: "Gerencie os links úteis do menu lateral e o link exclusivo de acesso para guardiões." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Configuracoes,
 });
 
