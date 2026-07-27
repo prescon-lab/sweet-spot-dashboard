@@ -1,6 +1,7 @@
 export interface EventGoal {
   id: string;
   text: string;
+  coreText: string;
   checked: boolean;
 }
 
@@ -8,7 +9,6 @@ export interface AppEvent {
   id: string;
   name: string;
   ejGoals: EventGoal[];
-  coreGoal: string;
   createdAt: string;
 }
 

@@ -131,28 +131,32 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                             <h3 className="font-bold text-xl text-[#0A1942] uppercase">{event.name}</h3>
                             <p className="text-sm text-muted-foreground mt-1">Registrado em: {new Date(event.createdAt).toLocaleDateString()}</p>
                           </div>
-                          {event.coreGoal && (
-                            <div className="bg-primary/10 px-4 py-2 rounded-lg border border-primary/20">
-                              <span className="text-xs font-semibold text-primary uppercase block mb-1">Meta do Núcleo</span>
-                              <span className="text-sm font-bold text-[#0A1942]">{event.coreGoal}</span>
-                            </div>
-                          )}
                         </div>
                         
                         <div className="pt-4 border-t space-y-3">
-                          <h4 className="text-sm font-semibold uppercase text-muted-foreground mb-3">Metas da EJ ({ejData?.name})</h4>
-                          {event.ejGoals.map(goal => (
-                            <div key={goal.id} className="flex items-start gap-3 bg-muted/20 p-3 rounded-lg hover:bg-muted/40 transition-colors">
-                              <Checkbox 
-                                checked={goal.checked}
-                                onCheckedChange={() => eventStore.toggleGoal(event.id, goal.id)}
-                                className="mt-1 border-gray-400 data-[state=checked]:bg-primary data-[state=checked]:text-white"
-                              />
-                              <p className={`text-sm ${goal.checked ? 'line-through text-muted-foreground' : 'text-foreground font-medium'}`}>
-                                {goal.text}
-                              </p>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <h4 className="text-xs font-semibold uppercase text-muted-foreground">Meta da EJ ({ejData?.name})</h4>
+                              <h4 className="text-xs font-semibold uppercase text-muted-foreground">Meta do Núcleo</h4>
                             </div>
-                          ))}
+                            {event.ejGoals.map(goal => (
+                              <div key={goal.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/20 p-3 rounded-lg hover:bg-muted/40 transition-colors">
+                                <div className="flex items-start gap-3">
+                                  <Checkbox 
+                                    checked={goal.checked}
+                                    onCheckedChange={() => eventStore.toggleGoal(event.id, goal.id)}
+                                    className="mt-1 border-gray-400 data-[state=checked]:bg-primary data-[state=checked]:text-white"
+                                  />
+                                  <p className={`text-sm ${goal.checked ? 'line-through text-muted-foreground' : 'text-foreground font-medium'}`}>
+                                    {goal.text}
+                                  </p>
+                                </div>
+                                <div className="flex items-center">
+                                  <span className="text-sm font-bold text-primary">{goal.coreText}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                           {event.ejGoals.length === 0 && (
                             <p className="text-sm text-muted-foreground">Nenhuma meta específica definida.</p>
                           )}

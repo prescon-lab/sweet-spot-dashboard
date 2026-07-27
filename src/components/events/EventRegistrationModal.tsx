@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { eventStore } from "@/lib/eventStore";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Plus } from "lucide-react";
 
 interface EventRegistrationModalProps {
   open: boolean;
@@ -14,15 +14,14 @@ interface EventRegistrationModalProps {
 
 export function EventRegistrationModal({ open, onOpenChange }: EventRegistrationModalProps) {
   const [eventName, setEventName] = useState("");
-  const [coreGoal, setCoreGoal] = useState("");
-  const [ejGoals, setEjGoals] = useState([{ id: Date.now().toString(), text: "", checked: false }]);
+  const [ejGoals, setEjGoals] = useState([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
 
   const handleAddGoal = () => {
-    setEjGoals([...ejGoals, { id: Date.now().toString(), text: "", checked: false }]);
+    setEjGoals([...ejGoals, { id: Date.now().toString(), text: "", coreText: "", checked: false }]);
   };
 
-  const handleGoalChange = (id: string, text: string) => {
-    setEjGoals(ejGoals.map(g => g.id === id ? { ...g, text } : g));
+  const handleGoalChange = (id: string, field: 'text' | 'coreText', value: string) => {
+    setEjGoals(ejGoals.map(g => g.id === id ? { ...g, [field]: value } : g));
   };
 
   const handleGoalCheck = (id: string, checked: boolean) => {
@@ -40,7 +39,6 @@ export function EventRegistrationModal({ open, onOpenChange }: EventRegistration
     eventStore.addEvent({
       id: Date.now().toString(),
       name: eventName,
-      coreGoal,
       ejGoals: filteredGoals,
       createdAt: new Date().toISOString()
     });
@@ -50,15 +48,14 @@ export function EventRegistrationModal({ open, onOpenChange }: EventRegistration
     
     // Reset form
     setEventName("");
-    setCoreGoal("");
-    setEjGoals([{ id: Date.now().toString(), text: "", checked: false }]);
+    setEjGoals([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl w-[95vw] bg-[#a8b1b8] border-none shadow-2xl p-8 rounded-3xl">
-        <div className="flex flex-col space-y-8 text-white">
-          <h2 className="text-4xl font-light text-center tracking-widest text-white uppercase">
+      <DialogContent className="max-w-4xl w-[95vw] bg-[#FAF8F5] border-border/50 shadow-2xl p-8 rounded-3xl">
+        <div className="flex flex-col space-y-8">
+          <h2 className="text-3xl font-bold text-center tracking-tight text-[#0A1942] uppercase">
             Cadastro de Evento
           </h2>
 
@@ -67,18 +64,25 @@ export function EventRegistrationModal({ open, onOpenChange }: EventRegistration
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
               placeholder="NOME DO EVENTO: EX: RV DO FAÍSCA" 
-              className="w-full max-w-2xl bg-white/95 border-0 text-black placeholder:text-gray-500 h-14 rounded-2xl px-6 text-center text-lg font-medium shadow-inner"
+              className="w-full max-w-2xl bg-white border border-border/50 text-foreground placeholder:text-muted-foreground h-14 rounded-2xl px-6 text-center text-lg font-medium shadow-sm"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4">
-            {/* Left Column - Metas da EJ */}
-            <div className="space-y-4 flex flex-col items-center">
-              <h3 className="text-xl uppercase tracking-wider text-center text-[#2A313C]">Metas da EJ</h3>
-              
-              <div className="w-full space-y-3">
-                {ejGoals.map((goal, index) => (
-                  <div key={goal.id} className="relative flex items-center bg-white/95 rounded-2xl h-12 px-4 shadow-inner">
+          <div className="pt-4 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              <h3 className="text-lg uppercase tracking-wider text-center text-muted-foreground font-semibold">
+                Metas da EJ
+              </h3>
+              <h3 className="text-lg uppercase tracking-wider text-center text-muted-foreground font-semibold">
+                Meta do Núcleo
+              </h3>
+            </div>
+            
+            <div className="space-y-4">
+              {ejGoals.map((goal) => (
+                <div key={goal.id} className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                  {/* Left - Meta da EJ */}
+                  <div className="relative flex items-center bg-white rounded-2xl h-12 px-4 shadow-sm border border-border/50 transition-all hover:border-primary/30">
                     <Checkbox 
                       checked={goal.checked}
                       onCheckedChange={(checked) => handleGoalCheck(goal.id, checked as boolean)}
@@ -86,37 +90,39 @@ export function EventRegistrationModal({ open, onOpenChange }: EventRegistration
                     />
                     <Input 
                       value={goal.text}
-                      onChange={(e) => handleGoalChange(goal.id, e.target.value)}
-                      className="absolute inset-0 pl-12 pr-4 h-full border-0 bg-transparent text-black shadow-none focus-visible:ring-0"
+                      onChange={(e) => handleGoalChange(goal.id, 'text', e.target.value)}
+                      placeholder="Descreva a meta..."
+                      className="absolute inset-0 pl-12 pr-4 h-full border-0 bg-transparent text-foreground shadow-none focus-visible:ring-0"
                     />
                   </div>
-                ))}
-              </div>
 
-              <Button 
-                variant="ghost" 
-                onClick={handleAddGoal}
-                className="text-xs uppercase text-[#2A313C] hover:bg-black/10 self-start"
-              >
-                + Adicionar Metas
-              </Button>
+                  {/* Right - Meta do Núcleo */}
+                  <div className="flex items-center bg-white rounded-2xl h-12 shadow-sm border border-border/50 transition-all hover:border-primary/30">
+                    <Input 
+                      value={goal.coreText}
+                      onChange={(e) => handleGoalChange(goal.id, 'coreText', e.target.value)}
+                      placeholder="Ex: 5 EJs batendo, 20%..."
+                      className="w-full h-full border-0 bg-transparent px-4 text-foreground shadow-none focus-visible:ring-0 rounded-2xl"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* Right Column - Meta do Núcleo */}
-            <div className="space-y-4 flex flex-col items-center">
-              <h3 className="text-xl uppercase tracking-wider text-center text-[#2A313C]">Meta do Núcleo</h3>
-              <Input 
-                value={coreGoal}
-                onChange={(e) => setCoreGoal(e.target.value)}
-                className="w-full bg-white/95 border-0 text-black h-12 rounded-2xl px-4 shadow-inner"
-              />
-            </div>
+            <Button 
+              variant="ghost" 
+              onClick={handleAddGoal}
+              className="text-sm font-semibold text-primary hover:bg-primary/10 self-start"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Metas
+            </Button>
           </div>
 
-          <div className="flex justify-center pt-8">
+          <div className="flex justify-center pt-8 border-t border-border/30">
             <Button 
               onClick={handleSave}
-              className="bg-[#2A313C] hover:bg-[#2A313C]/90 text-white px-12 py-6 rounded-2xl text-lg uppercase tracking-widest font-semibold shadow-xl transition-transform hover:scale-105"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-6 rounded-2xl text-lg uppercase tracking-widest font-semibold shadow-lg transition-transform hover:-translate-y-1"
             >
               Cadastrar
             </Button>
