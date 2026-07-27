@@ -3,18 +3,29 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { eventStore } from "@/lib/eventStore";
+import { eventStore, AppEvent } from "@/lib/eventStore";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 interface EventRegistrationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  eventToEdit?: AppEvent | null;
 }
 
-export function EventRegistrationModal({ open, onOpenChange }: EventRegistrationModalProps) {
+export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: EventRegistrationModalProps) {
   const [eventName, setEventName] = useState("");
   const [ejGoals, setEjGoals] = useState([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
+
+  React.useEffect(() => {
+    if (open && eventToEdit) {
+      setEventName(eventToEdit.name);
+      setEjGoals(eventToEdit.ejGoals.length > 0 ? eventToEdit.ejGoals : [{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
+    } else if (open && !eventToEdit) {
+      setEventName("");
+      setEjGoals([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
+    }
+  }, [open, eventToEdit]);
 
   const handleAddGoal = () => {
     setEjGoals([...ejGoals, { id: Date.now().toString(), text: "", coreText: "", checked: false }]);
@@ -36,14 +47,23 @@ export function EventRegistrationModal({ open, onOpenChange }: EventRegistration
 
     const filteredGoals = ejGoals.filter(g => g.text.trim() !== "");
 
-    eventStore.addEvent({
-      id: Date.now().toString(),
-      name: eventName,
-      ejGoals: filteredGoals,
-      createdAt: new Date().toISOString()
-    });
+    if (eventToEdit) {
+      eventStore.updateEvent({
+        ...eventToEdit,
+        name: eventName,
+        ejGoals: filteredGoals,
+      });
+      toast.success("Evento atualizado com sucesso!");
+    } else {
+      eventStore.addEvent({
+        id: Date.now().toString(),
+        name: eventName,
+        ejGoals: filteredGoals,
+        createdAt: new Date().toISOString()
+      });
+      toast.success("Evento cadastrado com sucesso!");
+    }
 
-    toast.success("Evento cadastrado com sucesso!");
     onOpenChange(false);
     
     // Reset form
@@ -56,7 +76,7 @@ export function EventRegistrationModal({ open, onOpenChange }: EventRegistration
       <DialogContent className="max-w-4xl w-[95vw] bg-[#FAF8F5] border-border/50 shadow-2xl p-8 rounded-3xl">
         <div className="flex flex-col space-y-8">
           <h2 className="text-3xl font-bold text-center tracking-tight text-[#0A1942] uppercase">
-            Cadastro de Evento
+            {eventToEdit ? "Editar Evento" : "Cadastro de Evento"}
           </h2>
 
           <div className="flex justify-center w-full">
@@ -120,11 +140,8 @@ export function EventRegistrationModal({ open, onOpenChange }: EventRegistration
           </div>
 
           <div className="flex justify-center pt-8 border-t border-border/30">
-            <Button 
-              onClick={handleSave}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-6 rounded-2xl text-lg uppercase tracking-widest font-semibold shadow-lg transition-transform hover:-translate-y-1"
-            >
-              Cadastrar
+            <Button onClick={handleSave} className="w-full h-12 text-base font-semibold rounded-2xl shadow-sm hover:shadow-md transition-all">
+              {eventToEdit ? "Salvar Alterações" : "Cadastrar Evento"}
             </Button>
           </div>
         </div>

@@ -135,26 +135,22 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                         
                         <div className="pt-4 border-t space-y-3">
                           <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex justify-between items-center mb-4">
                               <h4 className="text-xs font-semibold uppercase text-muted-foreground">Meta da EJ ({ejData?.name})</h4>
-                              <h4 className="text-xs font-semibold uppercase text-muted-foreground">Meta do Núcleo</h4>
                             </div>
                             {event.ejGoals.map(goal => {
                               const isChecked = goal.checkedBy ? goal.checkedBy.includes(ejData?.name || 'unknown') : !!goal.checked;
                               return (
-                                <div key={goal.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/20 p-3 rounded-lg hover:bg-muted/40 transition-colors">
+                                <div key={goal.id} className="bg-muted/20 p-3 rounded-lg hover:bg-muted/40 transition-colors">
                                   <div className="flex items-start gap-3">
                                     <Checkbox 
                                       checked={isChecked}
                                       onCheckedChange={() => eventStore.toggleGoal(event.id, goal.id, ejData?.name || 'unknown')}
                                       className="mt-1 border-gray-400 data-[state=checked]:bg-primary data-[state=checked]:text-white"
                                     />
-                                    <p className={`text-sm ${isChecked ? 'line-through text-muted-foreground' : 'text-foreground font-medium'}`}>
+                                    <p className={`text-sm flex-1 ${isChecked ? 'line-through text-muted-foreground' : 'text-foreground font-medium'}`}>
                                       {goal.text}
                                     </p>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <span className="text-sm font-bold text-primary">{goal.coreText}</span>
                                   </div>
                                 </div>
                               );

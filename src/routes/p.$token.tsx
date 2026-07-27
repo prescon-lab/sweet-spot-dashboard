@@ -3,13 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer } from "lucide-react";
+import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pencil, ListChecks } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
-import { eventStore, AppEvent } from "@/lib/eventStore";
+import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/p/$token")({
   component: DashboardPanel,
@@ -20,6 +21,8 @@ function DashboardPanel() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [events, setEvents] = useState<AppEvent[]>([]);
+  const [eventToEdit, setEventToEdit] = useState<AppEvent | null>(null);
+  const [selectedGoal, setSelectedGoal] = useState<EventGoal | null>(null);
 
   useEffect(() => {
     setEvents(eventStore.getEvents());
@@ -33,6 +36,12 @@ function DashboardPanel() {
   };
 
   const handleAddBet = () => {
+    setEventToEdit(null);
+    setEventModalOpen(true);
+  };
+
+  const handleEditEvent = (event: AppEvent) => {
+    setEventToEdit(event);
     setEventModalOpen(true);
   };
 
@@ -67,12 +76,17 @@ function DashboardPanel() {
         ) : (
           events.map(event => (
             <Card key={event.id} className="glass-card overflow-hidden">
-              <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
-                <CardTitle className="text-lg uppercase tracking-wider text-primary flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  {event.name}
-                </CardTitle>
-                <CardDescription>Acompanhamento de metas deste evento</CardDescription>
+              <CardHeader className="bg-primary/5 border-b border-border/50 pb-4 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg uppercase tracking-wider text-primary flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    {event.name}
+                  </CardTitle>
+                  <CardDescription>Acompanhamento de metas deste evento</CardDescription>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => handleEditEvent(event)}>
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -84,7 +98,11 @@ function DashboardPanel() {
                     const pct = Math.min(Math.round((x / y) * 100), 100);
 
                     return (
-                      <div key={goal.id} className="space-y-3 bg-muted/10 p-4 rounded-xl border border-border/50">
+                      <div 
+                        key={goal.id} 
+                        className="space-y-3 bg-muted/10 p-4 rounded-xl border border-border/50 cursor-pointer hover:bg-muted/20 transition-colors"
+                        onClick={() => setSelectedGoal(goal)}
+                      >
                         <div className="flex justify-between items-start gap-4">
                           <p className="text-sm font-semibold leading-tight flex-1 text-[#0A1942]">{goal.text}</p>
                           <Badge variant="outline" className="shrink-0 bg-white">
@@ -166,8 +184,38 @@ function DashboardPanel() {
       />
       <EventRegistrationModal
         open={eventModalOpen}
-        onOpenChange={setEventModalOpen}
+        onOpenChange={(open) => {
+          setEventModalOpen(open);
+          if (!open) setEventToEdit(null);
+        }}
+        eventToEdit={eventToEdit}
       />
+      
+      {/* View Goal Checkers Dialog */}
+      <Dialog open={!!selectedGoal} onOpenChange={(open) => !open && setSelectedGoal(null)}>
+        <DialogContent className="max-w-md bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold tracking-tight text-[#0A1942]">
+              EJs que concluíram
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <h3 className="font-semibold text-primary mb-4">{selectedGoal?.text}</h3>
+            <div className="space-y-2 max-h-60 overflow-auto pr-2">
+              {(!selectedGoal?.checkedBy || selectedGoal.checkedBy.length === 0) ? (
+                <p className="text-sm text-muted-foreground">Nenhuma EJ concluiu esta meta ainda.</p>
+              ) : (
+                selectedGoal.checkedBy.map((ejId, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-white p-3 rounded-lg border shadow-sm">
+                    <ListChecks className="h-4 w-4 text-green-500" />
+                    <span className="font-medium text-sm">{ejId}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

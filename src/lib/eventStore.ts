@@ -39,6 +39,30 @@ export const eventStore = {
       }
     }
   },
+  updateEvent: (updatedEvent: AppEvent) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const current = eventStore.getEvents();
+        const index = current.findIndex(e => e.id === updatedEvent.id);
+        if (index !== -1) {
+          // Preserve checked states from the previous version if goals match by ID or text
+          const prevEvent = current[index];
+          updatedEvent.ejGoals = updatedEvent.ejGoals.map(newGoal => {
+            const oldGoal = prevEvent.ejGoals.find(g => g.id === newGoal.id || g.text === newGoal.text);
+            if (oldGoal) {
+              return { ...newGoal, checkedBy: oldGoal.checkedBy, checked: oldGoal.checked };
+            }
+            return newGoal;
+          });
+          current[index] = updatedEvent;
+          localStorage.setItem(STORE_KEY, JSON.stringify(current));
+          window.dispatchEvent(new Event('eventsUpdated'));
+        }
+      } catch (e) {
+        console.error("Failed to update event", e);
+      }
+    }
+  },
   // To toggle goals for specific EJs
   toggleGoal: (eventId: string, goalId: string, ejId: string) => {
     if (typeof window !== 'undefined') {
