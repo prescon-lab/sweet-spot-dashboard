@@ -192,17 +192,17 @@ function DashboardPanel() {
                       <p className="text-3xl font-bold text-foreground">{formatBRL(total)}</p>
                     </div>
                     <div className="flex flex-wrap gap-3">
-                      <div className="bg-red-50 border border-red-100 p-3 rounded-xl text-center flex-1 min-w-[120px]">
+                      <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px]">
                         <p className="text-xs font-bold text-red-600 uppercase mb-1">Quente</p>
-                        <p className="text-base font-bold text-red-700">{formatBRL(quente)}</p>
+                        <p className="text-base font-bold text-red-600 dark:text-red-400">{formatBRL(quente)}</p>
                       </div>
-                      <div className="bg-orange-50 border border-orange-100 p-3 rounded-xl text-center flex-1 min-w-[120px]">
+                      <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px]">
                         <p className="text-xs font-bold text-orange-600 uppercase mb-1">Morno</p>
-                        <p className="text-base font-bold text-orange-700">{formatBRL(morno)}</p>
+                        <p className="text-base font-bold text-orange-600 dark:text-orange-400">{formatBRL(morno)}</p>
                       </div>
-                      <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl text-center flex-1 min-w-[120px]">
+                      <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px]">
                         <p className="text-xs font-bold text-blue-600 uppercase mb-1">Frio</p>
-                        <p className="text-base font-bold text-blue-700">{formatBRL(frio)}</p>
+                        <p className="text-base font-bold text-blue-600 dark:text-blue-400">{formatBRL(frio)}</p>
                       </div>
                     </div>
                   </div>
