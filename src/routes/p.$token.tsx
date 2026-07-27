@@ -77,7 +77,8 @@ function DashboardPanel() {
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {event.ejGoals.map(goal => {
-                    const yMatches = goal.coreText.match(/\d+/);
+                    const coreText = goal.coreText || "100";
+                    const yMatches = coreText.match(/\d+/);
                     const y = yMatches ? parseInt(yMatches[0], 10) : 100; // default to 100 if no number found
                     const x = goal.checkedBy?.length || 0;
                     const pct = Math.min(Math.round((x / y) * 100), 100);
@@ -87,7 +88,7 @@ function DashboardPanel() {
                         <div className="flex justify-between items-start gap-4">
                           <p className="text-sm font-semibold leading-tight flex-1 text-[#0A1942]">{goal.text}</p>
                           <Badge variant="outline" className="shrink-0 bg-white">
-                            {x} / {goal.coreText}
+                            {x} / {goal.coreText || "-"}
                           </Badge>
                         </div>
                         <div className="space-y-1.5">
