@@ -672,7 +672,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
             </div>
 
             {/* Right Column - Sidebar */}
-            <div className="w-80 overflow-auto p-6 space-y-6">
+            <div className="w-full lg:w-80 shrink-0 lg:overflow-auto p-4 sm:p-6 space-y-6 border-t lg:border-t-0 border-border/40">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground">Desafio do Ciclo</label>
                 <Textarea 
