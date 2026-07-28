@@ -91,11 +91,12 @@ function DashboardPanel() {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-scale-in">
       {/* Header and Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Painel de Acompanhamento</h1>
+      <div className="flex flex-col lg:flex-row lg:justify-between items-start lg:items-center gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Painel de Acompanhamento</h1>
         </div>
-        <div className="flex w-full md:w-auto items-center gap-2">
+        <div className="flex w-full lg:w-auto flex-wrap items-center gap-2">
+
           <Button variant="outline" size="icon" onClick={handlePrint} title="Imprimir Relatório">
             <Printer className="h-4 w-4" />
           </Button>

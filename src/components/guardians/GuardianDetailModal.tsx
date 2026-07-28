@@ -237,7 +237,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
           <div className="flex-1 overflow-auto rounded-[32px] custom-scrollbar relative z-10">
             {/* Customizable Banner Area */}
             <div 
-              className="relative w-full min-h-[250px] flex items-end p-8 md:p-12 z-20"
+              className="relative w-full min-h-[250px] flex items-end p-5 sm:p-8 md:p-12 z-20"
             >
               {/* Settings Toggle Button */}
               <div className="absolute top-4 left-4 z-30">
@@ -355,10 +355,10 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
             </div>
 
             {/* Notifications and Results Area (2 columns) */}
-            <div className="flex flex-col md:flex-row min-h-[300px] rounded-3xl overflow-hidden mx-4 md:mx-8 mb-8 gap-4">
+            <div className="flex flex-col md:flex-row min-h-[300px] rounded-3xl overflow-hidden mx-3 sm:mx-4 md:mx-8 mb-6 sm:mb-8 gap-4">
               {/* Left Column - Menções (Integrated Color) */}
               <div 
-                className="flex-1 p-8 flex flex-col h-[400px] rounded-3xl bg-black/10 backdrop-blur-md"
+                className="flex-1 min-w-0 p-5 sm:p-8 flex flex-col h-[400px] rounded-3xl bg-black/10 backdrop-blur-md"
                 style={{ color: getContrastColor(bannerColor) }}
               >
                 <div className="flex justify-between items-center mb-6 border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
@@ -417,7 +417,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
               {/* Right Column - Atualizações (Light) */}
               <div 
-                className="flex-1 p-8 flex flex-col h-[400px] rounded-3xl bg-white/20 backdrop-blur-md"
+                className="flex-1 min-w-0 p-5 sm:p-8 flex flex-col h-[400px] rounded-3xl bg-white/20 backdrop-blur-md"
                 style={{ color: getContrastColor(bannerColor) }}
               >
                 <h3 className="text-xl font-semibold mb-6 tracking-wide border-b pb-4" style={{ borderColor: `${getContrastColor(bannerColor)}33` }}>
@@ -444,7 +444,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
             {/* EJs List Area */}
             <div 
-              className="p-8 md:p-12 mx-4 md:mx-8 mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
+              className="p-5 sm:p-8 md:p-12 mx-3 sm:mx-4 md:mx-8 mb-6 sm:mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
               style={{ color: getContrastColor(bannerColor) }}
             >
               <div className="mb-6">
@@ -512,7 +512,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
             {/* Event Tracking Area */}
             {eventStore.getEvents().filter(e => e.status !== 'completed').length > 0 && (
               <div 
-                className="p-8 md:p-12 mx-4 md:mx-8 mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
+                className="p-5 sm:p-8 md:p-12 mx-3 sm:mx-4 md:mx-8 mb-6 sm:mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
                 style={{ color: getContrastColor(bannerColor) }}
               >
                 <div className="mb-6">

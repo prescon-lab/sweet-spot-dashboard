@@ -355,10 +355,11 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-6xl w-[95vw] h-[90vh] glass-modal p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl" hideCloseButton>
           {/* Header Area */}
-          <div className="flex items-center justify-between p-8 bg-card/40 backdrop-blur-md border-b border-border/50">
-            <div className="flex items-center gap-6 flex-1">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4 sm:p-6 lg:p-8 bg-card/40 backdrop-blur-md border-b border-border/50 shrink-0 overflow-y-auto max-h-[45vh] lg:max-h-none">
+            <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+
               <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                <Avatar className="h-28 w-28 shadow-sm transition-transform group-hover:scale-105 border-0 bg-black/5">
+                <Avatar className="h-16 w-16 sm:h-20 sm:w-20 lg:h-28 lg:w-28 shrink-0 shadow-sm transition-transform group-hover:scale-105 border-0 bg-black/5">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -383,65 +384,67 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   className="hidden" 
                 />
               </div>
-              <div className="space-y-4 flex-1 max-w-2xl">
+              <div className="space-y-3 sm:space-y-4 flex-1 min-w-0 max-w-2xl">
                 <Input
                   defaultValue={ejData?.name || "Nova EJ"}
-                  className="text-4xl font-bold h-16 border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-card focus-visible:ring-primary/30 transition-colors px-2 -ml-2"
+                  className="text-xl sm:text-2xl lg:text-4xl font-bold h-11 sm:h-14 lg:h-16 w-full border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-card focus-visible:ring-primary/30 transition-colors px-2 -ml-2"
                 />
-                <div className="flex gap-6">
-                  <div className="flex flex-col">
-                    <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-48" />
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-6">
+                  <div className="flex flex-col col-span-2 sm:col-span-1 min-w-0">
+                    <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-48" />
                     <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider">Guardiã(o) da EJ</span>
                   </div>
-                  <div className="flex flex-col">
-                    <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-32 text-center" />
+                  <div className="flex flex-col min-w-0">
+                    <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-32 text-center" />
                     <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">Grupo</span>
                   </div>
-                  <div className="flex flex-col">
-                    <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-32 text-center" />
+                  <div className="flex flex-col min-w-0">
+                    <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-32 text-center" />
                     <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">CM</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex gap-4">
-                <Button variant="ghost" className="text-muted-foreground hover:bg-muted/50" onClick={() => onOpenChange(false)}>
+            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-4 w-full">
+                <Button variant="ghost" className="min-h-11 text-muted-foreground hover:bg-muted/50" onClick={() => onOpenChange(false)}>
                   Fechar sem Salvar
                 </Button>
-                <Button className="font-semibold text-white px-8" onClick={handleSave}>
+                <Button className="min-h-11 font-semibold text-white px-4 sm:px-8" onClick={handleSave}>
                   <Save className="w-4 h-4 mr-2" />
                   Salvar Dados
                 </Button>
               </div>
             </div>
+
           </div>
 
           {/* Body Content */}
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-col lg:flex-row flex-1 overflow-y-auto lg:overflow-hidden">
             {/* Left Column - Tabs */}
-            <div className="flex-1 overflow-auto p-6 border-r border-border/40">
+            <div className="flex-1 min-w-0 lg:overflow-auto p-4 sm:p-6 lg:border-r border-border/40">
               <Tabs defaultValue="apostas" className="w-full h-full flex flex-col">
-                <TabsList className="w-full justify-start rounded-none border-b border-border/40 bg-transparent h-12 p-0 space-x-6">
+                <TabsList className="w-full justify-start rounded-none border-b border-border/40 bg-transparent h-12 p-0 gap-4 sm:gap-6 overflow-x-auto flex-nowrap">
                   <TabsTrigger 
                     value="apostas" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-base"
+                    className="shrink-0 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-sm sm:text-base"
                   >
                     Apostas & Metas
                   </TabsTrigger>
                   <TabsTrigger 
                     value="dailys" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-base"
+                    className="shrink-0 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-sm sm:text-base"
                   >
                     Saídas das Dailys
                   </TabsTrigger>
                   <TabsTrigger 
                     value="reuniao" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-base"
+                    className="shrink-0 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-sm sm:text-base"
                   >
                     Reunião / Acompanhamento
                   </TabsTrigger>
                 </TabsList>
+
 
                 {/* Aba 1: Apostas & Metas */}
                 <TabsContent value="apostas" className="flex-1 pt-6 outline-none space-y-6">
@@ -669,7 +672,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
             </div>
 
             {/* Right Column - Sidebar */}
-            <div className="w-80 overflow-auto p-6 space-y-6">
+            <div className="w-full lg:w-80 shrink-0 lg:overflow-auto p-4 sm:p-6 space-y-6 border-t lg:border-t-0 border-border/40">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground">Desafio do Ciclo</label>
                 <Textarea 

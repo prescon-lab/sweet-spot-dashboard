@@ -97,9 +97,9 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] bg-[#FAF8F5] border-border/50 shadow-2xl p-8 rounded-3xl">
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-[#FAF8F5] border-border/50 shadow-2xl p-5 sm:p-8 rounded-3xl">
         <div className="flex flex-col space-y-8">
-          <h2 className="text-3xl font-bold text-center tracking-tight text-foreground uppercase">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center tracking-tight text-foreground uppercase">
             {eventToEdit ? "Editar Evento" : "Cadastro de Evento"}
           </h2>
 
@@ -113,7 +113,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
           </div>
 
           <div className="pt-4 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-12">
               <h3 className="text-lg uppercase tracking-wider text-center text-muted-foreground font-semibold">
                 Metas da EJ
               </h3>
@@ -124,7 +124,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
             
             <div className="space-y-4">
               {ejGoals.map((goal) => (
-                <div key={goal.id} className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div key={goal.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-12 items-center">
                   {/* Left - Meta da EJ */}
                   <div className="relative flex items-center bg-card rounded-2xl h-12 px-4 shadow-sm border border-border/50 transition-all hover:border-primary/30">
                     <Checkbox 

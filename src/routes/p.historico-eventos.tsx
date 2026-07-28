@@ -52,7 +52,7 @@ function HistoricoEventos() {
   if (completedEvents.length === 0) {
     return (
       <div className="p-6 md:p-10 max-w-7xl mx-auto flex flex-col space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Histórico de Eventos</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Histórico de Eventos</h1>
         <div className="text-center py-20 bg-muted/20 rounded-3xl border border-dashed">
           <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
           <h3 className="text-2xl font-bold text-foreground">Nenhum evento concluído ainda</h3>
@@ -65,7 +65,7 @@ function HistoricoEventos() {
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto flex flex-col space-y-8 fade-in">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Histórico de Eventos</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Histórico de Eventos</h1>
         <p className="text-muted-foreground mt-2">Métricas e resultados de EJs que bateram metas.</p>
       </div>
 

@@ -116,7 +116,7 @@ function Configuracoes() {
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-fade-in space-y-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Configurações</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Configurações</h1>
         <p className="text-muted-foreground mt-2">
           Gerencie os links úteis que aparecem no menu lateral.
         </p>
