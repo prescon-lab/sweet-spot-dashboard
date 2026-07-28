@@ -384,26 +384,28 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   className="hidden" 
                 />
               </div>
-              <div className="space-y-4 flex-1 max-w-2xl">
+              <div className="space-y-3 sm:space-y-4 flex-1 min-w-0 max-w-2xl">
                 <Input
                   defaultValue={ejData?.name || "Nova EJ"}
-                  className="text-4xl font-bold h-16 border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-card focus-visible:ring-primary/30 transition-colors px-2 -ml-2"
+                  className="text-xl sm:text-2xl lg:text-4xl font-bold h-11 sm:h-14 lg:h-16 w-full border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-card focus-visible:ring-primary/30 transition-colors px-2 -ml-2"
                 />
-                <div className="flex gap-6">
-                  <div className="flex flex-col">
-                    <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-48" />
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-6">
+                  <div className="flex flex-col col-span-2 sm:col-span-1 min-w-0">
+                    <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-48" />
                     <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider">Guardiã(o) da EJ</span>
                   </div>
-                  <div className="flex flex-col">
-                    <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-32 text-center" />
+                  <div className="flex flex-col min-w-0">
+                    <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-32 text-center" />
                     <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">Grupo</span>
                   </div>
-                  <div className="flex flex-col">
-                    <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-10 text-base font-medium bg-muted/30 border-transparent w-32 text-center" />
+                  <div className="flex flex-col min-w-0">
+                    <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-32 text-center" />
                     <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">CM</span>
                   </div>
                 </div>
               </div>
+            </div>
+
             </div>
             <div className="flex items-center gap-4">
               <div className="flex gap-4">
