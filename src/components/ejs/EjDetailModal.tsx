@@ -359,7 +359,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
             <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
 
               <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                <Avatar className="h-28 w-28 shadow-sm transition-transform group-hover:scale-105 border-0 bg-black/5">
+                <Avatar className="h-16 w-16 sm:h-20 sm:w-20 lg:h-28 lg:w-28 shrink-0 shadow-sm transition-transform group-hover:scale-105 border-0 bg-black/5">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
