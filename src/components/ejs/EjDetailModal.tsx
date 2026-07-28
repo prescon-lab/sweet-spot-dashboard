@@ -420,30 +420,31 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
           </div>
 
           {/* Body Content */}
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-col lg:flex-row flex-1 overflow-y-auto lg:overflow-hidden">
             {/* Left Column - Tabs */}
-            <div className="flex-1 overflow-auto p-6 border-r border-border/40">
+            <div className="flex-1 min-w-0 lg:overflow-auto p-4 sm:p-6 lg:border-r border-border/40">
               <Tabs defaultValue="apostas" className="w-full h-full flex flex-col">
-                <TabsList className="w-full justify-start rounded-none border-b border-border/40 bg-transparent h-12 p-0 space-x-6">
+                <TabsList className="w-full justify-start rounded-none border-b border-border/40 bg-transparent h-12 p-0 gap-4 sm:gap-6 overflow-x-auto flex-nowrap">
                   <TabsTrigger 
                     value="apostas" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-base"
+                    className="shrink-0 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-sm sm:text-base"
                   >
                     Apostas & Metas
                   </TabsTrigger>
                   <TabsTrigger 
                     value="dailys" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-base"
+                    className="shrink-0 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-sm sm:text-base"
                   >
                     Saídas das Dailys
                   </TabsTrigger>
                   <TabsTrigger 
                     value="reuniao" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-base"
+                    className="shrink-0 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-sm sm:text-base"
                   >
                     Reunião / Acompanhamento
                   </TabsTrigger>
                 </TabsList>
+
 
                 {/* Aba 1: Apostas & Metas */}
                 <TabsContent value="apostas" className="flex-1 pt-6 outline-none space-y-6">
