@@ -355,8 +355,9 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-6xl w-[95vw] h-[90vh] glass-modal p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl" hideCloseButton>
           {/* Header Area */}
-          <div className="flex items-center justify-between p-8 bg-card/40 backdrop-blur-md border-b border-border/50">
-            <div className="flex items-center gap-6 flex-1">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4 sm:p-6 lg:p-8 bg-card/40 backdrop-blur-md border-b border-border/50 shrink-0 overflow-y-auto max-h-[45vh] lg:max-h-none">
+            <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+
               <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                 <Avatar className="h-28 w-28 shadow-sm transition-transform group-hover:scale-105 border-0 bg-black/5">
                   {avatarUrl ? (
