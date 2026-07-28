@@ -405,19 +405,18 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 </div>
               </div>
             </div>
-
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex gap-4">
-                <Button variant="ghost" className="text-muted-foreground hover:bg-muted/50" onClick={() => onOpenChange(false)}>
+            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-4 w-full">
+                <Button variant="ghost" className="min-h-11 text-muted-foreground hover:bg-muted/50" onClick={() => onOpenChange(false)}>
                   Fechar sem Salvar
                 </Button>
-                <Button className="font-semibold text-white px-8" onClick={handleSave}>
+                <Button className="min-h-11 font-semibold text-white px-4 sm:px-8" onClick={handleSave}>
                   <Save className="w-4 h-4 mr-2" />
                   Salvar Dados
                 </Button>
               </div>
             </div>
+
           </div>
 
           {/* Body Content */}
