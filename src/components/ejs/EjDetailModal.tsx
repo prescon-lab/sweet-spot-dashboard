@@ -353,7 +353,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       </Dialog>
 
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] glass-modal p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl">
+        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] glass-modal p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl" hideCloseButton>
           {/* Header Area */}
           <div className="flex items-center justify-between p-8 bg-card/40 backdrop-blur-md border-b border-border/50">
             <div className="flex items-center gap-6 flex-1">

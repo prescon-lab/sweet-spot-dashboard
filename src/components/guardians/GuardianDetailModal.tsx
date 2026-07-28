@@ -219,6 +219,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
         <DialogContent 
           className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px] transition-colors duration-300"
           style={{ backgroundColor: bannerColor }}
+          hideCloseButton
         >
           {bannerUrl && (
             <div 
