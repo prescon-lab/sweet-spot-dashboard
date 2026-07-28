@@ -93,7 +93,7 @@ function DashboardPanel() {
       {/* Header and Actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Painel de Acompanhamento</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Painel de Acompanhamento</h1>
         </div>
         <div className="flex w-full md:w-auto items-center gap-2">
           <Button variant="outline" size="icon" onClick={handlePrint} title="Imprimir Relatório">
