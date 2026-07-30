@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { withCloseConfirmation, confirmDiscardChanges } from "@/lib/confirmClose";
+import { withCloseConfirmation } from "@/lib/confirmClose";
 import { Briefcase, Plus, Trash2 } from "lucide-react";
 import { leadStore, Lead, LeadStatus } from "@/lib/leadStore";
 

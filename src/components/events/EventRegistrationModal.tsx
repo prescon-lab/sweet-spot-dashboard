@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { withCloseConfirmation, confirmDiscardChanges } from "@/lib/confirmClose";
+import { withCloseConfirmation } from "@/lib/confirmClose";
 import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { toast } from "sonner";
 import { Plus, Trash2, CheckCircle2 } from "lucide-react";
