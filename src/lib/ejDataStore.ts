@@ -20,6 +20,7 @@ export interface EjData {
   notasReuniao?: string; // Legacy
   reunioes?: ReuniaoNota[];
   tarefas?: Task[];
+  presconTasks?: Task[];
   apostas?: Record<string, boolean>;
   avatarUrl?: string;
 }

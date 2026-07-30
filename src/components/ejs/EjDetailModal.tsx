@@ -33,9 +33,13 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [funnelModalOpen, setFunnelModalOpen] = useState(false);
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [presconTasks, setPresconTasks] = useState<Task[]>([]);
   const [newTaskText, setNewTaskText] = useState("");
+  const [newPresconText, setNewPresconText] = useState("");
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editingTaskText, setEditingTaskText] = useState("");
+  const [editingPresconId, setEditingPresconId] = useState<number | null>(null);
+  const [editingPresconText, setEditingPresconText] = useState("");
   const [editingReuniaoId, setEditingReuniaoId] = useState<number | null>(null);
   const [editingReuniaoText, setEditingReuniaoText] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -94,6 +98,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       if (ejName) {
         const data = ejDataStore.getEjData(ejName);
         setTasks(Array.isArray(data?.tarefas) ? data.tarefas : []);
+        setPresconTasks(Array.isArray(data?.presconTasks) ? data.presconTasks : []);
         setDesafio(data?.desafio || "");
         setDores(data?.dores || "");
         setProximaReuniao(data?.proximaReuniao || "");
@@ -108,6 +113,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         setAvatarUrl(data?.avatarUrl || null);
       } else {
         setTasks([]);
+        setPresconTasks([]);
         setDesafio("");
         setDores("");
         setProximaReuniao("");
@@ -142,6 +148,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       proximaReuniao,
       reunioes,
       tarefas: tasks,
+      presconTasks,
       apostas,
       avatarUrl: avatarUrl || undefined
     });
@@ -168,6 +175,11 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       hasChanges = true;
       const completedCount = tasks.filter(t => t.completed).length;
       activityStore.addActivity({ ejName, description: `Tarefas: ${completedCount}/${tasks.length} concluídas`, type: "update" });
+    }
+    if (JSON.stringify(presconTasks) !== JSON.stringify(previousData.presconTasks || [])) {
+      hasChanges = true;
+      const completedCount = presconTasks.filter(t => t.completed).length;
+      activityStore.addActivity({ ejName, description: `Prescon: ${completedCount}/${presconTasks.length} concluídas`, type: "update" });
     }
 
     if (!hasChanges) {
@@ -248,6 +260,47 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     setEditingTaskText("");
   };
 
+  const handleAddPrescon = () => {
+    if (!newPresconText.trim()) return;
+    
+    setPresconTasks([
+      ...presconTasks,
+      {
+        id: Date.now(),
+        text: newPresconText,
+        completed: false,
+        date: new Date().toLocaleDateString("pt-BR")
+      }
+    ]);
+    setNewPresconText("");
+  };
+
+  const togglePrescon = (id: number) => {
+    setPresconTasks(presconTasks.map(t => {
+      if (t.id === id) {
+        const isNowCompleted = !t.completed;
+        return { 
+          ...t, 
+          completed: isNowCompleted,
+          completedAt: isNowCompleted ? new Date().toLocaleString('pt-BR') : undefined
+        };
+      }
+      return t;
+    }));
+  };
+
+  const removePrescon = (id: number) => {
+    if (window.confirm("Ação não pode ser desfeita. Tem certeza que deseja apagar essa saída?")) {
+      setPresconTasks(presconTasks.filter(t => t.id !== id));
+    }
+  };
+
+  const saveEditedPrescon = (id: number) => {
+    setPresconTasks(presconTasks.map(t => t.id === id ? { ...t, text: editingPresconText } : t));
+    setEditingPresconId(null);
+    setEditingPresconText("");
+  };
+
   const removeReuniao = (id: number) => {
     if (window.confirm("Ação não pode ser desfeita. Tem certeza que deseja apagar essa anotação?")) {
       const novasReunioes = reunioes.filter(r => r.id !== id);
@@ -265,6 +318,13 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   };
 
   const sortedTasks = (Array.isArray(tasks) ? [...tasks] : []).sort((a, b) => {
+    if (a.completed !== b.completed) {
+      return a.completed ? 1 : -1;
+    }
+    return b.id - a.id;
+  });
+
+  const sortedPresconTasks = (Array.isArray(presconTasks) ? [...presconTasks] : []).sort((a, b) => {
     if (a.completed !== b.completed) {
       return a.completed ? 1 : -1;
     }
@@ -446,6 +506,12 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   >
                     Reunião / Acompanhamento
                   </TabsTrigger>
+                  <TabsTrigger 
+                    value="prescon" 
+                    className="shrink-0 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-sm sm:text-base"
+                  >
+                    PRESCON
+                  </TabsTrigger>
                 </TabsList>
 
 
@@ -594,6 +660,76 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                       ))}
                       {tasks.length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">Nenhuma saída cadastrada.</p>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Aba 4: Prescon */}
+                <TabsContent value="prescon" className="flex-1 pt-6 outline-none">
+                  <div className="bg-card rounded-xl border border-border/50 p-6 space-y-6">
+                    <div>
+                      <h3 className="font-semibold text-lg text-foreground">PRESCON</h3>
+                      <p className="opacity-70 text-sm text-muted-foreground mt-1">Saídas e encaminhamentos da Prescon.</p>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input 
+                          placeholder="Adicionar nova saída da Prescon..." 
+                          value={newPresconText}
+                          onChange={(e) => setNewPresconText(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddPrescon()}
+                        />
+                      </div>
+                      <Button onClick={handleAddPrescon}>Adicionar</Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {sortedPresconTasks.map(task => (
+                        <div key={task.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors group">
+                          <Checkbox 
+                            checked={task.completed}
+                            onCheckedChange={() => togglePrescon(task.id)}
+                          />
+                          <div className="flex-1">
+                            {editingPresconId === task.id ? (
+                              <div className="flex items-center gap-2">
+                                <Input 
+                                  value={editingPresconText} 
+                                  onChange={(e) => setEditingPresconText(e.target.value)}
+                                  onKeyDown={(e) => e.key === 'Enter' && saveEditedPrescon(task.id)}
+                                  autoFocus
+                                  className="h-8 text-sm"
+                                />
+                                <Button size="sm" onClick={() => saveEditedPrescon(task.id)}><Check className="w-4 h-4" /></Button>
+                              </div>
+                            ) : (
+                              <>
+                                <p className={`text-sm ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                                  {task.text}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Registrado em: {task.date}
+                                  {task.completedAt && ` • Concluído em: ${task.completedAt}`}
+                                </p>
+                              </>
+                            )}
+                          </div>
+                          {editingPresconId !== task.id && (
+                            <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => { setEditingPresconId(task.id); setEditingPresconText(task.text); }}>
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removePrescon(task.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {presconTasks.length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-4">Nenhuma saída da Prescon cadastrada.</p>
                       )}
                     </div>
                   </div>
