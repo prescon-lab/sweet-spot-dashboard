@@ -6,6 +6,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { withCloseConfirmation, confirmDiscardChanges } from "@/lib/confirmClose";
 import { Textarea } from "@/components/ui/textarea";
 import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy } from "lucide-react";
 import { ejsList } from "@/lib/data";
@@ -215,7 +216,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
         </DialogContent>
       </Dialog>
 
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={withCloseConfirmation(onOpenChange)}>
         <DialogContent 
           className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px] transition-colors duration-300"
           style={{ backgroundColor: bannerColor }}
@@ -561,7 +562,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
           
           {/* Bottom Actions Bar */}
           <div className="bg-black/20 backdrop-blur-md p-4 flex justify-end gap-3 z-20">
-            <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-full px-6 font-bold hover:bg-white/10 text-white">Fechar sem salvar</Button>
+            <Button variant="ghost" onClick={() => { if (confirmDiscardChanges()) onOpenChange(false); }} className="rounded-full px-6 font-bold hover:bg-white/10 text-white">Fechar sem salvar</Button>
             <Button onClick={() => onOpenChange(false)} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-lg">Salvar e Fechar</Button>
           </div>
         </DialogContent>

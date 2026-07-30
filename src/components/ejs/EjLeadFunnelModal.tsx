@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { withCloseConfirmation } from "@/lib/confirmClose";
 import { Briefcase, Plus, Trash2 } from "lucide-react";
 import { leadStore, Lead, LeadStatus } from "@/lib/leadStore";
 
@@ -74,7 +75,7 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={withCloseConfirmation(onOpenChange)}>
       <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto glass-modal">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between gap-2 text-xl">
