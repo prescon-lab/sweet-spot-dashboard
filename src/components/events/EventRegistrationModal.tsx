@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { withCloseConfirmation } from "@/lib/confirmClose";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { toast } from "sonner";
 import { Plus, Trash2, CheckCircle2 } from "lucide-react";
@@ -15,6 +15,7 @@ interface EventRegistrationModalProps {
 }
 
 export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: EventRegistrationModalProps) {
+  const dirtyGuard = useDirtyGuard(open);
   const [eventName, setEventName] = useState("");
   const [ejGoals, setEjGoals] = useState<EventGoal[]>([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
 
@@ -65,6 +66,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
       toast.success("Evento cadastrado com sucesso!");
     }
 
+    dirtyGuard.markClean();
     onOpenChange(false);
     
     // Reset form
@@ -97,8 +99,8 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
   };
 
   return (
-    <Dialog open={open} onOpenChange={withCloseConfirmation(onOpenChange)}>
-      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-[#FAF8F5] border-border/50 shadow-2xl p-5 sm:p-8 rounded-3xl">
+    <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)}>
+      <DialogContent {...dirtyGuard.containerProps} className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-[#FAF8F5] border-border/50 shadow-2xl p-5 sm:p-8 rounded-3xl">
         <div className="flex flex-col space-y-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-center tracking-tight text-foreground uppercase">
             {eventToEdit ? "Editar Evento" : "Cadastro de Evento"}
