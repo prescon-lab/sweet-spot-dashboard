@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { withCloseConfirmation, confirmDiscardChanges } from "@/lib/confirmClose";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Briefcase, Calendar as CalendarIcon, Check, Plus, Trash2, Save, Flame, Trophy, Pencil, ImageIcon } from "lucide-react";
 import Cropper from "react-easy-crop";
@@ -29,6 +29,7 @@ interface EjDetailModalProps {
 }
 
 export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps) {
+  const dirtyGuard = useDirtyGuard(open);
   const [funnelModalOpen, setFunnelModalOpen] = useState(false);
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -177,6 +178,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       });
     }
 
+    dirtyGuard.markClean();
     toast.success("Dados salvos com sucesso!");
     onOpenChange(false);
   };
@@ -353,8 +355,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         </DialogContent>
       </Dialog>
 
-      <Dialog open={open} onOpenChange={withCloseConfirmation(onOpenChange)}>
-        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] glass-modal p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl" hideCloseButton>
+      <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)}>
+        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] glass-modal p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl" hideCloseButton {...dirtyGuard.containerProps}>
           {/* Header Area */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4 sm:p-6 lg:p-8 bg-card/40 backdrop-blur-md border-b border-border/50 shrink-0 overflow-y-auto max-h-[45vh] lg:max-h-none">
             <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
@@ -408,7 +410,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
             </div>
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
               <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-4 w-full">
-                <Button variant="ghost" className="min-h-11 text-muted-foreground hover:bg-muted/50" onClick={() => { if (confirmDiscardChanges()) onOpenChange(false); }}>
+                <Button variant="ghost" className="min-h-11 text-muted-foreground hover:bg-muted/50" onClick={() => dirtyGuard.requestClose(onOpenChange)}>
                   Fechar sem Salvar
                 </Button>
                 <Button className="min-h-11 font-semibold text-white px-4 sm:px-8" onClick={handleSave}>
