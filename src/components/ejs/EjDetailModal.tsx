@@ -93,12 +93,12 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       const ejName = ejData?.name || "";
       if (ejName) {
         const data = ejDataStore.getEjData(ejName);
-        setTasks(data?.tarefas || []);
+        setTasks(Array.isArray(data?.tarefas) ? data.tarefas : []);
         setDesafio(data?.desafio || "");
         setDores(data?.dores || "");
         setProximaReuniao(data?.proximaReuniao || "");
         
-        let loadedReunioes = data?.reunioes || [];
+        let loadedReunioes = Array.isArray(data?.reunioes) ? data.reunioes : [];
         if (loadedReunioes.length === 0 && data?.notasReuniao) {
           loadedReunioes = [{ id: 1, date: new Date().toLocaleDateString('pt-BR'), text: data.notasReuniao }];
         }
@@ -264,7 +264,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     setEditingReuniaoText("");
   };
 
-  const sortedTasks = [...tasks].sort((a, b) => {
+  const sortedTasks = (Array.isArray(tasks) ? [...tasks] : []).sort((a, b) => {
     if (a.completed !== b.completed) {
       return a.completed ? 1 : -1;
     }
@@ -427,7 +427,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
             {/* Left Column - Tabs */}
             <div className="flex-1 min-w-0 lg:overflow-auto p-4 sm:p-6 lg:border-r border-border/40">
               <Tabs defaultValue="apostas" className="w-full h-full flex flex-col">
-                <TabsList className="w-full justify-start rounded-none border-b border-border/40 bg-transparent h-12 p-0 gap-4 sm:gap-6 overflow-x-auto flex-nowrap">
+                <TabsList className="w-full justify-start rounded-none border-b border-border/40 bg-transparent h-12 shrink-0 p-0 gap-4 sm:gap-6 overflow-x-auto flex-nowrap space-x-0 sm:space-x-6">
                   <TabsTrigger 
                     value="apostas" 
                     className="shrink-0 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent px-2 h-full text-sm sm:text-base"
