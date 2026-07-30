@@ -486,6 +486,61 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               </div>
             </div>
 
+            {/* Prescon Area */}
+            <div
+              className="p-5 sm:p-8 md:p-12 mx-3 sm:mx-4 md:mx-8 mb-6 sm:mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
+              style={{ color: getContrastColor(bannerColor) }}
+            >
+              <div className="mb-6">
+                <h3 className="text-xl font-bold">PRESCON</h3>
+                <p className="opacity-70 text-sm">Saídas e encaminhamentos da Prescon.</p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 mb-6">
+                <Input
+                  placeholder="Adicionar nova saída da Prescon..."
+                  value={newPresconText}
+                  onChange={(e) => setNewPresconText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddPrescon()}
+                  className="flex-1 h-11 bg-black/20 border-transparent rounded-2xl px-4 placeholder:opacity-60"
+                  style={{ color: getContrastColor(bannerColor) }}
+                />
+                <Button onClick={handleAddPrescon} className="h-11 rounded-2xl px-6 font-bold">
+                  Adicionar
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {presconItems.map(item => (
+                  <div key={item.id} className="flex items-center gap-3 bg-black/10 rounded-2xl p-4 group">
+                    <input
+                      type="checkbox"
+                      checked={item.completed}
+                      onChange={() => togglePrescon(item.id)}
+                      className="w-5 h-5 accent-green-500 cursor-pointer shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm ${item.completed ? "line-through opacity-60" : ""}`}>{item.text}</p>
+                      <p className="text-[10px] uppercase tracking-wider opacity-60 mt-1">
+                        Registrado em: {item.date}
+                        {item.completedAt ? ` \u2022 Concluído em: ${item.completedAt}` : ""}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => removePrescon(item.id)}
+                      className="w-9 h-9 flex items-center justify-center rounded-full bg-black/20 opacity-60 hover:opacity-100 transition-opacity shrink-0"
+                      title="Remover"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                {presconItems.length === 0 && (
+                  <p className="text-sm opacity-60 text-center py-8">Nenhuma saída da Prescon cadastrada.</p>
+                )}
+              </div>
+            </div>
+
             {/* EJs List Area */}
             <div 
               className="p-5 sm:p-8 md:p-12 mx-3 sm:mx-4 md:mx-8 mb-6 sm:mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
