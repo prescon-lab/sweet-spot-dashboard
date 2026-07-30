@@ -6,7 +6,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { withCloseConfirmation, confirmDiscardChanges } from "@/lib/confirmClose";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
+import { presconStore, PresconItem } from "@/lib/presconStore";
 import { Textarea } from "@/components/ui/textarea";
 import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy } from "lucide-react";
 import { ejsList } from "@/lib/data";
@@ -37,6 +38,7 @@ interface GuardianDetailModalProps {
 }
 
 export function GuardianDetailModal({ open, onOpenChange, guardianData }: GuardianDetailModalProps) {
+  const dirtyGuard = useDirtyGuard(open);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedEj, setSelectedEj] = useState<any>(null);
 
@@ -61,6 +63,46 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
   // Fetch the EJs for this guardian
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
+
+  const [presconItems, setPresconItems] = useState<PresconItem[]>([]);
+  const [newPresconText, setNewPresconText] = useState("");
+
+  React.useEffect(() => {
+    if (open && guardianData?.name) {
+      setPresconItems(presconStore.getItems(guardianData.name));
+    }
+  }, [open, guardianData?.name]);
+
+  const persistPrescon = (items: PresconItem[]) => {
+    setPresconItems(items);
+    if (guardianData?.name) presconStore.setItems(guardianData.name, items);
+  };
+
+  const handleAddPrescon = () => {
+    if (!newPresconText.trim()) return;
+    persistPrescon([
+      {
+        id: Date.now(),
+        text: newPresconText.trim(),
+        completed: false,
+        date: new Date().toLocaleDateString("pt-BR"),
+      },
+      ...presconItems,
+    ]);
+    setNewPresconText("");
+  };
+
+  const togglePrescon = (id: number) => {
+    persistPrescon(presconItems.map(i => i.id === id ? {
+      ...i,
+      completed: !i.completed,
+      completedAt: !i.completed ? new Date().toLocaleString("pt-BR") : undefined,
+    } : i));
+  };
+
+  const removePrescon = (id: number) => {
+    persistPrescon(presconItems.filter(i => i.id !== id));
+  };
 
   const [mentions, setMentions] = useState<Mention[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
@@ -216,8 +258,9 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
         </DialogContent>
       </Dialog>
 
-      <Dialog open={open} onOpenChange={withCloseConfirmation(onOpenChange)}>
+      <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)}>
         <DialogContent 
+          {...dirtyGuard.containerProps}
           className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px] transition-colors duration-300"
           style={{ backgroundColor: bannerColor }}
           hideCloseButton
@@ -562,8 +605,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
           
           {/* Bottom Actions Bar */}
           <div className="bg-black/20 backdrop-blur-md p-4 flex justify-end gap-3 z-20">
-            <Button variant="ghost" onClick={() => { if (confirmDiscardChanges()) onOpenChange(false); }} className="rounded-full px-6 font-bold hover:bg-white/10 text-white">Fechar sem salvar</Button>
-            <Button onClick={() => onOpenChange(false)} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-lg">Salvar e Fechar</Button>
+            <Button variant="ghost" onClick={() => dirtyGuard.requestClose(onOpenChange)} className="rounded-full px-6 font-bold hover:bg-white/10 text-white">Fechar sem salvar</Button>
+            <Button onClick={() => { dirtyGuard.markClean(); onOpenChange(false); }} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-lg">Salvar e Fechar</Button>
           </div>
         </DialogContent>
       </Dialog>
