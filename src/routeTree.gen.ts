@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PTokenRouteImport } from './routes/p.$token'
+import { Route as PCalendarioRouteImport } from './routes/p.calendario'
 import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
 import { Route as PEjsRouteImport } from './routes/p.ejs'
 import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const PTokenRoute = PTokenRouteImport.update({
   id: '/p/$token',
   path: '/p/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PCalendarioRoute = PCalendarioRouteImport.update({
+  id: '/p/calendario',
+  path: '/p/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PConfiguracoesRoute = PConfiguracoesRouteImport.update({
@@ -50,6 +56,7 @@ const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/p/$token': typeof PTokenRoute
+  '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/p/$token': typeof PTokenRoute
+  '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/p/$token': typeof PTokenRoute
+  '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/p/$token'
+    | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
     | '/p/guardioes'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/p/$token'
+    | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
     | '/p/guardioes'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/p/$token'
+    | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
     | '/p/guardioes'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PTokenRoute: typeof PTokenRoute
+  PCalendarioRoute: typeof PCalendarioRoute
   PConfiguracoesRoute: typeof PConfiguracoesRoute
   PEjsRoute: typeof PEjsRoute
   PGuardioesRoute: typeof PGuardioesRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/p/$token'
       fullPath: '/p/$token'
       preLoaderRoute: typeof PTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/calendario': {
+      id: '/p/calendario'
+      path: '/p/calendario'
+      fullPath: '/p/calendario'
+      preLoaderRoute: typeof PCalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/configuracoes': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PTokenRoute: PTokenRoute,
+  PCalendarioRoute: PCalendarioRoute,
   PConfiguracoesRoute: PConfiguracoesRoute,
   PEjsRoute: PEjsRoute,
   PGuardioesRoute: PGuardioesRoute,

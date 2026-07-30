@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy } from "lucide-react";
+import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy, Calendar as CalendarIcon } from "lucide-react";
+import { toast } from "sonner";
 import { ejsList } from "@/lib/data";
 import { guardianStore } from "@/lib/guardianStore";
 import { ejDataStore } from "@/lib/ejDataStore";
@@ -65,6 +66,20 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
   const [mentions, setMentions] = useState<Mention[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
+
+  const [selectedReuniaoEj, setSelectedReuniaoEj] = useState("");
+  const [selectedReuniaoDate, setSelectedReuniaoDate] = useState("");
+
+  const handleSaveGuardianReuniao = () => {
+    if (!selectedReuniaoEj || !selectedReuniaoDate) {
+      toast.error("Selecione a EJ e a Data");
+      return;
+    }
+    ejDataStore.saveEjData(selectedReuniaoEj, { proximaReuniao: selectedReuniaoDate });
+    toast.success(`Reunião agendada com ${selectedReuniaoEj}!`);
+    setSelectedReuniaoEj("");
+    setSelectedReuniaoDate("");
+  };
 
   // Sync mentions and config when modal opens
   React.useEffect(() => {
@@ -445,11 +460,45 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               </div>
             </div>
 
-            {/* EJs List Area */}
             <div 
               className="p-5 sm:p-8 md:p-12 mx-3 sm:mx-4 md:mx-8 mb-6 sm:mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
               style={{ color: getContrastColor(bannerColor) }}
             >
+              <div className="mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <CalendarIcon className="w-5 h-5" /> Agendar Reunião
+                </h3>
+                <p className="opacity-70 text-sm">Marque reuniões com as EJs sob sua responsabilidade.</p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <div className="flex-1">
+                  <select
+                    className="w-full h-10 px-3 rounded-lg border border-black/20 bg-white/10 outline-none focus:border-white/50"
+                    value={selectedReuniaoEj}
+                    onChange={(e) => setSelectedReuniaoEj(e.target.value)}
+                    style={{ color: getContrastColor(bannerColor) }}
+                  >
+                    <option value="" style={{ color: "black" }}>Selecione a EJ</option>
+                    {guardianEjs.map(ej => (
+                      <option key={ej.id} value={ej.name} style={{ color: "black" }}>{ej.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <Input 
+                    type="date" 
+                    className="h-10 border-black/20 bg-white/10"
+                    value={selectedReuniaoDate}
+                    onChange={(e) => setSelectedReuniaoDate(e.target.value)}
+                    style={{ color: getContrastColor(bannerColor) }}
+                  />
+                </div>
+                <Button onClick={handleSaveGuardianReuniao} className="h-10 bg-primary text-primary-foreground">
+                  Agendar
+                </Button>
+              </div>
+
               <div className="mb-6">
                 <h3 className="text-xl font-bold">EJs Acompanhadas ({guardianEjs.length})</h3>
                 <p className="opacity-70 text-sm">Clique em uma EJ para visualizar seus detalhes.</p>

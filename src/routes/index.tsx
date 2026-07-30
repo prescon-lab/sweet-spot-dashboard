@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Sparkles, Building2, BarChart3 } from "lucide-react";
+import { ArrowRight, Sparkles, Building2, BarChart3, Calendar as CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
+import { TodayTomorrowMeetings } from "@/components/dashboard/TodayTomorrowMeetings";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -59,7 +59,7 @@ function Index() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 max-w-2xl mx-auto gap-6 mt-12">
+        <div className="grid md:grid-cols-3 max-w-5xl mx-auto gap-6 mt-12">
           <Card className="glass-card cursor-pointer hover:border-primary/50 transition-all group" onClick={() => navigate({ to: "/p/ejs" })}>
             <CardHeader>
               <Building2 className="w-8 h-8 text-primary mb-2 group-hover:scale-110 transition-transform" />
@@ -95,9 +95,26 @@ function Index() {
               </Button>
             </CardFooter>
           </Card>
+          <Card className="glass-card cursor-pointer hover:border-primary/50 transition-all group" onClick={() => navigate({ to: "/p/calendario" })}>
+            <CardHeader>
+              <CalendarIcon className="w-8 h-8 text-primary mb-2 group-hover:scale-110 transition-transform" />
+              <CardTitle>Painel de Calendário</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Acesse o calendário completo para visualizar e agendar reuniões com as Empresas Juniores.
+              </CardDescription>
+            </CardContent>
+            <CardFooter>
+              <Button variant="ghost" className="w-full justify-between group-hover:bg-primary group-hover:text-primary-foreground">
+                Acessar Calendário
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
 
-        <DashboardCalendar />
+        <TodayTomorrowMeetings />
       </div>
     </div>
   );
