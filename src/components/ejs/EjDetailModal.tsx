@@ -264,13 +264,13 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     if (!newPresconText.trim()) return;
     
     setPresconTasks([
-      ...presconTasks,
       {
         id: Date.now(),
-        text: newPresconText,
+        text: newPresconText.trim(),
         completed: false,
         date: new Date().toLocaleDateString("pt-BR")
-      }
+      },
+      ...presconTasks
     ]);
     setNewPresconText("");
   };
@@ -666,70 +666,74 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 </TabsContent>
 
                 {/* Aba 4: Prescon */}
-                <TabsContent value="prescon" className="flex-1 pt-6 outline-none">
-                  <div className="bg-card rounded-xl border border-border/50 p-6 space-y-6">
-                    <div>
+                <TabsContent value="prescon" className="flex-1 pt-6 outline-none flex flex-col h-full">
+                  <div className="bg-card rounded-xl border border-border/50 p-6 flex-1 flex flex-col min-h-[400px]">
+                    <div className="flex justify-between items-center mb-4">
                       <h3 className="font-semibold text-lg text-foreground">PRESCON</h3>
-                      <p className="opacity-70 text-sm text-muted-foreground mt-1">Saídas e encaminhamentos da Prescon.</p>
                     </div>
+                    <p className="opacity-70 text-sm text-muted-foreground mb-6 -mt-2">Saídas e encaminhamentos da Prescon.</p>
                     
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Input 
-                          placeholder="Adicionar nova saída da Prescon..." 
+                    <div className="space-y-4 mb-6">
+                      <div className="relative">
+                        <Textarea 
+                          placeholder="Comece a digitar uma nova saída ou encaminhamento..." 
+                          className="w-full resize-y min-h-[100px] border-border/50 focus-visible:ring-primary/20 bg-muted/5 p-4 rounded-xl"
                           value={newPresconText}
                           onChange={(e) => setNewPresconText(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleAddPrescon()}
                         />
+                        <Button size="sm" onClick={handleAddPrescon} className="absolute bottom-3 right-3 text-white">
+                          <Plus className="w-4 h-4 mr-1" />
+                          Adicionar Saída
+                        </Button>
                       </div>
-                      <Button onClick={handleAddPrescon}>Adicionar</Button>
                     </div>
 
-                    <div className="space-y-3">
-                      {sortedPresconTasks.map(task => (
-                        <div key={task.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors group">
-                          <Checkbox 
-                            checked={task.completed}
-                            onCheckedChange={() => togglePrescon(task.id)}
-                          />
-                          <div className="flex-1">
-                            {editingPresconId === task.id ? (
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                      {presconTasks.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                          <p className="text-sm">Nenhuma saída da Prescon salva.</p>
+                        </div>
+                      ) : (
+                        presconTasks.map(task => (
+                          <div key={task.id} className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-2 relative group">
+                            <div className="flex justify-between items-start">
+                              <h4 className="font-semibold text-sm text-foreground">Anotação</h4>
                               <div className="flex items-center gap-2">
-                                <Input 
+                                <span className="text-xs font-medium bg-card px-2 py-1 rounded text-muted-foreground border">
+                                  {task.date}
+                                </span>
+                                {editingPresconId !== task.id && (
+                                  <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={() => { setEditingPresconId(task.id); setEditingPresconText(task.text); }}>
+                                      <Pencil className="w-3 h-3" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => removePrescon(task.id)}>
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {editingPresconId === task.id ? (
+                              <div className="space-y-2 mt-2">
+                                <Textarea 
                                   value={editingPresconText} 
                                   onChange={(e) => setEditingPresconText(e.target.value)}
-                                  onKeyDown={(e) => e.key === 'Enter' && saveEditedPrescon(task.id)}
+                                  className="w-full resize-y min-h-[100px] border-border/50 bg-card"
                                   autoFocus
-                                  className="h-8 text-sm"
                                 />
-                                <Button size="sm" onClick={() => saveEditedPrescon(task.id)}><Check className="w-4 h-4" /></Button>
+                                <div className="flex gap-2 justify-end">
+                                  <Button size="sm" variant="outline" onClick={() => setEditingPresconId(null)}>Cancelar</Button>
+                                  <Button size="sm" onClick={() => saveEditedPrescon(task.id)}>Salvar</Button>
+                                </div>
                               </div>
                             ) : (
-                              <>
-                                <p className={`text-sm ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                                  {task.text}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Registrado em: {task.date}
-                                  {task.completedAt && ` • Concluído em: ${task.completedAt}`}
-                                </p>
-                              </>
+                              <p className="text-sm text-foreground/90 whitespace-pre-wrap">{task.text}</p>
                             )}
                           </div>
-                          {editingPresconId !== task.id && (
-                            <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => { setEditingPresconId(task.id); setEditingPresconText(task.text); }}>
-                                <Pencil className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removePrescon(task.id)}>
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                      {presconTasks.length === 0 && (
-                        <p className="text-sm text-muted-foreground text-center py-4">Nenhuma saída da Prescon cadastrada.</p>
+                        ))
                       )}
                     </div>
                   </div>
