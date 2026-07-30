@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, Building2, BarChart3 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -95,6 +96,8 @@ function Index() {
             </CardFooter>
           </Card>
         </div>
+
+        <DashboardCalendar />
       </div>
     </div>
   );

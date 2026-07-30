@@ -195,6 +195,13 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     onOpenChange(false);
   };
 
+  const saveProximaReuniaoDate = () => {
+    if (ejData?.name) {
+      ejDataStore.saveEjData(ejData.name, { proximaReuniao });
+      toast.success("Data da próxima reunião salva!");
+    }
+  };
+
   const handleSaveReuniao = () => {
     if (!novaReuniao.trim()) return;
     
@@ -838,14 +845,17 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground">Próxima Reunião</label>
-                <div className="relative">
-                  <Input 
-                    type="date" 
-                    className="bg-card pl-10" 
-                    value={proximaReuniao}
-                    onChange={(e) => setProximaReuniao(e.target.value)}
-                  />
-                  <CalendarIcon className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input 
+                      type="date" 
+                      className="bg-card pl-10" 
+                      value={proximaReuniao}
+                      onChange={(e) => setProximaReuniao(e.target.value)}
+                    />
+                    <CalendarIcon className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+                  </div>
+                  <Button size="sm" onClick={saveProximaReuniaoDate} className="h-10">Salvar</Button>
                 </div>
               </div>
 

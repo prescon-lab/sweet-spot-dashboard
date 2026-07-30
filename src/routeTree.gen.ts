@@ -10,30 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PHistoricoEventosRouteImport } from './routes/p.historico-eventos'
-import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
-import { Route as PEjsRouteImport } from './routes/p.ejs'
-import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
 import { Route as PTokenRouteImport } from './routes/p.$token'
+import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
+import { Route as PEjsRouteImport } from './routes/p.ejs'
+import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
+import { Route as PHistoricoEventosRouteImport } from './routes/p.historico-eventos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
-  id: '/p/historico-eventos',
-  path: '/p/historico-eventos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PGuardioesRoute = PGuardioesRouteImport.update({
-  id: '/p/guardioes',
-  path: '/p/guardioes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PEjsRoute = PEjsRouteImport.update({
-  id: '/p/ejs',
-  path: '/p/ejs',
+const PTokenRoute = PTokenRouteImport.update({
+  id: '/p/$token',
+  path: '/p/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PConfiguracoesRoute = PConfiguracoesRouteImport.update({
@@ -41,9 +31,19 @@ const PConfiguracoesRoute = PConfiguracoesRouteImport.update({
   path: '/p/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PTokenRoute = PTokenRouteImport.update({
-  id: '/p/$token',
-  path: '/p/$token',
+const PEjsRoute = PEjsRouteImport.update({
+  id: '/p/ejs',
+  path: '/p/ejs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PGuardioesRoute = PGuardioesRouteImport.update({
+  id: '/p/guardioes',
+  path: '/p/guardioes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
+  id: '/p/historico-eventos',
+  path: '/p/historico-eventos',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -117,25 +117,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/p/historico-eventos': {
-      id: '/p/historico-eventos'
-      path: '/p/historico-eventos'
-      fullPath: '/p/historico-eventos'
-      preLoaderRoute: typeof PHistoricoEventosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/guardioes': {
-      id: '/p/guardioes'
-      path: '/p/guardioes'
-      fullPath: '/p/guardioes'
-      preLoaderRoute: typeof PGuardioesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/ejs': {
-      id: '/p/ejs'
-      path: '/p/ejs'
-      fullPath: '/p/ejs'
-      preLoaderRoute: typeof PEjsRouteImport
+    '/p/$token': {
+      id: '/p/$token'
+      path: '/p/$token'
+      fullPath: '/p/$token'
+      preLoaderRoute: typeof PTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/configuracoes': {
@@ -145,11 +131,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PConfiguracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/p/$token': {
-      id: '/p/$token'
-      path: '/p/$token'
-      fullPath: '/p/$token'
-      preLoaderRoute: typeof PTokenRouteImport
+    '/p/ejs': {
+      id: '/p/ejs'
+      path: '/p/ejs'
+      fullPath: '/p/ejs'
+      preLoaderRoute: typeof PEjsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/guardioes': {
+      id: '/p/guardioes'
+      path: '/p/guardioes'
+      fullPath: '/p/guardioes'
+      preLoaderRoute: typeof PGuardioesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/historico-eventos': {
+      id: '/p/historico-eventos'
+      path: '/p/historico-eventos'
+      fullPath: '/p/historico-eventos'
+      preLoaderRoute: typeof PHistoricoEventosRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -166,3 +166,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
