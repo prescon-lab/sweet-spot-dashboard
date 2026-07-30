@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { toast } from "sonner";
@@ -17,14 +16,20 @@ interface EventRegistrationModalProps {
 export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: EventRegistrationModalProps) {
   const dirtyGuard = useDirtyGuard(open);
   const [eventName, setEventName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [ejGoals, setEjGoals] = useState<EventGoal[]>([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
 
   React.useEffect(() => {
     if (open && eventToEdit) {
       setEventName(eventToEdit.name);
+      setStartDate(eventToEdit.startDate || "");
+      setEndDate(eventToEdit.endDate || "");
       setEjGoals(eventToEdit.ejGoals.length > 0 ? eventToEdit.ejGoals : [{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
     } else if (open && !eventToEdit) {
       setEventName("");
+      setStartDate("");
+      setEndDate("");
       setEjGoals([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
     }
   }, [open, eventToEdit]);
@@ -53,6 +58,8 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
       eventStore.updateEvent({
         ...eventToEdit,
         name: eventName,
+        startDate,
+        endDate,
         ejGoals: filteredGoals,
       });
       toast.success("Evento atualizado com sucesso!");
@@ -60,6 +67,8 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
       eventStore.addEvent({
         id: Date.now().toString(),
         name: eventName,
+        startDate,
+        endDate,
         ejGoals: filteredGoals,
         createdAt: new Date().toISOString()
       });
@@ -71,6 +80,8 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
     
     // Reset form
     setEventName("");
+    setStartDate("");
+    setEndDate("");
     setEjGoals([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
   };
 
@@ -115,6 +126,27 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
             />
           </div>
 
+          <div className="flex justify-center w-full gap-4 max-w-2xl mx-auto">
+            <div className="w-full">
+              <label className="text-sm font-semibold text-muted-foreground ml-2">Data de Início</label>
+              <Input 
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full bg-card border border-border/50 text-foreground h-12 rounded-2xl px-4 mt-1"
+              />
+            </div>
+            <div className="w-full">
+              <label className="text-sm font-semibold text-muted-foreground ml-2">Data de Término (23:59)</label>
+              <Input 
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full bg-card border border-border/50 text-foreground h-12 rounded-2xl px-4 mt-1"
+              />
+            </div>
+          </div>
+
           <div className="pt-4 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-12">
               <h3 className="text-lg uppercase tracking-wider text-center text-muted-foreground font-semibold">
@@ -130,16 +162,11 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
                 <div key={goal.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-12 items-center">
                   {/* Left - Meta da EJ */}
                   <div className="relative flex items-center bg-card rounded-2xl h-12 px-4 shadow-sm border border-border/50 transition-all hover:border-primary/30">
-                    <Checkbox 
-                      checked={goal.checked}
-                      onCheckedChange={(checked) => handleGoalCheck(goal.id, checked as boolean)}
-                      className="border-gray-400 data-[state=checked]:bg-primary data-[state=checked]:text-white z-10 w-5 h-5 rounded"
-                    />
                     <Input 
                       value={goal.text}
                       onChange={(e) => handleGoalChange(goal.id, 'text', e.target.value)}
                       placeholder="Descreva a meta..."
-                      className="absolute inset-0 pl-12 pr-4 h-full border-0 bg-transparent text-foreground shadow-none focus-visible:ring-0"
+                      className="w-full h-full border-0 bg-transparent text-foreground shadow-none focus-visible:ring-0 px-2"
                     />
                   </div>
 

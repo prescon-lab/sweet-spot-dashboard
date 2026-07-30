@@ -1,12 +1,32 @@
 import { useState, useEffect } from "react";
 import { format, isToday, isTomorrow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon, Clock, Plus } from "lucide-react";
 import { ejDataStore, EjData } from "@/lib/ejDataStore";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { ejsList } from "@/lib/data";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 export function TodayTomorrowMeetings() {
   const [todayMeetings, setTodayMeetings] = useState<string[]>([]);
   const [tomorrowMeetings, setTomorrowMeetings] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEj, setSelectedEj] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+
+  const handleSaveMeeting = () => {
+    if (!selectedEj || !selectedDate) {
+      toast.error("Preencha todos os campos");
+      return;
+    }
+    ejDataStore.saveEjData(selectedEj, { proximaReuniao: selectedDate });
+    toast.success(`Reunião com ${selectedEj} agendada!`);
+    setIsModalOpen(false);
+    setSelectedEj("");
+    setSelectedDate("");
+  };
 
   const loadMeetings = () => {
     const allData = ejDataStore.getAllData();
@@ -47,6 +67,10 @@ export function TodayTomorrowMeetings() {
           <h2 className="text-xl font-bold text-foreground">Reuniões Imediatas</h2>
           <p className="text-sm text-muted-foreground">Confira as EJs agendadas para hoje e amanhã</p>
         </div>
+        <Button onClick={() => setIsModalOpen(true)} size="sm" className="ml-auto">
+          <Plus className="w-4 h-4 mr-2" />
+          Nova Reunião
+        </Button>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -96,6 +120,43 @@ export function TodayTomorrowMeetings() {
           </div>
         </div>
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px] glass-modal rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Agendar Nova Reunião</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground">Data da Reunião</label>
+              <Input 
+                type="date" 
+                value={selectedDate} 
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="bg-card h-12 rounded-xl"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground">Selecione a EJ</label>
+              <Select value={selectedEj} onValueChange={setSelectedEj}>
+                <SelectTrigger className="w-full bg-card h-12 rounded-xl text-foreground">
+                  <SelectValue placeholder="Escolha uma EJ..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {ejsList.map(ej => (
+                    <SelectItem key={ej.id} value={ej.name}>{ej.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSaveMeeting}>Salvar Reunião</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

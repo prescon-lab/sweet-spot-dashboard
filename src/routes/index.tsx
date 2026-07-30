@@ -5,8 +5,6 @@ import { ArrowRight, Sparkles, Building2, BarChart3, Calendar as CalendarIcon } 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { TodayTomorrowMeetings } from "@/components/dashboard/TodayTomorrowMeetings";
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -114,7 +112,6 @@ function Index() {
           </Card>
         </div>
 
-        <TodayTomorrowMeetings />
       </div>
     </div>
   );

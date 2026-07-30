@@ -12,6 +12,14 @@ export interface ReuniaoNota {
   text: string;
 }
 
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  type?: string;
+}
+
 export interface EjData {
   ejName: string;
   desafio?: string;
@@ -23,6 +31,7 @@ export interface EjData {
   presconTasks?: Task[];
   apostas?: Record<string, boolean>;
   avatarUrl?: string;
+  calendarioEventos?: CalendarEvent[];
 }
 
 const STORE_KEY = 'sweet_spot_ej_data';

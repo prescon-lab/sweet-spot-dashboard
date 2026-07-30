@@ -12,6 +12,7 @@ import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { leadStore, Lead } from "@/lib/leadStore";
 import { ejDataStore } from "@/lib/ejDataStore";
 import { ejsList } from "@/lib/data";
+import { TodayTomorrowMeetings } from "@/components/dashboard/TodayTomorrowMeetings";
 import { activityStore, Activity } from "@/lib/activityStore";
 import { mentionStore, Mention } from "@/lib/mentionStore";
 import { Progress } from "@/components/ui/progress";
@@ -182,6 +183,7 @@ function DashboardPanel() {
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
+          <TodayTomorrowMeetings />
           {/* Global Revenue Card */}
           {(() => {
             const safeLeads = Array.isArray(leads) ? leads : [];
