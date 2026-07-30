@@ -486,8 +486,11 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               </div>
             </div>
 
-            {/* Prescon Area */}
+            {/* Prescon Area (saves instantly, so it never flags unsaved changes) */}
             <div
+              onInputCapture={(e) => e.stopPropagation()}
+              onChangeCapture={(e) => e.stopPropagation()}
+              onClickCapture={(e) => e.stopPropagation()}
               className="p-5 sm:p-8 md:p-12 mx-3 sm:mx-4 md:mx-8 mb-6 sm:mb-8 rounded-3xl bg-black/10 backdrop-blur-md"
               style={{ color: getContrastColor(bannerColor) }}
             >
