@@ -5,7 +5,6 @@ import { ArrowRight, Sparkles, Building2, BarChart3, Calendar as CalendarIcon } 
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { SquadProgressWidget } from "@/components/dashboard/SquadProgressWidget";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -109,8 +108,6 @@ function Index() {
             </CardFooter>
           </Card>
         </div>
-
-        <SquadProgressWidget />
 
       </div>
     </div>
