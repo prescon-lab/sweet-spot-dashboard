@@ -18,6 +18,7 @@ export async function initCloudSync() {
   isSyncing = true;
 
   // 1. Carregar do Supabase (prioridade inicial)
+  try {
     const { data, error } = await supabase.from('app_data').select('*');
     if (error) {
       console.error("Erro Supabase (select):", error);
