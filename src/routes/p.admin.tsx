@@ -248,9 +248,9 @@ function AdminPage() {
                     </Select>
                   </div>
                   {p.guardian_name && (
-                    <div className="hidden lg:flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 h-[44px]">
-                      <Shield className="w-3 h-3" />
-                      Vinculado
+                    <div className="hidden lg:flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 h-[44px] max-w-[200px] truncate" title={`Vinculado a ${p.guardian_name}`}>
+                      <Shield className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{p.guardian_name}</span>
                     </div>
                   )}
                   <Badge variant={p.isAdmin ? "default" : "secondary"} className="hidden md:inline-flex">
