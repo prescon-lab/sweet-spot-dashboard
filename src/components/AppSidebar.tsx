@@ -39,6 +39,12 @@ const items = [
     icon: BarChart2,
   },
   {
+    title: "Administração",
+    url: "/p/admin",
+    icon: ShieldCheck,
+    adminOnly: true,
+  },
+  {
     title: "Configurações",
     url: "/p/configuracoes",
     icon: Settings,
