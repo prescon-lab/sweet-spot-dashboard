@@ -16,6 +16,7 @@ export interface AppEvent {
   completionDates?: Record<string, string>; // Maps ejName to ISO date string of when they completed all goals
   startDate?: string;
   endDate?: string;
+  auditDate?: string;
 }
 
 const STORE_KEY = 'sweet_spot_events';
