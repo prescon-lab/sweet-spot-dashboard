@@ -1,3 +1,5 @@
+import { syncToCloud } from "./cloudSync";
+
 export interface Activity {
   id: string;
   ejName: string;
@@ -35,6 +37,8 @@ export const activityStore = {
         // Keep only the last 50 activities to avoid huge local storage size
         const updated = [newActivity, ...activities].slice(0, 50);
         localStorage.setItem(STORE_KEY, JSON.stringify(updated));
+        syncToCloud(STORE_KEY, updated);
+        window.dispatchEvent(new Event('ejActivitiesUpdated'));
         window.dispatchEvent(new Event('activitiesUpdated'));
       } catch (e) {
         console.error("Failed to save activity", e);

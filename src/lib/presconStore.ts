@@ -1,3 +1,5 @@
+import { syncToCloud } from "./cloudSync";
+
 export interface PresconItem {
   id: number;
   text: string;
@@ -25,6 +27,7 @@ function writeAll(map: PresconMap) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(map));
+    syncToCloud(STORE_KEY, map);
     window.dispatchEvent(new Event("presconUpdated"));
   } catch (e) {
     console.error("Failed to save prescon store", e);

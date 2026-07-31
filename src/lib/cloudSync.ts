@@ -7,7 +7,11 @@ const SYNC_KEYS = [
   "sweet_spot_events",
   "sweet_spot_leads",
   "vertentes_guardian_customizations",
-  "sweet_spot_mentions"
+  "sweet_spot_mentions",
+  "vertentes_guardian_prescon",
+  "sweet_spot_activities",
+  "sweet_spot_ej_data",
+  "vertentes_links"
 ];
 
 let isSyncing = false;
@@ -44,6 +48,10 @@ export async function initCloudSync() {
         window.dispatchEvent(new Event("leadsUpdated"));
         window.dispatchEvent(new Event("guardianStoreUpdated"));
         window.dispatchEvent(new Event("mentionsUpdated"));
+        window.dispatchEvent(new Event("presconUpdated"));
+        window.dispatchEvent(new Event("activitiesUpdated"));
+        window.dispatchEvent(new Event("ejDataUpdated"));
+        window.dispatchEvent(new Event("linksStoreUpdated"));
       }
     }
   } catch (e) {
@@ -67,6 +75,10 @@ export async function initCloudSync() {
           if (row.key === "sweet_spot_leads") window.dispatchEvent(new Event("leadsUpdated"));
           if (row.key === "vertentes_guardian_customizations") window.dispatchEvent(new Event("guardianStoreUpdated"));
           if (row.key === "sweet_spot_mentions") window.dispatchEvent(new Event("mentionsUpdated"));
+          if (row.key === "vertentes_guardian_prescon") window.dispatchEvent(new Event("presconUpdated"));
+          if (row.key === "sweet_spot_activities") window.dispatchEvent(new Event("activitiesUpdated"));
+          if (row.key === "sweet_spot_ej_data") window.dispatchEvent(new Event("ejDataUpdated"));
+          if (row.key === "vertentes_links") window.dispatchEvent(new Event("linksStoreUpdated"));
         }
       }
     })

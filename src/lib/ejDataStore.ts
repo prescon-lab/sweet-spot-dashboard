@@ -1,3 +1,5 @@
+import { syncToCloud } from "./cloudSync";
+
 export interface Task {
   id: number;
   text: string;
@@ -66,6 +68,7 @@ export const ejDataStore = {
         
         allData[ejName] = updatedData;
         localStorage.setItem(STORE_KEY, JSON.stringify(allData));
+        syncToCloud(STORE_KEY, allData);
         window.dispatchEvent(new Event('ejDataUpdated'));
       } catch (e) {
         console.error("Failed to save ej data", e);

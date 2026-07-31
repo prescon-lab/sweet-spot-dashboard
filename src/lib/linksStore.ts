@@ -1,3 +1,5 @@
+import { syncToCloud } from "./cloudSync";
+
 export interface UsefulLink {
   id: string;
   title: string;
@@ -64,6 +66,7 @@ class LinksStore {
 
   private save(links: UsefulLink[]) {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(links));
+    syncToCloud(this.STORAGE_KEY, links);
     window.dispatchEvent(new Event('linksStoreUpdated'));
   }
 }
