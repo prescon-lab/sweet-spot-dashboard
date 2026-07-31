@@ -180,6 +180,8 @@ function DashboardPanel() {
         )}
       </div>
 
+      {/* Squad Progress Widget */}
+      <SquadProgressWidget />
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -363,8 +365,6 @@ function DashboardPanel() {
           </Card>
         </div>
       </div>
-
-      <SquadProgressWidget />
 
       <EjDetailModal 
         open={detailModalOpen} 
