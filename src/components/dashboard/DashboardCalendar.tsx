@@ -125,8 +125,8 @@ export function DashboardCalendar() {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
-  const endDate = endOfWeek(monthEnd);
-  const days = eachDayOfInterval({ start: startDate, end: endDate });
+  const gridEndDate = endOfWeek(monthEnd);
+  const days = eachDayOfInterval({ start: startDate, end: gridEndDate });
 
   const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 

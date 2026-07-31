@@ -9,42 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PTokenRouteImport } from './routes/p.$token'
-import { Route as PCalendarioRouteImport } from './routes/p.calendario'
-import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
-import { Route as PEjsRouteImport } from './routes/p.ejs'
-import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
 import { Route as PHistoricoEventosRouteImport } from './routes/p.historico-eventos'
+import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
+import { Route as PEjsRouteImport } from './routes/p.ejs'
+import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
+import { Route as PCalendarioRouteImport } from './routes/p.calendario'
+import { Route as PAdminRouteImport } from './routes/p.admin'
+import { Route as PTokenRouteImport } from './routes/p.$token'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PTokenRoute = PTokenRouteImport.update({
-  id: '/p/$token',
-  path: '/p/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PCalendarioRoute = PCalendarioRouteImport.update({
-  id: '/p/calendario',
-  path: '/p/calendario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PConfiguracoesRoute = PConfiguracoesRouteImport.update({
-  id: '/p/configuracoes',
-  path: '/p/configuracoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PEjsRoute = PEjsRouteImport.update({
-  id: '/p/ejs',
-  path: '/p/ejs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PGuardioesRoute = PGuardioesRouteImport.update({
-  id: '/p/guardioes',
-  path: '/p/guardioes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
@@ -52,10 +34,42 @@ const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
   path: '/p/historico-eventos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PGuardioesRoute = PGuardioesRouteImport.update({
+  id: '/p/guardioes',
+  path: '/p/guardioes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PEjsRoute = PEjsRouteImport.update({
+  id: '/p/ejs',
+  path: '/p/ejs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PConfiguracoesRoute = PConfiguracoesRouteImport.update({
+  id: '/p/configuracoes',
+  path: '/p/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PCalendarioRoute = PCalendarioRouteImport.update({
+  id: '/p/calendario',
+  path: '/p/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PAdminRoute = PAdminRouteImport.update({
+  id: '/p/admin',
+  path: '/p/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PTokenRoute = PTokenRouteImport.update({
+  id: '/p/$token',
+  path: '/p/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/p/$token': typeof PTokenRoute
+  '/p/admin': typeof PAdminRoute
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
@@ -64,7 +78,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/p/$token': typeof PTokenRoute
+  '/p/admin': typeof PAdminRoute
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
@@ -74,7 +90,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/p/$token': typeof PTokenRoute
+  '/p/admin': typeof PAdminRoute
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
@@ -85,7 +103,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/p/$token'
+    | '/p/admin'
     | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
@@ -94,7 +114,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/p/$token'
+    | '/p/admin'
     | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
@@ -103,7 +125,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/p/$token'
+    | '/p/admin'
     | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
@@ -113,7 +137,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   PTokenRoute: typeof PTokenRoute
+  PAdminRoute: typeof PAdminRoute
   PCalendarioRoute: typeof PCalendarioRoute
   PConfiguracoesRoute: typeof PConfiguracoesRoute
   PEjsRoute: typeof PEjsRoute
@@ -123,46 +149,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/$token': {
-      id: '/p/$token'
-      path: '/p/$token'
-      fullPath: '/p/$token'
-      preLoaderRoute: typeof PTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/calendario': {
-      id: '/p/calendario'
-      path: '/p/calendario'
-      fullPath: '/p/calendario'
-      preLoaderRoute: typeof PCalendarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/configuracoes': {
-      id: '/p/configuracoes'
-      path: '/p/configuracoes'
-      fullPath: '/p/configuracoes'
-      preLoaderRoute: typeof PConfiguracoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/ejs': {
-      id: '/p/ejs'
-      path: '/p/ejs'
-      fullPath: '/p/ejs'
-      preLoaderRoute: typeof PEjsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/guardioes': {
-      id: '/p/guardioes'
-      path: '/p/guardioes'
-      fullPath: '/p/guardioes'
-      preLoaderRoute: typeof PGuardioesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/historico-eventos': {
@@ -172,12 +170,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PHistoricoEventosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/guardioes': {
+      id: '/p/guardioes'
+      path: '/p/guardioes'
+      fullPath: '/p/guardioes'
+      preLoaderRoute: typeof PGuardioesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/ejs': {
+      id: '/p/ejs'
+      path: '/p/ejs'
+      fullPath: '/p/ejs'
+      preLoaderRoute: typeof PEjsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/configuracoes': {
+      id: '/p/configuracoes'
+      path: '/p/configuracoes'
+      fullPath: '/p/configuracoes'
+      preLoaderRoute: typeof PConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/calendario': {
+      id: '/p/calendario'
+      path: '/p/calendario'
+      fullPath: '/p/calendario'
+      preLoaderRoute: typeof PCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/admin': {
+      id: '/p/admin'
+      path: '/p/admin'
+      fullPath: '/p/admin'
+      preLoaderRoute: typeof PAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$token': {
+      id: '/p/$token'
+      path: '/p/$token'
+      fullPath: '/p/$token'
+      preLoaderRoute: typeof PTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   PTokenRoute: PTokenRoute,
+  PAdminRoute: PAdminRoute,
   PCalendarioRoute: PCalendarioRoute,
   PConfiguracoesRoute: PConfiguracoesRoute,
   PEjsRoute: PEjsRoute,
@@ -187,13 +229,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

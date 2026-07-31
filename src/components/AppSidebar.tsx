@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, Search, Settings, Users, BarChart2 } from "lucide-react"
+import { Calendar, Home, Inbox, Search, Settings, Users, BarChart2, ShieldCheck } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import {
   Sidebar,
@@ -37,6 +37,12 @@ const items = [
     title: "Histórico de Eventos",
     url: "/p/historico-eventos",
     icon: BarChart2,
+  },
+  {
+    title: "Administração",
+    url: "/p/admin",
+    icon: ShieldCheck,
+    adminOnly: true,
   },
   {
     title: "Configurações",

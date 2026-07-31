@@ -119,6 +119,92 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AuthProvider, useAuth } from "@/lib/auth";
+import { useRouterState, useNavigate } from "@tanstack/react-router";
+import { Loader2, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+function UserChip() {
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+  if (!user) return null;
+
+  return (
+    <div className="flex items-center gap-2 min-w-0">
+      <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[180px]">
+        {user.email}
+      </span>
+      <span className="hidden md:inline rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+        {isAdmin ? "Administrador" : "Guardião"}
+      </span>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="gap-1.5 min-h-[44px] sm:min-h-0"
+        onClick={async () => {
+          await signOut();
+          navigate({ to: "/auth", replace: true });
+        }}
+      >
+        <LogOut className="w-4 h-4" />
+        <span className="hidden sm:inline">Sair</span>
+      </Button>
+    </div>
+  );
+}
+
+function AuthGate({ children }: { children: ReactNode }) {
+  const { session, loading } = useAuth();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const isAuthRoute = pathname === "/auth";
+
+  useEffect(() => {
+    if (!loading && !session && !isAuthRoute) {
+      navigate({ to: "/auth", replace: true });
+    }
+  }, [loading, session, isAuthRoute, navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!session && !isAuthRoute) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function AppShell() {
+  const { session } = useAuth();
+
+  return (
+    <SidebarProvider>
+      {session ? <AppSidebar /> : null}
+      <main className="flex-1 overflow-x-hidden min-w-0">
+        <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl">
+          {session ? <SidebarTrigger className="h-10 w-10" /> : <span />}
+          <div className="flex items-center gap-2">
+            <UserChip />
+            <ThemeToggle />
+          </div>
+        </header>
+        <AuthGate>
+          <Outlet />
+        </AuthGate>
+      </main>
+    </SidebarProvider>
+  );
+}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -126,18 +212,12 @@ function RootComponent() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vertentes-theme">
       <QueryClientProvider client={queryClient}>
-        <SidebarProvider>
-          <AppSidebar />
-          <main className="flex-1 overflow-x-hidden min-w-0">
-            <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl">
-              <SidebarTrigger className="h-10 w-10" />
-              <ThemeToggle />
-            </header>
-            <Outlet />
-          </main>
-        </SidebarProvider>
+        <AuthProvider>
+          <AppShell />
+        </AuthProvider>
         <Toaster />
       </QueryClientProvider>
     </ThemeProvider>
   );
 }
+
