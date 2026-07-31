@@ -10,7 +10,6 @@ import { Plus, Users, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ejListStore } from "@/lib/ejListStore";
 import { SquadDetailModal } from "@/components/squads/SquadDetailModal";
-import { Squad } from "@/lib/squadStore";
 
 export const Route = createFileRoute("/p/squads")({
   component: SquadsPage,
