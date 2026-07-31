@@ -151,7 +151,7 @@ function GestaoGentePage() {
               >
                 <option value="">Selecione um jogo...</option>
                 {games.map(g => (
-                  <option key={g.id} value={g.id}>{g.name} {g.active ? "(Ativo)" : ""}</option>
+                  <option key={g.id} value={g.id}>{g.name} {!g.active ? "(Histórico)" : ""}</option>
                 ))}
               </select>
             </div>
@@ -276,14 +276,34 @@ function GestaoGentePage() {
                   {games.map(game => (
                     <div 
                       key={game.id} 
-                      className={`p-3 rounded-lg border ${activeGameId === game.id ? 'border-primary bg-primary/5' : 'bg-card'} cursor-pointer hover:border-primary/50 flex justify-between items-center`}
+                      className={`p-3 rounded-lg border ${activeGameId === game.id ? 'border-primary bg-primary/5' : 'bg-card'} cursor-pointer hover:border-primary/50 flex flex-col gap-2`}
                       onClick={() => setActiveGameId(game.id)}
                     >
-                      <div>
-                        <p className="font-semibold text-sm">{game.name}</p>
-                        <p className="text-xs text-muted-foreground">{game.rules.length} regras</p>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-sm">{game.name}</p>
+                          <p className="text-xs text-muted-foreground">{game.rules.length} regras</p>
+                        </div>
+                        {game.active ? (
+                           <Badge variant="secondary" className="text-[10px] bg-green-500/10 text-green-600 hover:bg-green-500/20">Ativo</Badge>
+                        ) : (
+                           <Badge variant="outline" className="text-[10px] bg-muted">Histórico</Badge>
+                        )}
                       </div>
-                      {game.active && <Badge variant="secondary" className="text-[10px]">Ativo</Badge>}
+                      <div className="flex justify-end gap-2 border-t pt-2 mt-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`h-7 text-xs ${game.active ? 'text-orange-500 hover:text-orange-600' : ''}`}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            gamificationStore.toggleGameActive(game.id);
+                            toast.success(game.active ? "Jogo enviado para o histórico!" : "Jogo reativado!");
+                          }}
+                        >
+                          {game.active ? "Encerrar" : "Reativar"}
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </CardContent>
@@ -382,6 +402,10 @@ function GestaoGentePage() {
           <div className="py-4">
             {(!activeGame || activeGame.rules.length === 0) ? (
               <p className="text-center text-muted-foreground p-8">Este jogo não possui regras cadastradas.</p>
+            ) : !activeGame.active ? (
+              <p className="text-center text-muted-foreground p-8 bg-muted/30 rounded-xl border">
+                Este jogo foi encerrado e está no histórico.<br/>Não é possível alterar as pontuações.
+              </p>
             ) : (
               <div className="space-y-4">
                 {activeGame.rules.map(rule => {
