@@ -42,6 +42,16 @@ function GestaoGentePage() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [tempScores, setTempScores] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (selectedPerson && activeGameId) {
+      const scores = gamificationStore.getScoresForProfileAndGame(selectedPerson.id, activeGameId);
+      const initial: Record<string, number> = {};
+      scores.forEach(s => initial[s.ruleId] = s.quantity);
+      setTempScores(initial);
+    }
+  }, [selectedPerson, activeGameId]);
 
   const loadStore = useCallback(() => {
     const state = gamificationStore.getState();
@@ -303,6 +313,21 @@ function GestaoGentePage() {
                         >
                           {game.active ? "Encerrar" : "Reativar"}
                         </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            if (window.confirm("Atenção: Isso excluirá o jogo e TODAS as pontuações associadas a ele permanentemente. Deseja continuar?")) {
+                              gamificationStore.deleteGame(game.id);
+                              if (activeGameId === game.id) setActiveGameId("");
+                              toast.success("Jogo excluído permanentemente!");
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -409,9 +434,7 @@ function GestaoGentePage() {
             ) : (
               <div className="space-y-4">
                 {activeGame.rules.map(rule => {
-                  const scores = selectedPerson ? gamificationStore.getScoresForProfileAndGame(selectedPerson.id, activeGame.id) : [];
-                  const userScore = scores.find(s => s.ruleId === rule.id);
-                  const quantity = userScore?.quantity || 0;
+                  const quantity = tempScores[rule.id] || 0;
                   
                   return (
                     <div key={rule.id} className="bg-card p-4 rounded-xl border shadow-sm flex items-center justify-between gap-4">
@@ -427,29 +450,29 @@ function GestaoGentePage() {
                           className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-md"
                           disabled={quantity <= 0}
                           onClick={() => {
-                            if (selectedPerson) {
-                              gamificationStore.setScore(selectedPerson.id, activeGame.id, rule.id, quantity - 1);
-                              // Force re-render of modal
-                              setSelectedPerson({...selectedPerson});
-                            }
+                            setTempScores(prev => ({...prev, [rule.id]: Math.max(0, quantity - 1)}));
                           }}
                         >
                           <Minus className="w-4 h-4" />
                         </Button>
                         
-                        <div className="w-10 text-center font-bold text-lg tabular-nums">
-                          {quantity}
-                        </div>
+                        <Input 
+                          type="number"
+                          min="0"
+                          className="w-16 h-8 text-center font-bold text-lg tabular-nums p-1 bg-background"
+                          value={quantity}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            setTempScores(prev => ({...prev, [rule.id]: isNaN(val) ? 0 : Math.max(0, val)}));
+                          }}
+                        />
                         
                         <Button 
                           variant="ghost" 
                           size="icon" 
                           className="h-8 w-8 text-green-600 hover:bg-green-600/10 hover:text-green-600 rounded-md"
                           onClick={() => {
-                            if (selectedPerson) {
-                              gamificationStore.setScore(selectedPerson.id, activeGame.id, rule.id, quantity + 1);
-                              setSelectedPerson({...selectedPerson});
-                            }
+                            setTempScores(prev => ({...prev, [rule.id]: quantity + 1}));
                           }}
                         >
                           <Plus className="w-4 h-4" />
@@ -468,10 +491,26 @@ function GestaoGentePage() {
             
             {/* Total Footer */}
             <div className="mt-6 pt-4 border-t border-border/50 flex justify-between items-center bg-primary/5 p-4 rounded-xl">
-              <span className="font-bold text-foreground">Pontuação Total no Jogo:</span>
-              <span className="text-2xl font-black text-primary">
-                {selectedPerson && activeGame ? gamificationStore.calculateTotalScore(selectedPerson.id, activeGame.id) : 0} pts
-              </span>
+              <div>
+                <span className="font-bold text-foreground block">Pontuação Estimada:</span>
+                <span className="text-2xl font-black text-primary">
+                  {activeGame ? activeGame.rules.reduce((acc, rule) => acc + (tempScores[rule.id] || 0) * rule.points, 0) : 0} pts
+                </span>
+              </div>
+              
+              {activeGame && activeGame.active && (
+                <Button onClick={() => {
+                  if (selectedPerson && activeGame) {
+                    Object.entries(tempScores).forEach(([ruleId, quantity]) => {
+                      gamificationStore.setScore(selectedPerson.id, activeGame.id, ruleId, quantity);
+                    });
+                    toast.success("Pontuações salvas!");
+                    setSelectedPerson(null);
+                  }
+                }}>
+                  Salvar Pontuação
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>
