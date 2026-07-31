@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Users, Building2, TrendingUp, Trophy } from "lucide-react";
 import { squadStore, Squad } from "@/lib/squadStore";
+import { guardianStore } from "@/lib/guardianStore";
 import { ejListStore } from "@/lib/ejListStore";
 import { leadStore } from "@/lib/leadStore";
 import { eventStore, AppEvent } from "@/lib/eventStore";
@@ -40,6 +41,9 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
   }, []);
 
   if (!open || !squad) return null;
+
+  const leaderConfig = squad ? guardianStore.get(squad.leader) : null;
+  const leaderAvatar = leaderConfig?.avatarUrl;
 
   const guardianNames = squad.squad_members?.map(m => m.guardian_name) || [];
   if (!guardianNames.includes(squad.leader)) {
@@ -80,8 +84,12 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
       <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 gap-0 glass-modal border-none shadow-2xl rounded-2xl">
         <div className="w-full h-40 bg-gradient-to-r from-primary/80 to-primary flex items-end p-8 relative rounded-t-2xl">
           <div className="text-white z-10 flex gap-4 items-center">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-            <Users className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl overflow-hidden shrink-0">
+            {leaderAvatar ? (
+              <img src={leaderAvatar} alt={`Líder ${squad.leader}`} className="w-full h-full object-cover" />
+            ) : (
+              <Users className="w-10 h-10 text-white" />
+            )}
           </div>
           <div>
             <h1 className="text-4xl font-extrabold drop-shadow-md">{squad.name}</h1>
