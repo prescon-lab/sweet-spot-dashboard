@@ -56,6 +56,7 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
     setStatus("morno");
     setClosingDate("");
     setObs("");
+    dirtyGuard.markClean();
   };
 
   const handleDelete = (id: string) => {
@@ -133,7 +134,10 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
                 <Textarea value={obs} onChange={e => setObs(e.target.value)} placeholder="Detalhes da negociação..." />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setIsAdding(false)}>Cancelar</Button>
+                <Button variant="outline" onClick={() => {
+                  setIsAdding(false);
+                  dirtyGuard.markClean();
+                }}>Cancelar</Button>
                 <Button onClick={handleSave}>Salvar Lead</Button>
               </div>
             </div>
