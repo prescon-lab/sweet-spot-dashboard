@@ -16,17 +16,22 @@ export function TodayTomorrowMeetings() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEj, setSelectedEj] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+  const [responsavel, setResponsavel] = useState("");
 
   const handleSaveMeeting = () => {
     if (!selectedEj || !selectedDate) {
       toast.error("Preencha todos os campos");
       return;
     }
-    ejDataStore.saveEjData(selectedEj, { proximaReuniao: selectedDate });
+    ejDataStore.saveEjData(selectedEj, { 
+      proximaReuniao: selectedDate,
+      responsavelReuniao: responsavel || undefined
+    });
     toast.success(`Reunião com ${selectedEj} agendada!`);
     setIsModalOpen(false);
     setSelectedEj("");
     setSelectedDate("");
+    setResponsavel("");
   };
 
   const loadMeetings = () => {
@@ -88,12 +93,22 @@ export function TodayTomorrowMeetings() {
             {todayMeetings.length === 0 ? (
               <p className="text-sm text-muted-foreground italic">Nenhuma reunião para hoje.</p>
             ) : (
-              todayMeetings.map(ej => (
-                <div key={ej} className="bg-background rounded-lg p-3 text-sm font-medium border flex items-center gap-2">
-                  <CalendarIcon className="w-4 h-4 text-primary" />
-                  {ej}
-                </div>
-              ))
+              todayMeetings.map(ej => {
+                const data = ejDataStore.getEjData(ej);
+                return (
+                  <div key={ej} className="bg-background rounded-lg p-3 text-sm font-medium border flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4 text-primary" />
+                      {ej}
+                    </div>
+                    {data?.responsavelReuniao && (
+                      <span className="text-xs text-muted-foreground ml-6">
+                        Responsável: {data.responsavelReuniao}
+                      </span>
+                    )}
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -111,12 +126,22 @@ export function TodayTomorrowMeetings() {
             {tomorrowMeetings.length === 0 ? (
               <p className="text-sm text-muted-foreground italic">Nenhuma reunião para amanhã.</p>
             ) : (
-              tomorrowMeetings.map(ej => (
-                <div key={ej} className="bg-background rounded-lg p-3 text-sm font-medium border flex items-center gap-2">
-                  <CalendarIcon className="w-4 h-4 text-primary" />
-                  {ej}
-                </div>
-              ))
+              tomorrowMeetings.map(ej => {
+                const data = ejDataStore.getEjData(ej);
+                return (
+                  <div key={ej} className="bg-background rounded-lg p-3 text-sm font-medium border flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4 text-primary" />
+                      {ej}
+                    </div>
+                    {data?.responsavelReuniao && (
+                      <span className="text-xs text-muted-foreground ml-6">
+                        Responsável: {data.responsavelReuniao}
+                      </span>
+                    )}
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -150,6 +175,17 @@ export function TodayTomorrowMeetings() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground">Quem vai fazer a reunião?</label>
+              <Input 
+                type="text" 
+                placeholder="Ex: João Silva"
+                value={responsavel} 
+                onChange={(e) => setResponsavel(e.target.value)}
+                className="bg-card h-12 rounded-xl"
+              />
             </div>
           </div>
           <DialogFooter>

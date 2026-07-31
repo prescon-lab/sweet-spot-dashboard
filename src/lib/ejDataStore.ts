@@ -25,6 +25,7 @@ export interface EjData {
   desafio?: string;
   dores?: string;
   proximaReuniao?: string;
+  responsavelReuniao?: string;
   notasReuniao?: string; // Legacy
   reunioes?: ReuniaoNota[];
   tarefas?: Task[];

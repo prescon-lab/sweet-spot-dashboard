@@ -235,10 +235,21 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
       <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)}>
         <DialogContent 
           {...dirtyGuard.containerProps}
-          className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col overflow-hidden gap-0 border-none shadow-2xl rounded-[32px] transition-colors duration-300"
+          className="max-w-none w-screen h-[100dvh] p-0 m-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none transition-colors duration-300 data-[state=open]:animate-in data-[state=open]:slide-in-from-right-1/2 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right-1/2"
           style={{ backgroundColor: bannerColor }}
           hideCloseButton
         >
+          {/* Back Button Area */}
+          <div className="absolute top-4 left-4 z-50 flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              className="bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-sm shadow-sm h-10 px-4 flex items-center gap-2 font-semibold"
+              onClick={() => { dirtyGuard.markClean(); onOpenChange(false); }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              Voltar
+            </Button>
+          </div>
           {bannerUrl && (
             <div 
               className="absolute inset-0 pointer-events-none z-0" 
@@ -258,7 +269,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               className="relative w-full min-h-[250px] flex items-end p-5 sm:p-8 md:p-12 z-20"
             >
               {/* Settings Toggle Button */}
-              <div className="absolute top-4 left-4 z-30">
+              <div className="absolute top-4 right-4 z-30">
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -271,7 +282,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
 
               {/* Settings Panel (Absolute) */}
               {showSettings && (
-                <div className="absolute top-16 left-4 z-40 bg-card/95 backdrop-blur-xl p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200 text-foreground border border-border/40">
+                <div className="absolute top-16 right-4 z-40 bg-card/95 backdrop-blur-xl p-4 rounded-xl shadow-xl w-72 space-y-4 animate-in fade-in zoom-in duration-200 text-foreground border border-border/40">
                   <h4 className="font-bold text-sm text-foreground">Configurações Visuais</h4>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground">Cor do Painel</label>
@@ -614,7 +625,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
           {/* Bottom Actions Bar */}
           <div className="bg-black/20 backdrop-blur-md p-4 flex justify-end gap-3 z-20">
             <Button variant="ghost" onClick={() => dirtyGuard.requestClose(onOpenChange)} className="rounded-full px-6 font-bold hover:bg-white/10 text-white">Fechar sem salvar</Button>
-            <Button onClick={() => { dirtyGuard.markClean(); onOpenChange(false); }} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-lg">Salvar e Fechar</Button>
+            <Button onClick={() => { dirtyGuard.markClean(); onOpenChange(false); }} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-lg">Salvar Perfil</Button>
           </div>
         </DialogContent>
       </Dialog>
