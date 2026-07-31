@@ -123,18 +123,14 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     mentionStore.markAsRead(id);
   };
 
-  // Sync to store on change
-  React.useEffect(() => {
-    if (guardianData?.name) {
-      guardianStore.set(guardianData.name, {
-        color: bannerColor,
-        bannerUrl: bannerUrl || "",
-        bannerOpacity: bannerOpacity,
-        avatarUrl: avatarUrl || "",
-        quote: quote
-      });
-    }
-  }, [bannerColor, bannerUrl, bannerOpacity, quote, avatarUrl, guardianData?.name]);
+  const updateConfig = (key: keyof import("@/lib/guardianStore").GuardianCustomization, value: any) => {
+    if (!guardianData?.name) return;
+    const currentConfig = guardianStore.get(guardianData.name);
+    guardianStore.set(guardianData.name, {
+      ...currentConfig,
+      [key]: value
+    });
+  };
 
   if (!guardianData) return null;
 
@@ -183,8 +179,10 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
     const compressedDataUrl = canvas.toDataURL("image/png");
     if (cropType === 'avatar') {
       setAvatarUrl(compressedDataUrl);
+      updateConfig('avatarUrl', compressedDataUrl);
     } else {
       setBannerUrl(compressedDataUrl);
+      updateConfig('bannerUrl', compressedDataUrl);
     }
     setCropModalOpen(false);
     setTempImageUrl(null);
@@ -290,12 +288,12 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                       <input 
                         type="color" 
                         value={bannerColor}
-                        onChange={(e) => setBannerColor(e.target.value)}
+                        onChange={(e) => { setBannerColor(e.target.value); updateConfig('color', e.target.value); }}
                         className="w-8 h-8 rounded cursor-pointer border-0 p-0"
                       />
                       <Input 
                         value={bannerColor} 
-                        onChange={(e) => setBannerColor(e.target.value)}
+                        onChange={(e) => { setBannerColor(e.target.value); updateConfig('color', e.target.value); }}
                         className="h-8 text-xs font-mono"
                       />
                     </div>
@@ -323,11 +321,11 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                             max="1" 
                             step="0.05"
                             value={bannerOpacity}
-                            onChange={(e) => setBannerOpacity(parseFloat(e.target.value))}
+                            onChange={(e) => { setBannerOpacity(parseFloat(e.target.value)); updateConfig('bannerOpacity', parseFloat(e.target.value)); }}
                             className="w-full accent-primary h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer"
                           />
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => setBannerUrl(null)} className="w-full text-xs text-red-500 h-7 bg-red-50 hover:bg-red-100 hover:text-red-600">
+                        <Button variant="ghost" size="sm" onClick={() => { setBannerUrl(null); updateConfig('bannerUrl', ""); }} className="w-full text-xs text-red-500 h-7 bg-red-50 hover:bg-red-100 hover:text-red-600">
                           Remover Fundo
                         </Button>
                       </div>
@@ -374,7 +372,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                     <Input 
                       placeholder="FRASE DO DIA" 
                       value={quote}
-                      onChange={(e) => setQuote(e.target.value)}
+                      onChange={(e) => { setQuote(e.target.value); updateConfig('quote', e.target.value); }}
                       className="h-auto py-2 text-sm md:text-base bg-black/20 border-transparent w-full rounded-2xl px-6 text-center md:text-left focus-visible:ring-white/30 uppercase tracking-widest" 
                       style={{ color: getContrastColor(bannerColor) }}
                     />
