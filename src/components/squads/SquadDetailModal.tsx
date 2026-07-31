@@ -7,6 +7,7 @@ import { leadStore } from "@/lib/leadStore";
 import { eventStore, AppEvent } from "@/lib/eventStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface SquadDetailModalProps {
   open: boolean;
@@ -75,22 +76,11 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
     : 0;
 
   return (
-    <div 
-      className="absolute inset-0 top-0 left-0 translate-x-0 translate-y-0 max-w-none w-full h-full p-0 m-0 flex flex-col overflow-y-auto gap-0 border-none shadow-none rounded-none transition-colors duration-300 animate-in slide-in-from-right-1/2 bg-background z-50"
-    >
-      <div className="absolute top-4 left-4 z-50 flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          className="bg-primary/10 hover:bg-primary/20 text-primary rounded-full backdrop-blur-sm shadow-sm h-10 px-4 flex items-center gap-2 font-semibold"
-          onClick={() => onOpenChange(false)}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-          Voltar
-        </Button>
-      </div>
-
-      <div className="w-full h-48 bg-gradient-to-r from-primary/80 to-primary flex items-end p-8 relative">
-        <div className="text-white z-10 flex gap-4 items-center">
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 gap-0 glass-modal border-none shadow-2xl rounded-2xl">
+        <div className="w-full h-40 bg-gradient-to-r from-primary/80 to-primary flex items-end p-8 relative rounded-t-2xl">
+          <div className="text-white z-10 flex gap-4 items-center">
           <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
             <Users className="w-10 h-10 text-white" />
           </div>
@@ -197,7 +187,8 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
           </Card>
         </div>
 
-      </div>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

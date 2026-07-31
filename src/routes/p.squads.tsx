@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Plus, Users, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ejListStore } from "@/lib/ejListStore";
+import { SquadDetailModal } from "@/components/squads/SquadDetailModal";
+import { Squad } from "@/lib/squadStore";
 
 export const Route = createFileRoute("/p/squads")({
   component: SquadsPage,
@@ -17,6 +19,8 @@ function SquadsPage() {
   const queryClient = useQueryClient();
   const [newSquadName, setNewSquadName] = useState("");
   const [newSquadLeader, setNewSquadLeader] = useState("");
+  const [selectedSquad, setSelectedSquad] = useState<Squad | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   const guardians = ejListStore.getUniqueGuardians();
 
@@ -125,7 +129,19 @@ function SquadsPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {squads.map(squad => (
-            <Card key={squad.id} className="flex flex-col">
+            <Card 
+              key={squad.id} 
+              className="flex flex-col hover:border-primary/50 transition-colors cursor-pointer"
+              onClick={(e) => {
+                // Ignore clicks on buttons/selects inside the card
+                const target = e.target as HTMLElement;
+                if (target.tagName === 'BUTTON' || target.tagName === 'SELECT' || target.closest('button') || target.closest('select')) {
+                  return;
+                }
+                setSelectedSquad(squad);
+                setDetailModalOpen(true);
+              }}
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
@@ -211,6 +227,12 @@ function SquadsPage() {
           )}
         </div>
       )}
+
+      <SquadDetailModal 
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        squad={selectedSquad}
+      />
     </div>
   );
 }
