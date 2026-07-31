@@ -5,7 +5,7 @@ import { useAuth, SUPER_ADMIN_EMAIL } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ShieldOff, Loader2, Users, Search } from "lucide-react";
+import { ShieldCheck, ShieldOff, Loader2, Users, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/admin")({
@@ -84,6 +84,26 @@ function AdminPage() {
     }
     setBusyId(null);
     await load();
+  };
+
+  const deleteProfile = async (person: Person) => {
+    if (person.email?.toLowerCase() === SUPER_ADMIN_EMAIL) {
+      toast.error("Não é possível excluir o administrador permanente.");
+      return;
+    }
+    if (!window.confirm(`Tem certeza que deseja excluir o perfil de ${person.full_name || person.email}? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    setBusyId(person.id);
+    const { error } = await supabase.from("profiles").delete().eq("id", person.id);
+    if (error) {
+      toast.error("Não foi possível excluir o perfil.");
+      console.error("Delete profile error:", error);
+    } else {
+      toast.success("Perfil excluído com sucesso.");
+      await load();
+    }
+    setBusyId(null);
   };
 
   if (authLoading || loading) {
@@ -211,6 +231,15 @@ function AdminPage() {
                       <ShieldCheck className="w-4 h-4" />
                     )}
                     {p.isAdmin ? "Tornar Guardião" : "Tornar Administrador"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="min-h-[44px] min-w-[44px] px-2 text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                    disabled={busyId === p.id || p.id === user?.id || p.email?.toLowerCase() === SUPER_ADMIN_EMAIL}
+                    onClick={() => deleteProfile(p)}
+                    title="Excluir perfil"
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
