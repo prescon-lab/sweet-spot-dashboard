@@ -12,6 +12,7 @@ import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy, Calendar as Calen
 import { toast } from "sonner";
 import { guardianStore } from "@/lib/guardianStore";
 import { ejListStore } from "@/lib/ejListStore";
+import { ejDataStore } from "@/lib/ejDataStore";
 import { eventStore } from "@/lib/eventStore";
 import { mentionStore, Mention } from "@/lib/mentionStore";
 import { activityStore } from "@/lib/activityStore";
