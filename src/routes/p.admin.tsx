@@ -112,12 +112,18 @@ function AdminPage() {
   };
 
   const updateProfileGuardian = async (id: string, guardian_name: string | null) => {
+    // Atualização otimista para a interface refletir na hora
+    setPeople(prev => prev.map(p => p.id === id ? { ...p, guardian_name } : p));
+    
     const { error } = await supabase.from("profiles").update({ guardian_name }).eq("id", id);
     if (error) {
       toast.error("Erro ao atualizar perfil: " + error.message);
+      await load(); // Reverte em caso de erro
     } else {
       toast.success("Perfil atualizado com sucesso!");
-      await load();
+      // Não precisa de await load() aqui pois já atualizamos localmente, 
+      // mas podemos chamar sem await para garantir sincronia no background
+      load();
     }
   };
 
