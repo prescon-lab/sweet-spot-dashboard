@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface Mention {
   id: string;
   guardianName: string;
@@ -38,6 +40,18 @@ export const mentionStore = {
         mentions.push(newMention);
         localStorage.setItem(STORE_KEY, JSON.stringify(mentions));
         window.dispatchEvent(new Event('mentionsUpdated'));
+
+        // Disparar notificação pro usuário no Supabase
+        supabase.from('profiles').select('id').eq('guardian_name', mention.guardianName).maybeSingle().then(({ data }) => {
+          if (data && data.id) {
+            supabase.from('notifications').insert({
+              user_id: data.id,
+              title: 'Você foi mencionado!',
+              content: `Mencionado na EJ ${mention.ejName} (${mention.source}): "${mention.contextText}"`,
+              type: 'mention'
+            }).then();
+          }
+        });
       } catch (e) {
         console.error("Failed to add mention", e);
       }
