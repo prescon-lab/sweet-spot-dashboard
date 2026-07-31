@@ -1,10 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { linksStore, UsefulLink } from "@/lib/linksStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash, Edit, Save, X, ShieldCheck, Copy } from "lucide-react";
-import { useAccessRole, buildGuardianLink } from "@/lib/access";
+import { Plus, Trash, Edit, Save, X, ShieldCheck, Users } from "lucide-react";
+import { useAccessRole } from "@/lib/access";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/configuracoes")({
