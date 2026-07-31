@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { squadStore } from "@/lib/squadStore";
+import { squadStore, Squad } from "@/lib/squadStore";
+import { guardianStore } from "@/lib/guardianStore";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,7 +129,11 @@ function SquadsPage() {
         <div className="flex justify-center p-8">Carregando squads...</div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {squads.map(squad => (
+          {squads.map(squad => {
+            const leaderConfig = guardianStore.get(squad.leader);
+            const leaderAvatar = leaderConfig?.avatarUrl;
+            
+            return (
             <Card 
               key={squad.id} 
               className="flex flex-col hover:border-primary/50 transition-colors cursor-pointer"
@@ -146,7 +151,13 @@ function SquadsPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-xl flex items-center gap-2">
-                      <Users className="w-5 h-5 text-primary" />
+                      {leaderAvatar ? (
+                        <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 shadow-sm border border-primary/20">
+                          <img src={leaderAvatar} alt={squad.leader} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <Users className="w-5 h-5 text-primary" />
+                      )}
                       {squad.name}
                     </CardTitle>
                     <CardDescription className="mt-1">
@@ -216,7 +227,7 @@ function SquadsPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )})}
           
           {squads.length === 0 && (
             <div className="col-span-full text-center p-12 bg-muted/20 rounded-xl border border-dashed">
