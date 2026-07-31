@@ -23,7 +23,7 @@ export const Route = createFileRoute("/p/configuracoes")({
 
 function Configuracoes() {
   const role = useAccessRole();
-  const [links2Placeholder] = useState<null>(null);
+  
   const [links, setLinks] = useState<UsefulLink[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   
