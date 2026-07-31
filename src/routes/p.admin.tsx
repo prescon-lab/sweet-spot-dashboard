@@ -230,8 +230,8 @@ function AdminPage() {
                     <p className="text-sm text-muted-foreground truncate">{p.email}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="w-32 sm:w-48 hidden sm:block">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
+                  <div className="w-[140px] sm:w-48">
                     <Select 
                       value={p.guardian_name || "none"} 
                       onValueChange={(val) => updateProfileGuardian(p.id, val === "none" ? null : val)}
@@ -248,7 +248,7 @@ function AdminPage() {
                     </Select>
                   </div>
                   {p.guardian_name && (
-                    <div className="hidden lg:flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 h-[44px] max-w-[200px] truncate" title={`Vinculado a ${p.guardian_name}`}>
+                    <div className="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 h-[44px] max-w-[150px] sm:max-w-[200px]" title={`Vinculado a ${p.guardian_name}`}>
                       <Shield className="w-3 h-3 shrink-0" />
                       <span className="truncate">{p.guardian_name}</span>
                     </div>
