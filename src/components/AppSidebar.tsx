@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, Search, Settings, Users, BarChart2 } from "lucide-react"
+import { Calendar, Home, Inbox, Search, Settings, Users, BarChart2, ShieldCheck } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import {
   Sidebar,
