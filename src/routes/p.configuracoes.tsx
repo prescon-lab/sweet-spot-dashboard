@@ -124,26 +124,20 @@ function Configuracoes() {
       <div className="glass-card p-6 rounded-3xl mb-8 space-y-4">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-primary" />
-          <h2 className="text-xl font-semibold">Link exclusivo para Guardiões</h2>
+          <h2 className="text-xl font-semibold">Acesso das pessoas</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Com este link, os guardiões acessam Início, Painel de EJs, Painel de Guardiões e visualizam o
-          Painel Geral (sem criar ou editar eventos). As configurações continuam só no link de administrador.
+          O acesso agora é feito com login pelo Google. Quem entra pela primeira vez fica como Guardião
+          (Início, Painel de EJs, Painel de Guardiões e Painel Geral só leitura). Administradores editam tudo.
         </p>
-        <div className="flex flex-col md:flex-row gap-3 md:items-center">
-          <Input readOnly value={guardianLink} className="bg-background/50 font-mono text-sm" />
-          <Button
-            className="gap-2 font-semibold shrink-0"
-            onClick={() => {
-              navigator.clipboard.writeText(guardianLink);
-              toast.success("Link de guardião copiado!");
-            }}
-          >
-            <Copy className="w-4 h-4" />
-            Copiar link
-          </Button>
-        </div>
+        <Button asChild className="gap-2 font-semibold min-h-[44px]">
+          <Link to="/p/admin">
+            <Users className="w-4 h-4" />
+            Gerenciar administradores
+          </Link>
+        </Button>
       </div>
+
 
 
       <div className="glass-card p-6 rounded-3xl mb-8 space-y-6">
