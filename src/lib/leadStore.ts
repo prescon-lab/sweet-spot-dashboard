@@ -1,4 +1,4 @@
-export type LeadStatus = 'quente' | 'morno' | 'frio';
+export type LeadStatus = 'quente' | 'morno' | 'frio' | 'fechado';
 
 export interface Lead {
   id: string;

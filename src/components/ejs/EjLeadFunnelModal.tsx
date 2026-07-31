@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
-import { Briefcase, Plus, Trash2 } from "lucide-react";
+import { Briefcase, Plus, Trash2, CheckCircle2 } from "lucide-react";
 import { leadStore, Lead, LeadStatus } from "@/lib/leadStore";
 
 interface EjLeadFunnelModalProps {
@@ -62,11 +62,16 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
     leadStore.deleteLead(id);
   };
 
+  const handleMarkAsClosed = (lead: Lead) => {
+    leadStore.updateLead({ ...lead, status: 'fechado' });
+  };
+
   const getStatusColor = (s: string) => {
     switch (s) {
       case 'quente': return 'bg-red-500 text-white';
       case 'morno': return 'bg-orange-500 text-white';
       case 'frio': return 'bg-blue-500 text-white';
+      case 'fechado': return 'bg-green-600 text-white';
       default: return 'bg-gray-200';
     }
   };
@@ -115,6 +120,7 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
                     <option value="quente">Quente</option>
                     <option value="morno">Morno</option>
                     <option value="frio">Frio</option>
+                    <option value="fechado">Fechado (Contrato Assinado)</option>
                   </select>
                 </div>
                 <div className="space-y-2">
@@ -161,9 +167,16 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
                       </p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(lead.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    {lead.status !== 'fechado' && (
+                      <Button variant="ghost" size="icon" onClick={() => handleMarkAsClosed(lead)} className="text-green-600 hover:text-green-700 hover:bg-green-50" title="Marcar como Fechado">
+                        <CheckCircle2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(lead.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50" title="Excluir Lead">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
