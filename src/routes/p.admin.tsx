@@ -41,8 +41,8 @@ function AdminPage() {
   const [query, setQuery] = useState("");
   const guardians = ejListStore.getUniqueGuardians();
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     const [{ data: profiles }, { data: roles }] = await Promise.all([
       supabase.from("profiles").select("id, email, full_name, avatar_url, guardian_name").order("email"),
       supabase.from("user_roles").select("user_id, role").eq("role", "admin"),
@@ -58,7 +58,7 @@ function AdminPage() {
         guardian_name: p.guardian_name,
       })),
     );
-    setLoading(false);
+    if (showSpinner) setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ function AdminPage() {
       else toast.success("Salvo — agora é Administrador.");
     }
     setBusyId(null);
-    await load();
+    await load(false);
   };
 
   const deleteProfile = async (person: Person) => {
@@ -106,7 +106,7 @@ function AdminPage() {
       console.error("Delete profile error:", error);
     } else {
       toast.success("Perfil excluído com sucesso.");
-      await load();
+      await load(false);
     }
     setBusyId(null);
   };
@@ -118,12 +118,10 @@ function AdminPage() {
     const { error } = await supabase.from("profiles").update({ guardian_name }).eq("id", id);
     if (error) {
       toast.error("Erro ao atualizar perfil: " + error.message);
-      await load(); // Reverte em caso de erro
+      await load(false); // Reverte em caso de erro
     } else {
       toast.success("Perfil atualizado com sucesso!");
-      // Não precisa de await load() aqui pois já atualizamos localmente, 
-      // mas podemos chamar sem await para garantir sincronia no background
-      load();
+      load(false);
     }
   };
 
