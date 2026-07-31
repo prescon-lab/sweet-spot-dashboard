@@ -115,9 +115,9 @@ function AdminPage() {
     // Atualização otimista para a interface refletir na hora
     setPeople(prev => prev.map(p => p.id === id ? { ...p, guardian_name } : p));
     
-    const { error } = await supabase.from("profiles").update({ guardian_name }).eq("id", id);
-    if (error) {
-      toast.error("Erro ao atualizar perfil: " + error.message);
+    const { data, error } = await supabase.from("profiles").update({ guardian_name }).eq("id", id).select();
+    if (error || !data || data.length === 0) {
+      toast.error("O banco ainda não liberou a permissão. Aguarde 1 minuto para a Lovable processar a atualização de segurança e tente novamente.");
       await load(false); // Reverte em caso de erro
     } else {
       toast.success("Perfil atualizado com sucesso!");
