@@ -18,6 +18,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
   const [eventName, setEventName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [auditDate, setAuditDate] = useState("");
   const [ejGoals, setEjGoals] = useState<EventGoal[]>([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
 
   React.useEffect(() => {
@@ -25,11 +26,13 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
       setEventName(eventToEdit.name);
       setStartDate(eventToEdit.startDate || "");
       setEndDate(eventToEdit.endDate || "");
+      setAuditDate(eventToEdit.auditDate || "");
       setEjGoals(eventToEdit.ejGoals.length > 0 ? eventToEdit.ejGoals : [{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
     } else if (open && !eventToEdit) {
       setEventName("");
       setStartDate("");
       setEndDate("");
+      setAuditDate("");
       setEjGoals([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
     }
   }, [open, eventToEdit]);
@@ -60,6 +63,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
         name: eventName,
         startDate,
         endDate,
+        auditDate,
         ejGoals: filteredGoals,
       });
       toast.success("Evento atualizado com sucesso!");
@@ -69,6 +73,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
         name: eventName,
         startDate,
         endDate,
+        auditDate,
         ejGoals: filteredGoals,
         createdAt: new Date().toISOString()
       });
@@ -82,6 +87,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
     setEventName("");
     setStartDate("");
     setEndDate("");
+    setAuditDate("");
     setEjGoals([{ id: Date.now().toString(), text: "", coreText: "", checked: false }]);
   };
 
@@ -126,7 +132,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
             />
           </div>
 
-          <div className="flex justify-center w-full gap-4 max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-4xl mx-auto">
             <div className="w-full">
               <label className="text-sm font-semibold text-muted-foreground ml-2">Data de Início</label>
               <Input 
@@ -142,6 +148,15 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                className="w-full bg-card border border-border/50 text-foreground h-12 rounded-2xl px-4 mt-1"
+              />
+            </div>
+            <div className="w-full">
+              <label className="text-sm font-semibold text-muted-foreground ml-2">Fim da Auditoria</label>
+              <Input 
+                type="date"
+                value={auditDate}
+                onChange={(e) => setAuditDate(e.target.value)}
                 className="w-full bg-card border border-border/50 text-foreground h-12 rounded-2xl px-4 mt-1"
               />
             </div>
