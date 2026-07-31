@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { ejsList } from "@/lib/data";
+import { ejListStore } from "@/lib/ejListStore";
 import { guardianStore } from "@/lib/guardianStore";
 import { GuardianDetailModal } from "@/components/guardians/GuardianDetailModal";
 import React from "react";
@@ -44,17 +44,25 @@ function GuardiansPanel() {
   const [searchTerm, setSearchTerm] = useState("");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedGuardian, setSelectedGuardian] = useState<any>(null);
-  const [updateTrigger, setUpdateTrigger] = useState(0);
-
-  React.useEffect(() => {
-    const handleUpdate = () => setUpdateTrigger(prev => prev + 1);
+  
+  useEffect(() => {
+    const handleUpdate = () => {
+      // Force re-render to fetch new EJs/Guardians
+      setSearchTerm(searchTerm);
+    };
+    window.addEventListener('ejListUpdated', handleUpdate);
     window.addEventListener('guardianStoreUpdated', handleUpdate);
-    return () => window.removeEventListener('guardianStoreUpdated', handleUpdate);
-  }, []);
+    return () => {
+      window.removeEventListener('ejListUpdated', handleUpdate);
+      window.removeEventListener('guardianStoreUpdated', handleUpdate);
+    };
+  }, [searchTerm]);
+
+  const ejs = ejListStore.getEjs();
 
   // Derivar lista de guardiões únicos e calcular a quantidade de EJs
   const guardiansMap = new Map<string, number>();
-  ejsList.forEach(ej => {
+  ejs.forEach(ej => {
     guardiansMap.set(ej.guardian, (guardiansMap.get(ej.guardian) || 0) + 1);
   });
 

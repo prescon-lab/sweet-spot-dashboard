@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
+import { GuardianDetailModal } from "@/components/guardians/GuardianDetailModal";
 import { Search, ChevronDown, Flame, Trophy } from "lucide-react";
 import { ejDataStore } from "@/lib/ejDataStore";
 import { eventStore } from "@/lib/eventStore";
+import { ejListStore } from "@/lib/ejListStore";
 
 export const Route = createFileRoute("/p/ejs")({
   head: () => ({
@@ -21,8 +23,6 @@ export const Route = createFileRoute("/p/ejs")({
   component: EjsPanel,
 });
 
-import { ejsList } from "@/lib/data";
-
 function EjsPanel() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterGuardian, setFilterGuardian] = useState("");
@@ -30,11 +30,23 @@ function EjsPanel() {
 
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedEj, setSelectedEj] = useState<any>(null);
+  
+  const [guardianModalOpen, setGuardianModalOpen] = useState(false);
+  const [selectedGuardianForModal, setSelectedGuardianForModal] = useState<any>(null);
+  const [ejs, setEjs] = useState(() => ejListStore.getEjs());
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setEjs(ejListStore.getEjs());
+    };
+    window.addEventListener('ejListUpdated', handleUpdate);
+    return () => window.removeEventListener('ejListUpdated', handleUpdate);
+  }, []);
 
   // Derivar lista de guardiões únicos
-  const uniqueGuardians = Array.from(new Set(ejsList.map(ej => ej.guardian))).sort();
+  const uniqueGuardians = ejListStore.getUniqueGuardians();
 
-  const filteredEjs = ejsList.filter((ej) => {
+  const filteredEjs = ejs.filter((ej) => {
     const ejSavedData = ejDataStore.getEjData(ej.name);
     const allEvents = eventStore.getEvents().filter(e => e.status !== 'completed');
     const activeEventIds = allEvents.map(e => e.id);

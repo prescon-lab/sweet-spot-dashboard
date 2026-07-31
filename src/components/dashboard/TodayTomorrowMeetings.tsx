@@ -3,12 +3,13 @@ import { format, isToday, isTomorrow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Clock, Plus } from "lucide-react";
 import { ejDataStore, EjData } from "@/lib/ejDataStore";
+import { ejListStore } from "@/lib/ejListStore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ejsList } from "@/lib/data";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+
 export function TodayTomorrowMeetings() {
   const [todayMeetings, setTodayMeetings] = useState<string[]>([]);
   const [tomorrowMeetings, setTomorrowMeetings] = useState<string[]>([]);
@@ -144,7 +145,7 @@ export function TodayTomorrowMeetings() {
                   <SelectValue placeholder="Escolha uma EJ..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {ejsList.map(ej => (
+                  {ejListStore.getEjs().map(ej => (
                     <SelectItem key={ej.id} value={ej.name}>{ej.name}</SelectItem>
                   ))}
                 </SelectContent>

@@ -10,9 +10,8 @@ import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 import { Textarea } from "@/components/ui/textarea";
 import { Users, AlertCircle, TrendingUp, Check, Flame, Trophy, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
-import { ejsList } from "@/lib/data";
 import { guardianStore } from "@/lib/guardianStore";
-import { ejDataStore } from "@/lib/ejDataStore";
+import { ejListStore } from "@/lib/ejListStore";
 import { eventStore } from "@/lib/eventStore";
 import { mentionStore, Mention } from "@/lib/mentionStore";
 import { activityStore } from "@/lib/activityStore";
@@ -62,6 +61,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
   const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
 
   // Fetch the EJs for this guardian
+  const ejsList = ejListStore.getEjs();
   const guardianEjs = ejsList.filter(ej => ej.guardian === guardianData?.name);
 
   const [mentions, setMentions] = useState<Mention[]>([]);

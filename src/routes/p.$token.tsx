@@ -11,7 +11,7 @@ import { EventRegistrationModal } from "@/components/events/EventRegistrationMod
 import { eventStore, AppEvent, EventGoal } from "@/lib/eventStore";
 import { leadStore, Lead } from "@/lib/leadStore";
 import { ejDataStore } from "@/lib/ejDataStore";
-import { ejsList } from "@/lib/data";
+import { ejListStore } from "@/lib/ejListStore";
 import { TodayTomorrowMeetings } from "@/components/dashboard/TodayTomorrowMeetings";
 import { activityStore, Activity } from "@/lib/activityStore";
 import { mentionStore, Mention } from "@/lib/mentionStore";

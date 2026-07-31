@@ -8,7 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { Trophy, Calendar as CalendarIcon, Printer, Trash2, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ejDataStore } from "@/lib/ejDataStore";
-import { ejsList } from "@/lib/data";
+import { ejListStore } from "@/lib/ejListStore";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/historico-eventos")({
@@ -90,7 +90,7 @@ function HistoricoEventos() {
 
           const totalEjsMet = Object.keys(completionDates).length;
 
-          const allEjs = ejsList.map(ej => ej.name);
+          const allEjs = ejListStore.getEjs().map(ej => ej.name);
           const apostasEjs: { name: string, goals: string[] }[] = [];
           const nonApostasEjs: { name: string, goals: string[] }[] = [];
 

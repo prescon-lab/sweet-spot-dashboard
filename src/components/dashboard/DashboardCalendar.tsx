@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ejDataStore, EjData } from "@/lib/ejDataStore";
-import { ejsList } from "@/lib/data";
+import { ejListStore } from "@/lib/ejListStore";
 import { toast } from "sonner";
 
 type CalendarDayData = {
@@ -226,7 +226,7 @@ export function DashboardCalendar() {
                   <SelectValue placeholder="Escolha uma EJ..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {ejsList.map(ej => (
+                  {ejListStore.getEjs().map(ej => (
                     <SelectItem key={ej.id} value={ej.name}>{ej.name}</SelectItem>
                   ))}
                 </SelectContent>

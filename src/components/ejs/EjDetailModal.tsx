@@ -19,7 +19,7 @@ import { EjLeadFunnelModal } from "./EjLeadFunnelModal";
 import { ejDataStore, EjData, Task, ReuniaoNota } from "@/lib/ejDataStore";
 import { activityStore } from "@/lib/activityStore";
 import { mentionStore } from "@/lib/mentionStore";
-import { ejsList } from "@/lib/data";
+import { ejListStore } from "@/lib/ejListStore";
 import { toast } from "sonner";
 
 interface EjDetailModalProps {
@@ -60,7 +60,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [apostas, setApostas] = useState<Record<string, boolean>>({});
   
   const [mentionSearch, setMentionSearch] = useState<string | null>(null);
-  const uniqueGuardians = Array.from(new Set(ejsList.map(ej => ej.guardian))).sort();
+  const [guardianName, setGuardianName] = useState("");
+  const uniqueGuardians = ejListStore.getUniqueGuardians();
 
   const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -111,6 +112,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         
         setApostas(data?.apostas || {});
         setAvatarUrl(data?.avatarUrl || null);
+        setGuardianName(ejData.guardian || "");
       } else {
         setTasks([]);
         setPresconTasks([]);
@@ -120,6 +122,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
         setReunioes([]);
         setApostas({});
         setAvatarUrl(null);
+        setGuardianName("");
       }
     }
 
@@ -137,6 +140,13 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     
     let hasChanges = false;
     
+    // Check for guardian change
+    if (ejName !== "Nova EJ" && guardianName.trim() !== (ejData?.guardian || "")) {
+      ejListStore.updateEjGuardian(ejName, guardianName);
+      hasChanges = true;
+      activityStore.addActivity({ ejName, description: `Guardião alterado para ${guardianName}`, type: "update" });
+    }
+
     const truncate = (str: string, length = 40) => {
       if (!str) return "Vazio";
       return str.length > length ? str.substring(0, length) + "..." : str;
@@ -461,7 +471,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 />
                 <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-6">
                   <div className="flex flex-col col-span-2 sm:col-span-1 min-w-0">
-                    <Input placeholder="Guardião" defaultValue={ejData?.guardian || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-48" />
+                    <Input placeholder="Guardião" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-48" />
                     <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider">Guardiã(o) da EJ</span>
                   </div>
                   <div className="flex flex-col min-w-0">
