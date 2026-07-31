@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Sparkles, Building2, BarChart3, Calendar as CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Sparkles, Building2, BarChart3, Calendar as CalendarIcon, Trophy, Medal } from "lucide-react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { gamificationStore } from "@/lib/gamificationStore";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -22,6 +23,48 @@ export const Route = createFileRoute("/")({
 function Index() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  
+  const [ranking, setRanking] = useState<{ profileId: string; totalScore: number; name?: string; avatar_url?: string }[]>([]);
+  const [activeGameName, setActiveGameName] = useState("");
+
+  useEffect(() => {
+    const loadRanking = async () => {
+      const state = gamificationStore.getState();
+      const activeGame = state.games?.find(g => g.active);
+      if (activeGame) {
+        setActiveGameName(activeGame.name);
+        const rank = gamificationStore.getRanking(activeGame.id);
+        
+        if (rank.length > 0) {
+          const profileIds = rank.map(r => r.profileId);
+          const { data } = await supabase.from("profiles").select("id, full_name, email, avatar_url").in("id", profileIds);
+          
+          if (data) {
+            const enrichedRank = rank.map(r => {
+              const p = data.find(d => d.id === r.profileId);
+              return {
+                ...r,
+                name: p?.full_name || p?.email || "Usuário",
+                avatar_url: p?.avatar_url
+              };
+            });
+            setRanking(enrichedRank);
+          } else {
+            setRanking(rank);
+          }
+        } else {
+          setRanking([]);
+        }
+      } else {
+        setRanking([]);
+        setActiveGameName("");
+      }
+    };
+    
+    loadRanking();
+    window.addEventListener("gamificationUpdated", loadRanking);
+    return () => window.removeEventListener("gamificationUpdated", loadRanking);
+  }, []);
 
   const handleStart = async () => {
     setIsLoading(true);
@@ -108,6 +151,46 @@ function Index() {
             </CardFooter>
           </Card>
         </div>
+
+        {/* Gamification Ranking Widget */}
+        {activeGameName && ranking.length > 0 && (
+          <Card className="max-w-5xl mx-auto glass-card border-primary/20 mt-12">
+            <CardHeader className="bg-primary/5 pb-4">
+              <CardTitle className="text-xl flex items-center gap-2 text-primary">
+                <Trophy className="w-6 h-6 text-yellow-500" />
+                Ranking: {activeGameName}
+              </CardTitle>
+              <CardDescription>Confira quem está liderando a pontuação desta temporada!</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-border/50">
+                {ranking.slice(0, 10).map((r, idx) => (
+                  <div key={r.profileId} className="p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors">
+                    <div className="w-8 text-center font-bold text-muted-foreground flex items-center justify-center">
+                      {idx === 0 ? <Medal className="w-6 h-6 text-yellow-500" /> : 
+                       idx === 1 ? <Medal className="w-6 h-6 text-gray-400" /> : 
+                       idx === 2 ? <Medal className="w-6 h-6 text-amber-700" /> : 
+                       <span className="text-lg">{idx + 1}º</span>}
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                      {r.avatar_url ? (
+                        <img src={r.avatar_url} alt={r.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-bold text-primary">{r.name?.charAt(0).toUpperCase() || "?"}</span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground text-sm md:text-base">{r.name}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-bold text-primary text-lg">{r.totalScore} pts</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
       </div>
     </div>

@@ -44,6 +44,12 @@ const items = [
     icon: BarChart2,
   },
   {
+    title: "Gestão de Gente",
+    url: "/p/gestao-gente",
+    icon: Users,
+    adminOnly: true,
+  },
+  {
     title: "Configurações",
     url: "/p/configuracoes",
     icon: Settings,
