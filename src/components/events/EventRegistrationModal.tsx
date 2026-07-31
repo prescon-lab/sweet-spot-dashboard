@@ -143,7 +143,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
               />
             </div>
             <div className="w-full">
-              <label className="text-sm font-semibold text-muted-foreground ml-2">Data de Término (23:59)</label>
+              <label className="text-sm font-semibold text-muted-foreground ml-2">Data de Término</label>
               <Input 
                 type="date"
                 value={endDate}
