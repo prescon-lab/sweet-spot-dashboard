@@ -55,12 +55,6 @@ const items = [
     icon: Settings,
     adminOnly: true,
   },
-  {
-    title: "Gestão de Acessos",
-    url: "/p/users",
-    icon: User,
-    adminOnly: true,
-  },
 ]
 
 import { useEffect, useState } from "react";

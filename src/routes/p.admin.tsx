@@ -5,7 +5,9 @@ import { useAuth, SUPER_ADMIN_EMAIL } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ShieldOff, Loader2, Users, Search, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ejListStore } from "@/lib/ejListStore";
+import { ShieldCheck, ShieldOff, Loader2, Users, Search, Trash2, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/admin")({
@@ -28,6 +30,7 @@ type Person = {
   full_name: string | null;
   avatar_url: string | null;
   isAdmin: boolean;
+  guardian_name: string | null;
 };
 
 function AdminPage() {
@@ -36,11 +39,12 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const guardians = ejListStore.getUniqueGuardians();
 
   const load = useCallback(async () => {
     setLoading(true);
     const [{ data: profiles }, { data: roles }] = await Promise.all([
-      supabase.from("profiles").select("id, email, full_name, avatar_url").order("email"),
+      supabase.from("profiles").select("id, email, full_name, avatar_url, guardian_name").order("email"),
       supabase.from("user_roles").select("user_id, role").eq("role", "admin"),
     ]);
     const adminIds = new Set((roles ?? []).map((r) => r.user_id));
@@ -51,6 +55,7 @@ function AdminPage() {
         full_name: p.full_name,
         avatar_url: p.avatar_url,
         isAdmin: adminIds.has(p.id),
+        guardian_name: p.guardian_name,
       })),
     );
     setLoading(false);
@@ -104,6 +109,16 @@ function AdminPage() {
       await load();
     }
     setBusyId(null);
+  };
+
+  const updateProfileGuardian = async (id: string, guardian_name: string | null) => {
+    const { error } = await supabase.from("profiles").update({ guardian_name }).eq("id", id);
+    if (error) {
+      toast.error("Erro ao atualizar perfil: " + error.message);
+    } else {
+      toast.success("Perfil atualizado com sucesso!");
+      await load();
+    }
   };
 
   if (authLoading || loading) {
@@ -216,7 +231,29 @@ function AdminPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <Badge variant={p.isAdmin ? "default" : "secondary"}>
+                  <div className="w-32 sm:w-48 hidden sm:block">
+                    <Select 
+                      value={p.guardian_name || "none"} 
+                      onValueChange={(val) => updateProfileGuardian(p.id, val === "none" ? null : val)}
+                    >
+                      <SelectTrigger className="h-[44px]">
+                        <SelectValue placeholder="Vincular a guardião" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Nenhum</SelectItem>
+                        {guardians.map(g => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {p.guardian_name && (
+                    <div className="hidden lg:flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 h-[44px]">
+                      <Shield className="w-3 h-3" />
+                      Vinculado
+                    </div>
+                  )}
+                  <Badge variant={p.isAdmin ? "default" : "secondary"} className="hidden md:inline-flex">
                     {p.isAdmin ? "Administrador" : "Guardião"}
                   </Badge>
                   <Button
