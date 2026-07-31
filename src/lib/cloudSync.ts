@@ -5,7 +5,8 @@ const SYNC_KEYS = [
   "vertentes_ej_list",
   "sweet_spot_events",
   "sweet_spot_leads",
-  "vertentes_guardians"
+  "vertentes_guardian_customizations",
+  "sweet_spot_mentions"
 ];
 
 let isSyncing = false;
@@ -37,7 +38,8 @@ export async function initCloudSync() {
         window.dispatchEvent(new Event("ejListUpdated"));
         window.dispatchEvent(new Event("eventsUpdated"));
         window.dispatchEvent(new Event("leadsUpdated"));
-        window.dispatchEvent(new Event("guardiansUpdated"));
+        window.dispatchEvent(new Event("guardianStoreUpdated"));
+        window.dispatchEvent(new Event("mentionsUpdated"));
       }
     }
   } catch (e) {
@@ -59,7 +61,8 @@ export async function initCloudSync() {
           if (row.key === "vertentes_ej_list") window.dispatchEvent(new Event("ejListUpdated"));
           if (row.key === "sweet_spot_events") window.dispatchEvent(new Event("eventsUpdated"));
           if (row.key === "sweet_spot_leads") window.dispatchEvent(new Event("leadsUpdated"));
-          if (row.key === "vertentes_guardians") window.dispatchEvent(new Event("guardiansUpdated"));
+          if (row.key === "vertentes_guardian_customizations") window.dispatchEvent(new Event("guardianStoreUpdated"));
+          if (row.key === "sweet_spot_mentions") window.dispatchEvent(new Event("mentionsUpdated"));
         }
       }
     })

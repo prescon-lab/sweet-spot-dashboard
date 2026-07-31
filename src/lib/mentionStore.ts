@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { syncToCloud } from "./cloudSync";
 
 export interface Mention {
   id: string;
@@ -39,6 +40,7 @@ export const mentionStore = {
         };
         mentions.push(newMention);
         localStorage.setItem(STORE_KEY, JSON.stringify(mentions));
+        syncToCloud(STORE_KEY, mentions);
         window.dispatchEvent(new Event('mentionsUpdated'));
 
         // Disparar notificação pro usuário no Supabase
@@ -65,6 +67,7 @@ export const mentionStore = {
       if (idx !== -1) {
         mentions[idx].read = true;
         localStorage.setItem(STORE_KEY, JSON.stringify(mentions));
+        syncToCloud(STORE_KEY, mentions);
         window.dispatchEvent(new Event('mentionsUpdated'));
       }
     }
