@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Mapeia chaves do localStorage que devem ser sincronizadas
 const SYNC_KEYS = [
@@ -17,9 +18,12 @@ export async function initCloudSync() {
   isSyncing = true;
 
   // 1. Carregar do Supabase (prioridade inicial)
-  try {
     const { data, error } = await supabase.from('app_data').select('*');
-    if (!error && data) {
+    if (error) {
+      console.error("Erro Supabase (select):", error);
+      return;
+    }
+    if (data) {
       let hasUpdates = false;
       data.forEach((row) => {
         if (SYNC_KEYS.includes(row.key)) {
@@ -33,7 +37,6 @@ export async function initCloudSync() {
         }
       });
       
-      // Se houve atualizações do banco na carga inicial, disparar eventos para a UI atualizar
       if (hasUpdates) {
         window.dispatchEvent(new Event("ejListUpdated"));
         window.dispatchEvent(new Event("eventsUpdated"));
@@ -74,11 +77,16 @@ export async function syncToCloud(key: string, data: any) {
   if (!SYNC_KEYS.includes(key)) return;
   
   try {
-    await supabase.from('app_data').upsert({ 
+    const { error } = await supabase.from('app_data').upsert({ 
       key, 
       data, 
       updated_at: new Date().toISOString() 
     }, { onConflict: 'key' });
+    
+    if (error) {
+      console.error(`Erro Supabase ao salvar ${key}:`, error);
+      toast.error(`Falha ao sincronizar dados na nuvem: ${error.message}`);
+    }
   } catch (e) {
     console.error("Erro ao sincronizar " + key, e);
   }
