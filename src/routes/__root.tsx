@@ -123,6 +123,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { useRouterState, useNavigate } from "@tanstack/react-router";
 import { Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { initCloudSync } from "@/lib/cloudSync";
 
 function UserChip() {
   const { user, isAdmin, signOut } = useAuth();
@@ -131,12 +132,14 @@ function UserChip() {
 
   return (
     <div className="flex items-center gap-2 min-w-0">
-      <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[180px]">
-        {user.email}
-      </span>
-      <span className="hidden md:inline rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-        {isAdmin ? "Administrador" : "Guardião"}
-      </span>
+      <Link to="/p/profile" className="flex items-center gap-2 min-w-0 hover:bg-accent p-1.5 rounded-md transition-colors cursor-pointer">
+        <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[180px]">
+          {user.email}
+        </span>
+        <span className="hidden md:inline rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+          {isAdmin ? "Administrador" : "Guardião"}
+        </span>
+      </Link>
       <Button
         variant="ghost"
         size="sm"
@@ -208,6 +211,10 @@ function AppShell() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    initCloudSync();
+  }, []);
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vertentes-theme">

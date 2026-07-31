@@ -1,3 +1,5 @@
+import { syncToCloud } from "./cloudSync";
+
 export type LeadStatus = 'quente' | 'morno' | 'frio' | 'fechado';
 
 export interface Lead {
@@ -39,6 +41,7 @@ export const leadStore = {
         const current = leadStore.getLeads();
         current.push(lead);
         localStorage.setItem(STORE_KEY, JSON.stringify(current));
+        syncToCloud(STORE_KEY, current);
         window.dispatchEvent(new Event('leadsUpdated'));
       } catch (e) {
         console.error("Failed to save lead", e);
@@ -54,6 +57,7 @@ export const leadStore = {
         if (index !== -1) {
           current[index] = updatedLead;
           localStorage.setItem(STORE_KEY, JSON.stringify(current));
+          syncToCloud(STORE_KEY, current);
           window.dispatchEvent(new Event('leadsUpdated'));
         }
       } catch (e) {
@@ -68,6 +72,7 @@ export const leadStore = {
         const current = leadStore.getLeads();
         const updated = current.filter(e => e.id !== id);
         localStorage.setItem(STORE_KEY, JSON.stringify(updated));
+        syncToCloud(STORE_KEY, updated);
         window.dispatchEvent(new Event('leadsUpdated'));
       } catch (e) {
         console.error("Failed to delete lead", e);

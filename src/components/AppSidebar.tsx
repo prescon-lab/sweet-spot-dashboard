@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, Search, Settings, Users, BarChart2, ShieldCheck } from "lucide-react"
+import { Home, Inbox, Search, Settings, Users, BarChart2, ShieldCheck, User, MessageSquare } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import {
   Sidebar,
@@ -29,6 +29,11 @@ const items = [
     icon: Search,
   },
   {
+    title: "Diário de Bordo",
+    url: "/p/reports",
+    icon: MessageSquare,
+  },
+  {
     title: "Painel de Guardiões",
     url: "/p/guardioes",
     icon: Users,
@@ -53,6 +58,12 @@ const items = [
     title: "Configurações",
     url: "/p/configuracoes",
     icon: Settings,
+    adminOnly: true,
+  },
+  {
+    title: "Gestão de Acessos",
+    url: "/p/users",
+    icon: User,
     adminOnly: true,
   },
 ]

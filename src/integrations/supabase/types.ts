@@ -21,6 +21,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          guardian_name: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -28,6 +29,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          guardian_name?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -35,6 +37,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          guardian_name?: string | null
         }
         Relationships: []
       }
@@ -111,6 +114,78 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
+      }
+      app_data: {
+        Row: {
+          key: string
+          data: Json
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          data: Json
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          data?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          content: string
+          type: string
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          content: string
+          type: string
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          content?: string
+          type?: string
+          is_read?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      daily_reports: {
+        Row: {
+          id: string
+          author_id: string
+          content: string
+          type: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          author_id: string
+          content: string
+          type: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          author_id?: string
+          content?: string
+          type?: string
+          created_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

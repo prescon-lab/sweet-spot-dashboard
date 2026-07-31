@@ -1,3 +1,7 @@
+import { syncToCloud } from "./cloudSync";
+import { supabase } from "@/integrations/supabase/client";
+import { ejListStore } from "./ejListStore";
+
 export interface EventGoal {
   id: string;
   text: string;
@@ -54,6 +58,7 @@ export const eventStore = {
         const current = eventStore.getEvents();
         current.push(event);
         localStorage.setItem(STORE_KEY, JSON.stringify(current));
+        syncToCloud(STORE_KEY, current);
         window.dispatchEvent(new Event('eventsUpdated'));
       } catch (e) {
         console.error("Failed to save event", e);
@@ -77,6 +82,7 @@ export const eventStore = {
           });
           current[index] = updatedEvent;
           localStorage.setItem(STORE_KEY, JSON.stringify(current));
+          syncToCloud(STORE_KEY, current);
           window.dispatchEvent(new Event('eventsUpdated'));
         }
       } catch (e) {
@@ -90,6 +96,7 @@ export const eventStore = {
         const current = eventStore.getEvents();
         const updated = current.filter(e => e.id !== eventId);
         localStorage.setItem(STORE_KEY, JSON.stringify(updated));
+        syncToCloud(STORE_KEY, updated);
         window.dispatchEvent(new Event('eventsUpdated'));
       } catch (e) {
         console.error("Failed to delete event", e);
@@ -114,6 +121,23 @@ export const eventStore = {
               goal.checkedBy = goal.checkedBy.filter(id => id !== ejId);
             } else {
               goal.checkedBy.push(ejId);
+              
+              // Disparar notificação para o Guardião desta EJ
+              const ejs = ejListStore.getEjs();
+              const ej = ejs.find(e => e.name === ejId);
+              if (ej && ej.guardian) {
+                // Find user by guardian name and notify
+                supabase.from('profiles').select('id').eq('guardian_name', ej.guardian).maybeSingle().then(({ data }) => {
+                  if (data && data.id) {
+                    supabase.from('notifications').insert({
+                      user_id: data.id,
+                      title: 'Meta Atualizada!',
+                      content: `A EJ ${ej.name} bateu uma meta no evento ${event.name}!`,
+                      type: 'goal_update'
+                    }).then();
+                  }
+                });
+              }
             }
             
             // Re-evaluate if this EJ completed all goals for the event
@@ -136,6 +160,7 @@ export const eventStore = {
             }
             
             localStorage.setItem(STORE_KEY, JSON.stringify(current));
+            syncToCloud(STORE_KEY, current);
             window.dispatchEvent(new Event('eventsUpdated'));
           }
         }

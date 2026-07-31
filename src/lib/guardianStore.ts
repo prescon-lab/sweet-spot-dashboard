@@ -1,3 +1,5 @@
+import { syncToCloud } from "./cloudSync";
+
 export interface GuardianCustomization {
   color: string;
   avatarUrl: string; // Figurinha
@@ -41,9 +43,11 @@ export const guardianStore = {
         const parsed = data ? JSON.parse(data) : {};
         parsed[guardianName] = config;
         localStorage.setItem(STORE_KEY, JSON.stringify(parsed));
+        syncToCloud(STORE_KEY, parsed);
         
         // Dispatch an event so other components can react
         window.dispatchEvent(new Event('guardianStoreUpdated'));
+        window.dispatchEvent(new Event('guardiansUpdated'));
       } catch (e) {
         console.error("Failed to save to guardian store", e);
       }

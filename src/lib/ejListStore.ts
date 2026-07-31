@@ -1,5 +1,6 @@
 import { ejsList as initialEjsList } from "./data";
 import { guardianStore } from "./guardianStore";
+import { syncToCloud } from "./cloudSync";
 
 export interface EjItem {
   id: number;
@@ -35,6 +36,7 @@ export const ejListStore = {
 
     if (typeof window !== "undefined") {
       localStorage.setItem(STORE_KEY, JSON.stringify(updatedEjs));
+      syncToCloud(STORE_KEY, updatedEjs);
       window.dispatchEvent(new Event("ejListUpdated"));
 
       // Certificar-se de que o novo guardião possui um perfil configurado

@@ -76,7 +76,6 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
     : 0;
 
   return (
-  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 gap-0 glass-modal border-none shadow-2xl rounded-2xl">
         <div className="w-full h-40 bg-gradient-to-r from-primary/80 to-primary flex items-end p-8 relative rounded-t-2xl">
