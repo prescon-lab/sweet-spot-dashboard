@@ -18,7 +18,10 @@ import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
 import { Route as PEjsRouteImport } from './routes/p.ejs'
 import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
 import { Route as PHistoricoEventosRouteImport } from './routes/p.historico-eventos'
+import { Route as PProfileRouteImport } from './routes/p.profile'
+import { Route as PReportsRouteImport } from './routes/p.reports'
 import { Route as PSquadsRouteImport } from './routes/p.squads'
+import { Route as PUsersRouteImport } from './routes/p.users'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -65,9 +68,24 @@ const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
   path: '/p/historico-eventos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PProfileRoute = PProfileRouteImport.update({
+  id: '/p/profile',
+  path: '/p/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PReportsRoute = PReportsRouteImport.update({
+  id: '/p/reports',
+  path: '/p/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PSquadsRoute = PSquadsRouteImport.update({
   id: '/p/squads',
   path: '/p/squads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PUsersRoute = PUsersRouteImport.update({
+  id: '/p/users',
+  path: '/p/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -81,7 +99,10 @@ export interface FileRoutesByFullPath {
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
   '/p/historico-eventos': typeof PHistoricoEventosRoute
+  '/p/profile': typeof PProfileRoute
+  '/p/reports': typeof PReportsRoute
   '/p/squads': typeof PSquadsRoute
+  '/p/users': typeof PUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -93,7 +114,10 @@ export interface FileRoutesByTo {
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
   '/p/historico-eventos': typeof PHistoricoEventosRoute
+  '/p/profile': typeof PProfileRoute
+  '/p/reports': typeof PReportsRoute
   '/p/squads': typeof PSquadsRoute
+  '/p/users': typeof PUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -106,7 +130,10 @@ export interface FileRoutesById {
   '/p/ejs': typeof PEjsRoute
   '/p/guardioes': typeof PGuardioesRoute
   '/p/historico-eventos': typeof PHistoricoEventosRoute
+  '/p/profile': typeof PProfileRoute
+  '/p/reports': typeof PReportsRoute
   '/p/squads': typeof PSquadsRoute
+  '/p/users': typeof PUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -120,7 +147,10 @@ export interface FileRouteTypes {
     | '/p/ejs'
     | '/p/guardioes'
     | '/p/historico-eventos'
+    | '/p/profile'
+    | '/p/reports'
     | '/p/squads'
+    | '/p/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -132,7 +162,10 @@ export interface FileRouteTypes {
     | '/p/ejs'
     | '/p/guardioes'
     | '/p/historico-eventos'
+    | '/p/profile'
+    | '/p/reports'
     | '/p/squads'
+    | '/p/users'
   id:
     | '__root__'
     | '/'
@@ -144,7 +177,10 @@ export interface FileRouteTypes {
     | '/p/ejs'
     | '/p/guardioes'
     | '/p/historico-eventos'
+    | '/p/profile'
+    | '/p/reports'
     | '/p/squads'
+    | '/p/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -157,7 +193,10 @@ export interface RootRouteChildren {
   PEjsRoute: typeof PEjsRoute
   PGuardioesRoute: typeof PGuardioesRoute
   PHistoricoEventosRoute: typeof PHistoricoEventosRoute
+  PProfileRoute: typeof PProfileRoute
+  PReportsRoute: typeof PReportsRoute
   PSquadsRoute: typeof PSquadsRoute
+  PUsersRoute: typeof PUsersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,11 +264,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PHistoricoEventosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/profile': {
+      id: '/p/profile'
+      path: '/p/profile'
+      fullPath: '/p/profile'
+      preLoaderRoute: typeof PProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/reports': {
+      id: '/p/reports'
+      path: '/p/reports'
+      fullPath: '/p/reports'
+      preLoaderRoute: typeof PReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/squads': {
       id: '/p/squads'
       path: '/p/squads'
       fullPath: '/p/squads'
       preLoaderRoute: typeof PSquadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/users': {
+      id: '/p/users'
+      path: '/p/users'
+      fullPath: '/p/users'
+      preLoaderRoute: typeof PUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -245,7 +305,10 @@ const rootRouteChildren: RootRouteChildren = {
   PEjsRoute: PEjsRoute,
   PGuardioesRoute: PGuardioesRoute,
   PHistoricoEventosRoute: PHistoricoEventosRoute,
+  PProfileRoute: PProfileRoute,
+  PReportsRoute: PReportsRoute,
   PSquadsRoute: PSquadsRoute,
+  PUsersRoute: PUsersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

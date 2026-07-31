@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { ejListStore } from "@/lib/ejListStore";
 import { guardianStore } from "@/lib/guardianStore";
 import { GuardianDetailModal } from "@/components/guardians/GuardianDetailModal";
+import { GuardianCard } from "@/components/guardians/GuardianCard";
 import React from "react";
 
 export const Route = createFileRoute("/p/guardioes")({
@@ -22,23 +23,6 @@ export const Route = createFileRoute("/p/guardioes")({
 });
 
 // Helper function to calculate brightness and return black or white for text contrast
-function getContrastColor(hexColor: string) {
-  if (!hexColor) return '#FFFFFF';
-  
-  // Remove # if present
-  const hex = hexColor.replace('#', '');
-  
-  // Parse RGB
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  
-  // Calculate relative luminance (YIQ)
-  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-  
-  // Return black for bright colors, white for dark colors
-  return (yiq >= 128) ? '#000000' : '#FFFFFF';
-}
 
 function GuardiansPanel() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,35 +85,12 @@ function GuardiansPanel() {
         {filteredGuardians.map((guardian, i) => {
           const config = guardianStore.get(guardian.name);
           return (
-            <div 
-              key={i}
-              onClick={() => handleCardClick(guardian)}
-              className="rounded-3xl p-4 md:p-6 flex flex-col items-center justify-center text-center cursor-pointer transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:brightness-110 group relative overflow-hidden h-48 md:h-56 border border-white/10"
-              style={{ backgroundColor: config.color || 'var(--color-primary)' }}
-            >
-              {/* Avatar Circle */}
-              <div 
-                className="w-24 h-24 md:w-28 md:h-28 rounded-full mb-4 md:mb-5 flex flex-col items-center justify-center bg-black/10 backdrop-blur-sm overflow-hidden border-2 border-white/20 shadow-inner group-hover:scale-105 transition-transform duration-300"
-              >
-                {config.avatarUrl ? (
-                  <img src={config.avatarUrl} alt={guardian.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-xl md:text-2xl font-bold text-muted-foreground/50">
-                    {guardian.name.substring(0, 2).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              
-              {/* Guardian Name */}
-              <h3 
-                className="font-bold text-sm md:text-base tracking-widest uppercase w-full px-1 z-10 drop-shadow-sm leading-tight break-words whitespace-normal"
-                style={{ color: getContrastColor(config.color || '#0A1942') }}
-              >
-                {guardian.name}
-              </h3>
-
-
-          </div>
+            <GuardianCard 
+              key={i} 
+              name={guardian.name} 
+              config={config} 
+              onClick={() => handleCardClick(guardian)} 
+            />
           );
         })}
       </div>
