@@ -10,7 +10,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
-export function TodayTomorrowMeetings() {
+interface TodayTomorrowMeetingsProps {
+  onEjClick?: (ejName: string) => void;
+}
+
+export function TodayTomorrowMeetings({ onEjClick }: TodayTomorrowMeetingsProps = {}) {
   const [todayMeetings, setTodayMeetings] = useState<string[]>([]);
   const [tomorrowMeetings, setTomorrowMeetings] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,7 +100,11 @@ export function TodayTomorrowMeetings() {
               todayMeetings.map(ej => {
                 const data = ejDataStore.getEjData(ej);
                 return (
-                  <div key={ej} className="bg-background rounded-lg p-3 text-sm font-medium border flex flex-col gap-1">
+                  <div 
+                    key={ej} 
+                    className="bg-background rounded-lg p-3 text-sm font-medium border flex flex-col gap-1 cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => onEjClick && onEjClick(ej)}
+                  >
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4 text-primary" />
                       {ej}
@@ -129,7 +137,11 @@ export function TodayTomorrowMeetings() {
               tomorrowMeetings.map(ej => {
                 const data = ejDataStore.getEjData(ej);
                 return (
-                  <div key={ej} className="bg-background rounded-lg p-3 text-sm font-medium border flex flex-col gap-1">
+                  <div 
+                    key={ej} 
+                    className="bg-background rounded-lg p-3 text-sm font-medium border flex flex-col gap-1 cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => onEjClick && onEjClick(ej)}
+                  >
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4 text-primary" />
                       {ej}
@@ -170,7 +182,7 @@ export function TodayTomorrowMeetings() {
                   <SelectValue placeholder="Escolha uma EJ..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {ejListStore.getEjs().map(ej => (
+                  {(ejListStore.getEjs() || []).map(ej => (
                     <SelectItem key={ej.id} value={ej.name}>{ej.name}</SelectItem>
                   ))}
                 </SelectContent>

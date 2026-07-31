@@ -51,11 +51,8 @@ function Index() {
             <Sparkles className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            Bem-vindo ao Painel de Acompanhamento
+            Início
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            O centro de controle para gerenciar, visualizar e acompanhar de perto todas as informações, metas, dailys e saúde das suas Empresas Juniores (EJs) e Guardiões.
-          </p>
         </div>
 
         <div className="grid md:grid-cols-3 max-w-5xl mx-auto gap-6 mt-12">

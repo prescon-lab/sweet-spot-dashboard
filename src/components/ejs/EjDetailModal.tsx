@@ -766,7 +766,10 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                                 />
                                 <div className="flex gap-2 justify-end">
                                   <Button size="sm" variant="outline" onClick={() => setEditingPresconId(null)}>Cancelar</Button>
-                                  <Button size="sm" onClick={() => saveEditedPrescon(task.id)}>Salvar</Button>
+                                  <Button size="sm" onClick={() => saveEditedPrescon(task.id)}>
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Salvar
+                                  </Button>
                                 </div>
                               </div>
                             ) : (
@@ -839,7 +842,10 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                                 />
                                 <div className="flex gap-2 justify-end">
                                   <Button size="sm" variant="outline" onClick={() => setEditingReuniaoId(null)}>Cancelar</Button>
-                                  <Button size="sm" onClick={() => saveEditedReuniao(reuniao.id)}>Salvar</Button>
+                                  <Button size="sm" onClick={() => saveEditedReuniao(reuniao.id)}>
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Salvar
+                                  </Button>
                                 </div>
                               </div>
                             ) : (
@@ -876,8 +882,21 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 bg-muted/20 p-4 rounded-xl border border-border/50">
                 <label className="text-sm font-semibold text-foreground">Próxima Reunião</label>
+                
+                {proximaReuniao ? (
+                  <div className="flex items-center gap-2 mb-3 bg-primary/10 text-primary px-3 py-2 rounded-lg font-medium border border-primary/20">
+                    <CalendarIcon className="w-4 h-4" />
+                    <span>Reunião marcada para: {proximaReuniao.split('-').reverse().join('/')}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 mb-3 text-muted-foreground italic px-3 py-2 bg-card rounded-lg border">
+                    <CalendarIcon className="w-4 h-4" />
+                    <span>Sem reunião marcada</span>
+                  </div>
+                )}
+
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <Input 
@@ -888,7 +907,10 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                     />
                     <CalendarIcon className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                   </div>
-                  <Button size="sm" onClick={saveProximaReuniaoDate} className="h-10">Salvar</Button>
+                  <Button size="sm" onClick={saveProximaReuniaoDate} className="h-10">
+                    <Save className="w-4 h-4 mr-2" />
+                    Salvar
+                  </Button>
                 </div>
               </div>
 
