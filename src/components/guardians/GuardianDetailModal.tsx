@@ -232,10 +232,11 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
         </DialogContent>
       </Dialog>
 
-      <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)}>
+      <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)} modal={false}>
         <DialogContent 
           {...dirtyGuard.containerProps}
-          className="max-w-none w-screen h-[100dvh] p-0 m-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none transition-colors duration-300 data-[state=open]:animate-in data-[state=open]:slide-in-from-right-1/2 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right-1/2"
+          usePortal={false}
+          className="absolute inset-0 top-0 left-0 translate-x-0 translate-y-0 max-w-none w-full h-full p-0 m-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none transition-colors duration-300 data-[state=open]:animate-in data-[state=open]:slide-in-from-right-1/2 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right-1/2"
           style={{ backgroundColor: bannerColor }}
           hideCloseButton
         >

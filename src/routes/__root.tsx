@@ -190,7 +190,7 @@ function AppShell() {
   return (
     <SidebarProvider>
       {session ? <AppSidebar /> : null}
-      <main className="flex-1 overflow-x-hidden min-w-0">
+      <main className="flex-1 overflow-x-hidden min-w-0 relative flex flex-col">
         <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl">
           {session ? <SidebarTrigger className="h-10 w-10" /> : <span />}
           <div className="flex items-center gap-2">
