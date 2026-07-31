@@ -59,6 +59,59 @@ export type Database = {
         }
         Relationships: []
       }
+      squads: {
+        Row: {
+          id: string
+          name: string
+          leader: string
+          color: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          leader: string
+          color?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          leader?: string
+          color?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      squad_members: {
+        Row: {
+          id: string
+          squad_id: string
+          guardian_name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          squad_id: string
+          guardian_name: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          squad_id?: string
+          guardian_name?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_members_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -34,6 +34,11 @@ const items = [
     icon: Users,
   },
   {
+    title: "Squads",
+    url: "/p/squads",
+    icon: Users, // Can use Users or something else, like a group icon.
+  },
+  {
     title: "Histórico de Eventos",
     url: "/p/historico-eventos",
     icon: BarChart2,

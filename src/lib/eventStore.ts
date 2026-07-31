@@ -6,10 +6,22 @@ export interface EventGoal {
   checkedBy?: string[];
 }
 
+export interface SquadEventGoal {
+  id: string;
+  squadId: string;
+  title: string;
+  type: 'checklist' | 'numeric' | 'automatic';
+  completed?: boolean;
+  targetValue?: number;
+  currentValue?: number;
+  automaticMetricType?: string;
+}
+
 export interface AppEvent {
   id: string;
   name: string;
   ejGoals: EventGoal[];
+  squadGoals?: SquadEventGoal[];
   createdAt: string;
   status?: 'active' | 'completed';
   completedAt?: string;
