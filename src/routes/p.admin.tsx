@@ -160,42 +160,6 @@ function AdminPage() {
         <p className="text-muted-foreground mt-2">
           Todo mundo que entra com o Google aparece aqui como Guardião. Promova a Administrador quem precisa editar tudo.
         </p>
-        
-        {/* DEV ONLY RESET BUTTON */}
-        <div className="mt-4 p-4 border border-red-500/50 bg-red-500/10 rounded-xl max-w-sm space-y-2">
-          <h3 className="font-bold text-red-500">Ferramenta de Limpeza (Para Testes)</h3>
-          <p className="text-xs text-muted-foreground">Isso apagará TODOS os dados de EJs, Guardiões, Reuniões e Menções do banco para que você comece do zero. Use com cuidado!</p>
-          <Button 
-            variant="destructive" 
-            className="w-full mt-2 font-bold"
-            onClick={async () => {
-              if (window.confirm("CUIDADO! Isso vai apagar TODOS os dados da plataforma. Tem certeza?")) {
-                toast.info("Limpando banco de dados...");
-                
-                const emptyData = [
-                  { key: 'sweet_spot_events', data: [], updated_at: new Date().toISOString() },
-                  { key: 'sweet_spot_leads', data: [], updated_at: new Date().toISOString() },
-                  { key: 'vertentes_guardian_customizations', data: {}, updated_at: new Date().toISOString() },
-                  { key: 'sweet_spot_mentions', data: [], updated_at: new Date().toISOString() },
-                  { key: 'vertentes_guardian_prescon', data: [], updated_at: new Date().toISOString() },
-                  { key: 'sweet_spot_activities', data: [], updated_at: new Date().toISOString() },
-                  { key: 'sweet_spot_ej_data', data: {}, updated_at: new Date().toISOString() },
-                  { key: 'vertentes_links', data: [], updated_at: new Date().toISOString() }
-                ];
-                
-                await supabase.from('app_data').upsert(emptyData, { onConflict: 'key' });
-                await supabase.from('app_data').delete().eq('key', 'vertentes_ej_list');
-                
-                // Clear local storage too
-                localStorage.clear();
-                toast.success("Banco limpo! Recarregando a página...");
-                setTimeout(() => window.location.reload(), 2000);
-              }
-            }}
-          >
-            LIMPAR TODOS OS DADOS E COMEÇAR DO ZERO
-          </Button>
-        </div>
       </div>
 
       <div className="glass-card rounded-3xl p-6 space-y-5">
@@ -297,6 +261,42 @@ function AdminPage() {
           Ir para Configurações
         </Link>
       </p>
+
+      {/* DEV ONLY RESET BUTTON */}
+      <div className="mt-12 p-4 border border-red-500/50 bg-red-500/10 rounded-xl max-w-sm space-y-2 opacity-50 hover:opacity-100 transition-opacity">
+        <h3 className="font-bold text-red-500">Ferramenta de Limpeza (Para Testes)</h3>
+        <p className="text-xs text-muted-foreground">Isso apagará TODOS os dados de EJs, Guardiões, Reuniões e Menções do banco para que você comece do zero. Use com cuidado!</p>
+        <Button 
+          variant="destructive" 
+          className="w-full mt-2 font-bold"
+          onClick={async () => {
+            if (window.confirm("CUIDADO! Isso vai apagar TODOS os dados da plataforma. Tem certeza?")) {
+              toast.info("Limpando banco de dados...");
+              
+              const emptyData = [
+                { key: 'sweet_spot_events', data: [], updated_at: new Date().toISOString() },
+                { key: 'sweet_spot_leads', data: [], updated_at: new Date().toISOString() },
+                { key: 'vertentes_guardian_customizations', data: {}, updated_at: new Date().toISOString() },
+                { key: 'sweet_spot_mentions', data: [], updated_at: new Date().toISOString() },
+                { key: 'vertentes_guardian_prescon', data: [], updated_at: new Date().toISOString() },
+                { key: 'sweet_spot_activities', data: [], updated_at: new Date().toISOString() },
+                { key: 'sweet_spot_ej_data', data: {}, updated_at: new Date().toISOString() },
+                { key: 'vertentes_links', data: [], updated_at: new Date().toISOString() }
+              ];
+              
+              await supabase.from('app_data').upsert(emptyData, { onConflict: 'key' });
+              await supabase.from('app_data').delete().eq('key', 'vertentes_ej_list');
+              
+              // Clear local storage too
+              localStorage.clear();
+              toast.success("Banco limpo! Recarregando a página...");
+              setTimeout(() => window.location.reload(), 2000);
+            }
+          }}
+        >
+          LIMPAR TODOS OS DADOS E COMEÇAR DO ZERO
+        </Button>
+      </div>
     </div>
   );
 }
