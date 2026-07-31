@@ -232,13 +232,11 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
         </DialogContent>
       </Dialog>
 
-      <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)} modal={false}>
-        <DialogContent 
+      {open && (
+        <div 
           {...dirtyGuard.containerProps}
-          usePortal={false}
-          className="absolute inset-0 top-0 left-0 translate-x-0 translate-y-0 max-w-none w-full h-full p-0 m-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none transition-colors duration-300 data-[state=open]:animate-in data-[state=open]:slide-in-from-right-1/2 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right-1/2"
+          className="absolute inset-0 top-0 left-0 translate-x-0 translate-y-0 max-w-none w-full h-full p-0 m-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none transition-colors duration-300 animate-in slide-in-from-right-1/2 bg-background z-50"
           style={{ backgroundColor: bannerColor }}
-          hideCloseButton
         >
           {/* Back Button Area */}
           <div className="absolute top-4 left-4 z-50 flex items-center gap-2">
@@ -628,8 +626,8 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
             <Button variant="ghost" onClick={() => dirtyGuard.requestClose(onOpenChange)} className="rounded-full px-6 font-bold hover:bg-white/10 text-white">Fechar sem salvar</Button>
             <Button onClick={() => { dirtyGuard.markClean(); onOpenChange(false); }} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-lg">Salvar Perfil</Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
       {/* EJ Detail Modal */}
       <EjDetailModal 
