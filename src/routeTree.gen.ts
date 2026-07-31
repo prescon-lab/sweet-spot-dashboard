@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PHistoricoEventosRouteImport } from './routes/p.historico-eventos'
 import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
@@ -17,6 +18,11 @@ import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
 import { Route as PCalendarioRouteImport } from './routes/p.calendario'
 import { Route as PTokenRouteImport } from './routes/p.$token'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,6 +61,7 @@ const PTokenRoute = PTokenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/p/$token': typeof PTokenRoute
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/p/$token': typeof PTokenRoute
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/p/$token': typeof PTokenRoute
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/p/$token'
     | '/p/calendario'
     | '/p/configuracoes'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/p/$token'
     | '/p/calendario'
     | '/p/configuracoes'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/p/$token'
     | '/p/calendario'
     | '/p/configuracoes'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   PTokenRoute: typeof PTokenRoute
   PCalendarioRoute: typeof PCalendarioRoute
   PConfiguracoesRoute: typeof PConfiguracoesRoute
@@ -123,6 +136,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -177,6 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   PTokenRoute: PTokenRoute,
   PCalendarioRoute: PCalendarioRoute,
   PConfiguracoesRoute: PConfiguracoesRoute,
