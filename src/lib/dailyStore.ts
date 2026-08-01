@@ -26,7 +26,7 @@ export const dailyStore = {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORE_KEY, JSON.stringify(config));
-        syncToCloud(STORE_KEY, [{ id: '1', ...config }]); // Wrapper for generic cloudSync
+        syncToCloud(STORE_KEY, config);
         window.dispatchEvent(new Event('dailyConfigUpdated'));
       } catch (e) {
         console.error("Failed to save daily config", e);
@@ -36,7 +36,7 @@ export const dailyStore = {
   removeConfig: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(STORE_KEY);
-      syncToCloud(STORE_KEY, []);
+      syncToCloud(STORE_KEY, null);
       window.dispatchEvent(new Event('dailyConfigUpdated'));
     }
   }

@@ -52,6 +52,7 @@ export async function initCloudSync() {
         window.dispatchEvent(new Event("activitiesUpdated"));
         window.dispatchEvent(new Event("ejDataUpdated"));
         window.dispatchEvent(new Event("linksStoreUpdated"));
+        window.dispatchEvent(new Event("dailyConfigUpdated"));
       }
     }
   } catch (e) {
@@ -79,6 +80,7 @@ export async function initCloudSync() {
           if (row.key === "sweet_spot_activities") window.dispatchEvent(new Event("activitiesUpdated"));
           if (row.key === "sweet_spot_ej_data") window.dispatchEvent(new Event("ejDataUpdated"));
           if (row.key === "vertentes_links") window.dispatchEvent(new Event("linksStoreUpdated"));
+          if (row.key === "sweet_spot_daily_config") window.dispatchEvent(new Event("dailyConfigUpdated"));
         }
       }
     })
