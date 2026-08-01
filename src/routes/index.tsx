@@ -2,8 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trophy, Medal, Building2, Camera, X } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Trophy, Medal, Building2, Camera, ZoomIn, ZoomOut } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { gamificationStore, GameRule } from "@/lib/gamificationStore";
@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth";
 import { ejListStore } from "@/lib/ejListStore";
 import { squadStore, Squad } from "@/lib/squadStore";
 import { Badge } from "@/components/ui/badge";
+import Cropper from "react-easy-crop";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,6 +40,18 @@ function Index() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Crop state
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [savingCrop, setSavingCrop] = useState(false);
+
+  const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -149,41 +162,54 @@ function Index() {
     return () => window.removeEventListener("gamificationUpdated", loadData);
   }, [user]);
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-
-    setUploadingAvatar(true);
     const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64 = reader.result as string;
+    reader.onloadend = () => {
+      setTempImageUrl(reader.result as string);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+    // Reset so same file can be re-selected
+    e.target.value = "";
+  };
 
-      // Compress
+  const handleSaveCrop = async () => {
+    if (!tempImageUrl || !croppedAreaPixels || !user) return;
+    setSavingCrop(true);
+    try {
       const img = new Image();
-      img.src = base64;
+      img.src = tempImageUrl;
       await new Promise((res) => (img.onload = res));
       const canvas = document.createElement("canvas");
       canvas.width = 256;
       canvas.height = 256;
       const ctx = canvas.getContext("2d");
-      if (!ctx) { setUploadingAvatar(false); return; }
-      ctx.drawImage(img, 0, 0, 256, 256);
-      const compressed = canvas.toDataURL("image/jpeg", 0.8);
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ avatar_url: compressed })
-        .eq("id", user.id);
-
+      if (!ctx) return;
+      ctx.drawImage(
+        img,
+        croppedAreaPixels.x,
+        croppedAreaPixels.y,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height,
+        0, 0, 256, 256
+      );
+      const compressed = canvas.toDataURL("image/jpeg", 0.85);
+      const { error } = await supabase.from("profiles").update({ avatar_url: compressed }).eq("id", user.id);
       if (error) {
         toast.error("Erro ao salvar a foto.");
       } else {
         toast.success("Foto de perfil atualizada!");
         setProfile((prev) => prev ? { ...prev, avatar_url: compressed } : prev);
+        setCropModalOpen(false);
+        setTempImageUrl(null);
       }
-      setUploadingAvatar(false);
-    };
-    reader.readAsDataURL(file);
+    } finally {
+      setSavingCrop(false);
+    }
   };
 
   if (!user || !profile) {
@@ -257,17 +283,10 @@ function Index() {
           </div>
           <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploadingAvatar}
             className="absolute inset-0 rounded-full bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white text-xs gap-1"
           >
-            {uploadingAvatar ? (
-              <span className="text-xs">Salvando...</span>
-            ) : (
-              <>
-                <Camera className="w-5 h-5" />
-                <span>Editar</span>
-              </>
-            )}
+            <Camera className="w-5 h-5" />
+            <span>Editar</span>
           </button>
         </div>
 
@@ -440,6 +459,60 @@ function Index() {
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto -mx-1 px-1">
             <RankingList items={ranking} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Crop Avatar */}
+      <Dialog open={cropModalOpen} onOpenChange={(open) => { if (!open) { setCropModalOpen(false); setTempImageUrl(null); } }}>
+        <DialogContent className="max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="w-4 h-4 text-primary" />
+              Ajustar Foto de Perfil
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Cropper Area */}
+          <div className="relative w-full h-72 bg-muted rounded-2xl overflow-hidden">
+            {tempImageUrl && (
+              <Cropper
+                image={tempImageUrl}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </div>
+
+          {/* Zoom control */}
+          <div className="flex items-center gap-3 mt-2">
+            <ZoomOut className="w-4 h-4 text-muted-foreground shrink-0" />
+            <input
+              type="range"
+              min={1}
+              max={3}
+              step={0.05}
+              value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              className="w-full accent-primary cursor-pointer"
+            />
+            <ZoomIn className="w-4 h-4 text-muted-foreground shrink-0" />
+          </div>
+          <p className="text-xs text-center text-muted-foreground -mt-1">Arraste para reposicionar · Use o controle para dar zoom</p>
+
+          <div className="flex gap-3 mt-2">
+            <Button variant="outline" className="flex-1" onClick={() => { setCropModalOpen(false); setTempImageUrl(null); }}>
+              Cancelar
+            </Button>
+            <Button className="flex-1" disabled={savingCrop} onClick={handleSaveCrop}>
+              {savingCrop ? "Salvando..." : "Salvar Foto"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
