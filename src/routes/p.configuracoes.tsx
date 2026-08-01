@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { dailyStore, DailyConfig } from "@/lib/dailyStore";
 import { announcementStore, Announcement } from "@/lib/announcementStore";
 import { Textarea } from "@/components/ui/textarea";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 function isValidDate(value?: string) {
   if (!value) return false;
@@ -62,6 +63,9 @@ function Configuracoes() {
   const [newAnnStart, setNewAnnStart] = useState("");
   const [newAnnEnd, setNewAnnEnd] = useState("");
   const [newAnnIcon, setNewAnnIcon] = useState("Bell");
+
+  // Deletion Confirmation State
+  const [deleteConfirmInfo, setDeleteConfirmInfo] = useState<{type: 'daily' | 'announcement' | 'link', id?: string} | null>(null);
 
   useEffect(() => {
     loadLinks();
@@ -127,10 +131,7 @@ function Configuracoes() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Tem certeza que deseja remover este link?")) {
-      linksStore.remove(id);
-      toast.success("Link removido.");
-    }
+    setDeleteConfirmInfo({ type: 'link', id });
   };
 
   const handleStartEdit = (link: UsefulLink) => {
@@ -167,10 +168,7 @@ function Configuracoes() {
   };
 
   const handleRemoveDaily = () => {
-    if (confirm("Tem certeza que deseja remover as Dailys?")) {
-      dailyStore.removeConfig();
-      toast.success("Dailys removidas.");
-    }
+    setDeleteConfirmInfo({ type: 'daily' });
   };
 
   const toggleDayOfWeek = (day: number) => {
@@ -205,10 +203,23 @@ function Configuracoes() {
   };
 
   const handleDeleteAnnouncement = (id: string) => {
-    if (confirm("Tem certeza que deseja remover este aviso?")) {
+    setDeleteConfirmInfo({ type: 'announcement', id });
+  };
+
+  const executeDeletion = () => {
+    if (!deleteConfirmInfo) return;
+    const { type, id } = deleteConfirmInfo;
+    if (type === 'link' && id) {
+      linksStore.remove(id);
+      toast.success("Link removido.");
+    } else if (type === 'daily') {
+      dailyStore.removeConfig();
+      toast.success("Dailys removidas.");
+    } else if (type === 'announcement' && id) {
       announcementStore.remove(id);
       toast.success("Aviso removido.");
     }
+    setDeleteConfirmInfo(null);
   };
 
   if (role === "guardian") {
@@ -438,7 +449,7 @@ function Configuracoes() {
                       </Badge>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-500/10 shrink-0" onClick={() => handleDeleteAnnouncement(ann.id)}>
+                  <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-500/10 shrink-0" onClick={() => setDeleteConfirmInfo({ type: 'announcement', id: ann.id })}>
                     <Trash className="w-4 h-4" />
                   </Button>
                 </div>
@@ -538,6 +549,25 @@ function Configuracoes() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!deleteConfirmInfo} onOpenChange={(open) => !open && setDeleteConfirmInfo(null)}>
+        <AlertDialogContent className="glass-modal rounded-3xl border-primary/20 bg-background/95 backdrop-blur-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteConfirmInfo?.type === 'daily' && "Tem certeza que deseja remover as configurações de Daily? Essa ação não poderá ser desfeita."}
+              {deleteConfirmInfo?.type === 'announcement' && "Tem certeza que deseja remover este aviso? Ele não aparecerá mais para os usuários."}
+              {deleteConfirmInfo?.type === 'link' && "Tem certeza que deseja remover este link útil?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={executeDeletion} className="bg-red-500 text-white hover:bg-red-600 border-red-500 font-bold rounded-full px-6">
+              Confirmar Exclusão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
