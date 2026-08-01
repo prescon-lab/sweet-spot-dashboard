@@ -11,6 +11,10 @@ import { useAccessRole } from "@/lib/access";
 import { toast } from "sonner";
 import { dailyStore, DailyConfig } from "@/lib/dailyStore";
 import { announcementStore, Announcement } from "@/lib/announcementStore";
+import { eventStore } from "@/lib/eventStore";
+import { ejListStore } from "@/lib/ejListStore";
+import { squadStore } from "@/lib/squadStore";
+import { activityStore } from "@/lib/activityStore";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -56,6 +60,7 @@ function Configuracoes() {
   });
   const [savedDailyConfig, setSavedDailyConfig] = useState<DailyConfig | null>(null);
   const [isEditingDaily, setIsEditingDaily] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
 
   // Announcements State
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -146,6 +151,54 @@ function Configuracoes() {
     setEditTitle(link.title);
     setEditUrl(link.url);
     setEditCategory(link.category);
+  };
+
+  const handleCleanTestData = async () => {
+    if (!confirm("Tem certeza que deseja apagar TODOS os dados (Avisos, Eventos, EJs, Atividades) que contenham a palavra 'teste' no nome? Essa ação não pode ser desfeita.")) {
+      return;
+    }
+    
+    setIsCleaning(true);
+    try {
+      // Clean Announcements
+      const anns = announcementStore.getAll();
+      anns.forEach(a => {
+        if (a.title.toLowerCase().includes('teste') || a.content.toLowerCase().includes('teste')) {
+          announcementStore.remove(a.id);
+        }
+      });
+
+      // Clean Events
+      const evts = eventStore.getEvents();
+      evts.forEach(e => {
+        if (e.name.toLowerCase().includes('teste')) {
+          eventStore.deleteEvent(e.id);
+        }
+      });
+
+      // Clean Activities
+      const acts = activityStore.getActivities();
+      acts.forEach(a => {
+        if (a.ejName.toLowerCase().includes('teste') || a.description.toLowerCase().includes('teste')) {
+          activityStore.deleteActivity(a.id);
+        }
+      });
+
+      // Clean EJs
+      const ejs = ejListStore.getEjs();
+      ejs.forEach(e => {
+        if (e.name.toLowerCase().includes('teste')) {
+          ejListStore.deleteEj(e.id);
+        }
+      });
+
+      toast.success("Limpeza de dados de teste concluída!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Ocorreu um erro ao limpar os dados.");
+    } finally {
+      setIsCleaning(false);
+    }
   };
 
   const handleSaveEdit = (id: string) => {
@@ -664,6 +717,29 @@ function Configuracoes() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ZONA DE PERIGO / LIMPEZA */}
+      <section className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6 md:p-8 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold flex items-center gap-2 text-red-600">
+            <AlertTriangle className="w-5 h-5" />
+            Zona de Limpeza (Testes)
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Para publicar a plataforma limpa, use o botão abaixo para excluir tudo que você criou com a palavra "Teste" no nome. 
+            Isso vai procurar por Avisos, Eventos, EJs e Atividades e excluí-los automaticamente.
+          </p>
+        </div>
+        
+        <Button 
+          variant="destructive" 
+          onClick={handleCleanTestData} 
+          disabled={isCleaning}
+          className="w-full sm:w-auto font-bold rounded-xl"
+        >
+          {isCleaning ? "Limpando..." : "Limpar Dados de Teste"}
+        </Button>
+      </section>
     </div>
   );
 }
