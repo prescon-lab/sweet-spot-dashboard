@@ -16,6 +16,7 @@ import Cropper from "react-easy-crop";
 import { activityStore, Activity } from "@/lib/activityStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { SquadDetailModal } from "@/components/squads/SquadDetailModal";
+import { EventDashboardPanel } from "@/components/events/EventDashboardPanel";
 import { Activity as ActivityIcon, Bell, Flame, Clock, CalendarDays, MessageSquare, PartyPopper, AlertTriangle, Info, Check } from "lucide-react";
 import { isDailyDay } from "@/lib/dailyStore";
 import { announcementStore, Announcement } from "@/lib/announcementStore";
@@ -431,8 +432,10 @@ function Index() {
 
   return (
     <div className="page-shell space-y-8 animate-scale-in">
-      {/* Hidden file input for avatar */}
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+
+      {/* Global Event Dashboard Panel */}
+      <EventDashboardPanel />
 
       {/* Header Profile */}
       <div className="flex flex-col items-center gap-6 bg-card p-6 md:p-8 rounded-3xl border shadow-sm">
