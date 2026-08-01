@@ -131,7 +131,7 @@ function Index() {
             return {
               ...r,
               name: u?.full_name || u?.email || "Usuário",
-              avatar_url: u?.avatar_url,
+              avatar_url: u?.avatar_url ?? undefined,
             };
           });
           setRanking(enrichedRank);
