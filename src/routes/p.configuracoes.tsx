@@ -15,6 +15,7 @@ import { eventStore } from "@/lib/eventStore";
 import { ejListStore } from "@/lib/ejListStore";
 import { squadStore } from "@/lib/squadStore";
 import { activityStore } from "@/lib/activityStore";
+import { syncToCloud } from "@/lib/cloudSync";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -173,18 +174,22 @@ function Configuracoes() {
     setIsCleaning(true);
     try {
       if (cleanOptions.announcements) {
-        const anns = announcementStore.getAll();
-        anns.forEach(a => announcementStore.remove(a.id));
+        localStorage.setItem('sweet_spot_announcements', '[]');
+        syncToCloud('sweet_spot_announcements', []);
+        window.dispatchEvent(new Event('announcementsUpdated'));
       }
 
       if (cleanOptions.events) {
-        const evts = eventStore.getEvents();
-        evts.forEach(e => eventStore.deleteEvent(e.id));
+        localStorage.setItem('sweet_spot_events', '[]');
+        syncToCloud('sweet_spot_events', []);
+        window.dispatchEvent(new Event('eventsUpdated'));
       }
 
       if (cleanOptions.activities) {
-        const acts = activityStore.getActivities();
-        acts.forEach(a => activityStore.deleteActivity(a.id));
+        localStorage.setItem('sweet_spot_activities', '[]');
+        syncToCloud('sweet_spot_activities', []);
+        window.dispatchEvent(new Event('ejActivitiesUpdated'));
+        window.dispatchEvent(new Event('activitiesUpdated'));
       }
 
       if (cleanOptions.guardians) {
