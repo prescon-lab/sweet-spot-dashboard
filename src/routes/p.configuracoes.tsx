@@ -47,7 +47,11 @@ function Configuracoes() {
     
     const dConfig = dailyStore.getConfig();
     if (dConfig) {
-      setDailyConfig(dConfig);
+      setDailyConfig({
+        startDate: dConfig.startDate ?? "",
+        endDate: dConfig.endDate ?? "",
+        daysOfWeek: Array.isArray(dConfig.daysOfWeek) ? dConfig.daysOfWeek : [1, 2, 3, 4, 5],
+      });
     }
     
     const handleUpdate = () => {
@@ -117,9 +121,10 @@ function Configuracoes() {
 
   const toggleDayOfWeek = (day: number) => {
     setDailyConfig(prev => {
-      const days = prev.daysOfWeek.includes(day)
-        ? prev.daysOfWeek.filter(d => d !== day)
-        : [...prev.daysOfWeek, day].sort();
+      const current = prev.daysOfWeek ?? [];
+      const days = current.includes(day)
+        ? current.filter(d => d !== day)
+        : [...current, day].sort();
       return { ...prev, daysOfWeek: days };
     });
   };
