@@ -21,6 +21,7 @@ import { activityStore } from "@/lib/activityStore";
 import { mentionStore } from "@/lib/mentionStore";
 import { ejListStore } from "@/lib/ejListStore";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EjDetailModalProps {
   open: boolean;
@@ -61,7 +62,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   
   const [mentionSearch, setMentionSearch] = useState<string | null>(null);
   const [guardianName, setGuardianName] = useState("");
-  const uniqueGuardians = ejListStore.getUniqueGuardians();
+  const [mentionUsers, setMentionUsers] = useState<string[]>([]);
 
   const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -130,6 +131,14 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       setEvents(eventStore.getEvents().filter(e => e.status !== 'completed'));
     };
     
+    // Fetch users for mentions
+    supabase.from("profiles").select("full_name, guardian_name").then(({ data }) => {
+      if (data) {
+        const names = data.map(d => d.guardian_name || d.full_name).filter(Boolean);
+        setMentionUsers([...new Set(names)]);
+      }
+    });
+
     window.addEventListener('eventsUpdated', handleUpdate);
     return () => window.removeEventListener('eventsUpdated', handleUpdate);
   }, [open, ejData?.name]);
@@ -635,9 +644,9 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                         {mentionSearch !== null && (
                           <div className="absolute top-12 left-0 right-0 bg-card border rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
                             <div className="px-3 py-2 text-xs font-semibold text-muted-foreground bg-muted/30 border-b">
-                              Mencionar Guardião
+                              Mencionar Usuário
                             </div>
-                            {uniqueGuardians.filter(g => g.toLowerCase().includes(mentionSearch)).map(g => (
+                            {mentionUsers.filter(g => g.toLowerCase().includes(mentionSearch)).map(g => (
                               <div 
                                 key={g} 
                                 className="px-4 py-3 hover:bg-primary/5 cursor-pointer text-sm font-medium transition-colors"
@@ -646,8 +655,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                                 <span className="text-primary mr-1">@</span>{g}
                               </div>
                             ))}
-                            {uniqueGuardians.filter(g => g.toLowerCase().includes(mentionSearch)).length === 0 && (
-                              <div className="px-4 py-3 text-sm text-muted-foreground">Nenhum guardião encontrado... (você pode continuar digitando)</div>
+                            {mentionUsers.filter(g => g.toLowerCase().includes(mentionSearch)).length === 0 && (
+                              <div className="px-4 py-3 text-sm text-muted-foreground">Nenhum usuário encontrado... (você pode continuar digitando)</div>
                             )}
                           </div>
                         )}

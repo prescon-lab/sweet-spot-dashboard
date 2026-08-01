@@ -27,6 +27,7 @@ interface ProfileData {
   full_name: string;
   guardian_name: string;
   avatar_url: string;
+  email?: string;
 }
 
 interface RankEntry {
@@ -87,12 +88,14 @@ function Index() {
       full_name: profileData.full_name || profileData.email || "Usuário",
       guardian_name: profileData.guardian_name || "",
       avatar_url: profileData.avatar_url || "",
+      email: profileData.email,
     };
     setProfile(p);
 
-    // Fetch EJs if guardian
-    if (p.guardian_name) {
-      const ejs = ejListStore.getEjs().filter((ej) => ej.guardian === p.guardian_name);
+    // Fetch EJs if guardian or prescon
+    const isPrescon = profileData.email === "prescon@nucleovertentes" || profileData.email === "prescon@nucleovertentes.com" || profileData.email === "prescon.nucleovertentes@gmail.com";
+    if (p.guardian_name || isPrescon) {
+      const ejs = ejListStore.getEjs().filter((ej) => isPrescon || ej.guardian === p.guardian_name);
       setMyEjs(ejs);
 
       try {
@@ -319,7 +322,7 @@ function Index() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
           {/* Minhas EJs */}
-          {profile.guardian_name && (
+          {(profile.guardian_name || profile.email?.includes("prescon")) && (
             <section className="space-y-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-primary" />
