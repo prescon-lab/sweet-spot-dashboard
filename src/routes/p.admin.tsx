@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ejListStore } from "@/lib/ejListStore";
 import { ShieldCheck, ShieldOff, Loader2, Users, Search, Trash2, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { listProfilesWithEmail } from "@/lib/adminUsers.functions";
 
 export const Route = createFileRoute("/p/admin")({
   head: () => ({
@@ -43,8 +44,8 @@ function AdminPage() {
 
   const load = useCallback(async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
-    const [{ data: profiles }, { data: roles }] = await Promise.all([
-      supabase.from("profiles").select("id, email, full_name, avatar_url, guardian_name").order("email"),
+    const [profiles, { data: roles }] = await Promise.all([
+      listProfilesWithEmail().catch(() => [] as Awaited<ReturnType<typeof listProfilesWithEmail>>),
       supabase.from("user_roles").select("user_id, role").eq("role", "admin"),
     ]);
     const adminIds = new Set((roles ?? []).map((r) => r.user_id));
