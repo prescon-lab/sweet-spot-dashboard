@@ -165,7 +165,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      member_directory: {
+        Row: {
+          avatar_url: string | null
+          full_name: string | null
+          guardian_name: string | null
+          id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          full_name?: string | null
+          guardian_name?: string | null
+          id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          full_name?: string | null
+          guardian_name?: string | null
+          id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -175,6 +195,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_member: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "guardian"
