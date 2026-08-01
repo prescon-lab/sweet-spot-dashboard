@@ -11,6 +11,12 @@ import { useAccessRole } from "@/lib/access";
 import { toast } from "sonner";
 import { dailyStore, DailyConfig } from "@/lib/dailyStore";
 
+function isValidDate(value?: string) {
+  if (!value) return false;
+  const d = new Date(value + "T12:00:00");
+  return !Number.isNaN(d.getTime());
+}
+
 export const Route = createFileRoute("/p/configuracoes")({
   head: () => ({
     meta: [
@@ -210,7 +216,7 @@ function Configuracoes() {
           Defina o período em que as Dailys estarão ativas e em quais dias da semana elas ocorrem. Isso exibirá o ícone ⚡ no calendário e avisará os usuários na página inicial.
         </p>
         
-        {savedDailyConfig && !isEditingDaily ? (
+        {savedDailyConfig && isValidDate(savedDailyConfig.startDate) && isValidDate(savedDailyConfig.endDate) && !isEditingDaily ? (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex justify-between items-center mt-4">
             <div>
               <h3 className="font-bold text-primary flex items-center gap-2">
