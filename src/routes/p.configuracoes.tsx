@@ -65,7 +65,8 @@ function Configuracoes() {
   const [cleanOptions, setCleanOptions] = useState({
     announcements: true,
     events: true,
-    activities: true
+    activities: true,
+    guardians: true
   });
 
   // Announcements State
@@ -160,7 +161,7 @@ function Configuracoes() {
   };
 
   const handleCleanTestData = async () => {
-    if (!cleanOptions.announcements && !cleanOptions.events && !cleanOptions.activities) {
+    if (!cleanOptions.announcements && !cleanOptions.events && !cleanOptions.activities && !cleanOptions.guardians) {
       toast.error("Selecione pelo menos um tipo de dado para limpar.");
       return;
     }
@@ -186,8 +187,15 @@ function Configuracoes() {
         acts.forEach(a => activityStore.deleteActivity(a.id));
       }
 
+      if (cleanOptions.guardians) {
+        localStorage.setItem("vertentes_guardian_customizations", "{}");
+        syncToCloud("vertentes_guardian_customizations", {});
+        window.dispatchEvent(new Event('guardianStoreUpdated'));
+        window.dispatchEvent(new Event('guardiansUpdated'));
+      }
+
       toast.success("Dados selecionados foram apagados com sucesso!");
-      setCleanOptions({ announcements: false, events: false, activities: false });
+      setCleanOptions({ announcements: false, events: false, activities: false, guardians: false });
     } catch (e) {
       console.error(e);
       toast.error("Ocorreu um erro ao limpar os dados.");
@@ -752,6 +760,15 @@ function Configuracoes() {
               className="w-5 h-5 accent-red-500"
             />
             <span className="font-medium text-foreground">Atividades (Histórico de Ações)</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-red-500/10 transition-colors">
+            <input 
+              type="checkbox" 
+              checked={cleanOptions.guardians}
+              onChange={(e) => setCleanOptions(prev => ({...prev, guardians: e.target.checked}))}
+              className="w-5 h-5 accent-red-500"
+            />
+            <span className="font-medium text-foreground">Cards de Guardiões (Fotos, Cores e Frases)</span>
           </label>
         </div>
 
