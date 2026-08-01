@@ -212,6 +212,7 @@ function Index() {
   useEffect(() => {
     loadData();
     window.addEventListener("gamificationUpdated", loadData);
+    window.addEventListener("dailyConfigUpdated", loadData);
     const handleActivitiesUpdated = () => {
       if (isAdmin) setActivities(activityStore.getActivities());
     };
@@ -219,6 +220,7 @@ function Index() {
 
     return () => {
       window.removeEventListener("gamificationUpdated", loadData);
+      window.removeEventListener("dailyConfigUpdated", loadData);
       window.removeEventListener("activitiesUpdated", handleActivitiesUpdated);
     };
   }, [user, isAdmin]);
