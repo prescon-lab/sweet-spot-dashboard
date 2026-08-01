@@ -9,8 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, Trash2, Trophy, Users, Search, Activity, Medal, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
 import { gamificationStore, Game, GameRule } from "@/lib/gamificationStore";
+import { userActivityStore, UserActivityMap } from "@/lib/userActivityStore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/p/gestao-gente")({
   head: () => ({
@@ -43,6 +47,8 @@ function GestaoGentePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [tempScores, setTempScores] = useState<Record<string, number>>({});
+  
+  const [userActivities, setUserActivities] = useState<UserActivityMap>({});
 
   useEffect(() => {
     if (selectedPerson && activeGameId) {
@@ -62,11 +68,17 @@ function GestaoGentePage() {
     }
   }, [activeGameId]);
 
+  const loadActivities = useCallback(() => {
+    setUserActivities(userActivityStore.getActivities());
+  }, []);
+
   useEffect(() => {
     if (!isAdmin) return;
     
     loadStore();
+    loadActivities();
     window.addEventListener("gamificationUpdated", loadStore);
+    window.addEventListener("userActivitiesUpdated", loadActivities);
     
     const fetchProfiles = async () => {
       setLoadingProfiles(true);
@@ -81,8 +93,9 @@ function GestaoGentePage() {
     
     return () => {
       window.removeEventListener("gamificationUpdated", loadStore);
+      window.removeEventListener("userActivitiesUpdated", loadActivities);
     };
-  }, [isAdmin, loadStore]);
+  }, [isAdmin, loadStore, loadActivities]);
 
   if (authLoading) return <div className="p-8 text-center">Carregando...</div>;
   
@@ -144,9 +157,10 @@ function GestaoGentePage() {
       </div>
 
       <Tabs defaultValue="pontuacoes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+        <TabsList className="grid w-full grid-cols-3 max-w-[600px]">
           <TabsTrigger value="pontuacoes">Pontuações & Lista</TabsTrigger>
           <TabsTrigger value="configuracao">Configuração do Jogo</TabsTrigger>
+          <TabsTrigger value="acessos">Rastreio de Acessos</TabsTrigger>
         </TabsList>
 
         {/* TAB PONTUAÇÕES E LISTA DE PESSOAS */}
@@ -402,6 +416,98 @@ function GestaoGentePage() {
             </div>
             
           </div>
+        </TabsContent>
+
+        <TabsContent value="acessos" className="space-y-6 mt-6">
+          <Card className="glass-card overflow-hidden">
+            <CardHeader className="bg-primary/5 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-primary" />
+                  Rastreio de Acessos
+                </CardTitle>
+                <CardDescription>Acompanhe o último acesso e a última interação de cada membro.</CardDescription>
+              </div>
+              <div className="relative w-full md:w-72">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Buscar pessoa..." 
+                  className="pl-9"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </CardHeader>
+            <div className="divide-y divide-border/50">
+              {loadingProfiles ? (
+                <div className="p-8 text-center text-muted-foreground">Carregando lista...</div>
+              ) : filteredPeople.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">Nenhuma pessoa encontrada.</div>
+              ) : (
+                filteredPeople.map(person => {
+                  const act = userActivities[person.id];
+                  const lastLogin = act?.lastLoginAt ? new Date(act.lastLoginAt) : null;
+                  const lastUpdate = act?.lastUpdateAt ? new Date(act.lastUpdateAt) : null;
+                  
+                  const isInactiveLogin = lastLogin ? (Date.now() - lastLogin.getTime()) > 5 * 24 * 60 * 60 * 1000 : true;
+                  const isInactiveUpdate = lastUpdate ? (Date.now() - lastUpdate.getTime()) > 5 * 24 * 60 * 60 * 1000 : true;
+
+                  return (
+                    <div key={person.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                          {person.avatar_url ? (
+                            <img src={person.avatar_url} alt={person.full_name || ""} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="font-bold text-primary">{person.full_name?.charAt(0).toUpperCase() || "?"}</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground">{person.full_name || person.email}</p>
+                          {person.guardian_name && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Guardião(ã)</Badge> 
+                              {person.guardian_name}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 sm:gap-6 sm:justify-end text-left sm:text-right mt-2 sm:mt-0">
+                        <div>
+                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Último Acesso</p>
+                          {lastLogin ? (
+                            <div>
+                              <p className={`font-semibold ${isInactiveLogin ? 'text-red-500' : 'text-green-600'}`}>
+                                {formatDistanceToNow(lastLogin, { addSuffix: true, locale: ptBR })}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">{lastLogin.toLocaleString('pt-BR')}</p>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground italic">Sem registro</p>
+                          )}
+                        </div>
+                        
+                        <div className="pl-4 border-l border-border/50">
+                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Última Atualização</p>
+                          {lastUpdate ? (
+                            <div>
+                              <p className={`font-semibold ${isInactiveUpdate ? 'text-orange-500' : 'text-blue-600'}`}>
+                                {formatDistanceToNow(lastUpdate, { addSuffix: true, locale: ptBR })}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">{lastUpdate.toLocaleString('pt-BR')}</p>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground italic">Sem registro</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </Card>
         </TabsContent>
       </Tabs>
 

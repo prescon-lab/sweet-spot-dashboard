@@ -1,4 +1,6 @@
+import { supabase } from "@/integrations/supabase/client";
 import { syncToCloud } from "./cloudSync";
+import { userActivityStore } from "./userActivityStore";
 
 export interface GameRule {
   id: string;
@@ -146,6 +148,7 @@ export const gamificationStore = {
     }
 
     this._saveState(state);
+    userActivityStore.registerUpdate(profileId);
   },
 
   getScoresForProfileAndGame(profileId: string, gameId: string): UserScoreRecord[] {

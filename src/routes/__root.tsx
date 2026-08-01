@@ -139,6 +139,7 @@ import { Button } from "@/components/ui/button";
 import { initCloudSync } from "@/lib/cloudSync";
 import { supabase } from "@/integrations/supabase/client";
 import { mentionStore, Mention } from "@/lib/mentionStore";
+import { userActivityStore } from "@/lib/userActivityStore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -254,7 +255,7 @@ function NotificationsDropdown() {
 }
 
 function AuthGate({ children }: { children: ReactNode }) {
-  const { session, loading } = useAuth();
+  const { session, loading, user } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const isAuthRoute = pathname === "/auth";
@@ -264,6 +265,12 @@ function AuthGate({ children }: { children: ReactNode }) {
       navigate({ to: "/auth", replace: true });
     }
   }, [loading, session, isAuthRoute, navigate]);
+
+  useEffect(() => {
+    if (session && user && !loading) {
+      userActivityStore.registerLogin(user.id);
+    }
+  }, [session, user, loading]);
 
   if (loading) {
     return (
