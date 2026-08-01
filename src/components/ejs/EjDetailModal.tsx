@@ -506,23 +506,24 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   className="hidden" 
                 />
               </div>
-              <div className="space-y-3 sm:space-y-4 flex-1 min-w-0 max-w-2xl">
+              <div className="space-y-4 flex-1 min-w-0 max-w-2xl mt-2">
                 <Input
                   defaultValue={ejData?.name || "Nova EJ"}
-                  className="text-xl sm:text-2xl lg:text-4xl font-bold h-11 sm:h-14 lg:h-16 w-full border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-card focus-visible:ring-primary/30 transition-colors px-2 -ml-2"
+                  className="text-2xl sm:text-3xl lg:text-5xl font-extrabold h-12 sm:h-14 lg:h-16 w-full border-transparent bg-transparent hover:bg-muted/30 focus-visible:bg-card focus-visible:ring-primary/30 transition-colors px-2 -ml-2 shadow-none"
+                  placeholder="Nome da EJ"
                 />
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-6">
-                  <div className="flex flex-col col-span-2 sm:col-span-1 min-w-0">
-                    <Input placeholder="Guardião" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-48" />
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider">Guardiã(o) da EJ</span>
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                  <div className="flex flex-col gap-1 min-w-[140px] sm:min-w-[180px]">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-1">Guardiã(o) da EJ</span>
+                    <Input placeholder="Guardião" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} className="h-10 text-sm font-medium bg-muted/30 border-transparent w-full" />
                   </div>
-                  <div className="flex flex-col min-w-0">
-                    <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-32 text-center" />
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">Grupo</span>
+                  <div className="flex flex-col gap-1 min-w-[100px] sm:min-w-[120px]">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-1">Grupo</span>
+                    <Input placeholder="Grupo" defaultValue={ejData?.group || ""} className="h-10 text-sm font-medium bg-muted/30 border-transparent w-full" />
                   </div>
-                  <div className="flex flex-col min-w-0">
-                    <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-11 text-base font-medium bg-muted/30 border-transparent w-full sm:w-32 text-center" />
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1.5 px-1 tracking-wider text-center">CM</span>
+                  <div className="flex flex-col gap-1 min-w-[100px] sm:min-w-[120px]">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-1">CM</span>
+                    <Input placeholder="CM" defaultValue={ejData?.cm || ""} className="h-10 text-sm font-medium bg-muted/30 border-transparent w-full" />
                   </div>
                 </div>
               </div>
@@ -926,13 +927,13 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   <div className="relative flex-1">
                     <Input 
                       type="date" 
-                      className="bg-card pl-10 h-10 w-full" 
+                      className="bg-card pl-10 h-10 w-full text-sm" 
                       value={proximaReuniao}
                       onChange={(e) => setProximaReuniao(e.target.value)}
                     />
                     <CalendarIcon className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                   </div>
-                  <Button size="sm" onClick={saveProximaReuniaoDate} className="h-10 px-4 shrink-0 font-semibold">
+                  <Button onClick={saveProximaReuniaoDate} className="h-10 px-4 shrink-0 font-semibold">
                     <Save className="w-4 h-4 mr-2" />
                     Salvar
                   </Button>
