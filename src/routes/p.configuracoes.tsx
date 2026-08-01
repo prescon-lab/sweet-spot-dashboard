@@ -13,6 +13,7 @@ import { dailyStore, DailyConfig } from "@/lib/dailyStore";
 import { announcementStore, Announcement } from "@/lib/announcementStore";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 function isValidDate(value?: string) {
   if (!value) return false;
@@ -63,6 +64,12 @@ function Configuracoes() {
   const [newAnnStart, setNewAnnStart] = useState("");
   const [newAnnEnd, setNewAnnEnd] = useState("");
   const [newAnnIcon, setNewAnnIcon] = useState("Bell");
+  
+  const [newAnnHasQuestion, setNewAnnHasQuestion] = useState(false);
+  const [newAnnQuestionText, setNewAnnQuestionText] = useState("");
+  const [newAnnQuestionType, setNewAnnQuestionType] = useState<"boolean" | "options" | "text">("boolean");
+  const [newAnnQuestionOptions, setNewAnnQuestionOptions] = useState("");
+  const [showResponsesModal, setShowResponsesModal] = useState<string | null>(null);
 
   // Deletion Confirmation State
   const [deleteConfirmInfo, setDeleteConfirmInfo] = useState<{type: 'daily' | 'announcement' | 'link', id?: string} | null>(null);
@@ -183,22 +190,38 @@ function Configuracoes() {
 
   const handleAddAnnouncement = () => {
     if (!newAnnTitle.trim() || !newAnnContent.trim() || !newAnnStart || !newAnnEnd) {
-      toast.error("Preencha todos os campos do aviso.");
+      toast.error("Preencha todos os campos obrigatórios do aviso.");
       return;
     }
+    
+    let questionObj = undefined;
+    if (newAnnHasQuestion && newAnnQuestionText.trim()) {
+      questionObj = {
+        text: newAnnQuestionText,
+        type: newAnnQuestionType,
+        options: newAnnQuestionType === 'options' ? newAnnQuestionOptions.split(',').map(s => s.trim()).filter(s => s) : undefined
+      };
+    }
+
     announcementStore.add({
       id: Date.now().toString(),
       title: newAnnTitle,
       content: newAnnContent,
       startDate: newAnnStart,
       endDate: newAnnEnd,
-      icon: newAnnIcon
+      icon: newAnnIcon,
+      question: questionObj as any,
+      responses: []
     });
     setNewAnnTitle("");
     setNewAnnContent("");
     setNewAnnStart("");
     setNewAnnEnd("");
     setNewAnnIcon("Bell");
+    setNewAnnHasQuestion(false);
+    setNewAnnQuestionText("");
+    setNewAnnQuestionType("boolean");
+    setNewAnnQuestionOptions("");
     toast.success("Aviso adicionado!");
   };
 
@@ -421,7 +444,29 @@ function Configuracoes() {
               />
             </div>
           </div>
-          <Button onClick={handleAddAnnouncement} className="mt-2 w-full sm:w-auto self-start gap-2">
+          
+          <div className="mt-4 border-t border-border/50 pt-4">
+            <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer select-none">
+              <input type="checkbox" className="rounded border-primary/20 accent-primary w-4 h-4" checked={newAnnHasQuestion} onChange={e => setNewAnnHasQuestion(e.target.checked)} />
+              Incluir uma pergunta ao usuário? (Opcional)
+            </label>
+            
+            {newAnnHasQuestion && (
+              <div className="mt-3 space-y-3 p-4 bg-background/50 rounded-xl border border-border/50">
+                <Input placeholder="Qual é a pergunta?" value={newAnnQuestionText} onChange={e => setNewAnnQuestionText(e.target.value)} />
+                <div className="flex gap-2 text-sm">
+                  <Button variant={newAnnQuestionType === 'boolean' ? 'default' : 'outline'} onClick={() => setNewAnnQuestionType('boolean')} className="flex-1">Sim / Não</Button>
+                  <Button variant={newAnnQuestionType === 'options' ? 'default' : 'outline'} onClick={() => setNewAnnQuestionType('options')} className="flex-1">Opções Múltiplas</Button>
+                  <Button variant={newAnnQuestionType === 'text' ? 'default' : 'outline'} onClick={() => setNewAnnQuestionType('text')} className="flex-1">Texto Livre</Button>
+                </div>
+                {newAnnQuestionType === 'options' && (
+                  <Input placeholder="Opções separadas por vírgula (ex: Maçã, Banana, Uva)" value={newAnnQuestionOptions} onChange={e => setNewAnnQuestionOptions(e.target.value)} />
+                )}
+              </div>
+            )}
+          </div>
+          
+          <Button onClick={handleAddAnnouncement} className="mt-4 w-full sm:w-auto self-start gap-2">
             <Plus className="w-4 h-4" />
             Adicionar Aviso
           </Button>
@@ -447,11 +492,23 @@ function Configuracoes() {
                       <Badge variant="secondary" className="text-[10px]">
                         De {format(new Date(ann.startDate + "T12:00:00"), "dd/MM/yy")} até {format(new Date(ann.endDate + "T12:00:00"), "dd/MM/yy")}
                       </Badge>
+                      {ann.question && (
+                        <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">
+                          Tem Pergunta ({ann.responses?.length || 0} resps)
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-500/10 shrink-0" onClick={() => setDeleteConfirmInfo({ type: 'announcement', id: ann.id })}>
-                    <Trash className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-1 shrink-0">
+                    {ann.question && (
+                      <Button variant="ghost" size="sm" className="text-xs" onClick={() => setShowResponsesModal(ann.id)}>
+                        Respostas
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={() => setDeleteConfirmInfo({ type: 'announcement', id: ann.id })}>
+                      <Trash className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -549,6 +606,45 @@ function Configuracoes() {
           </div>
         )}
       </div>
+
+      {/* Responses Modal */}
+      <Dialog open={!!showResponsesModal} onOpenChange={(open) => !open && setShowResponsesModal(null)}>
+        <DialogContent className="glass-modal sm:max-w-md rounded-3xl border-primary/20 bg-background/95 backdrop-blur-xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Respostas da Enquete</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {showResponsesModal && announcements.find(a => a.id === showResponsesModal)?.responses?.length ? (
+              <div className="space-y-4">
+                {(() => {
+                  const ann = announcements.find(a => a.id === showResponsesModal)!;
+                  if (ann.question?.type === 'text') {
+                    return ann.responses!.map((r, i) => (
+                      <div key={i} className="p-3 bg-muted/30 rounded-xl text-left">
+                        <p className="text-xs font-bold text-primary mb-1">{r.userEmail}</p>
+                        <p className="text-sm">{r.answer}</p>
+                      </div>
+                    ));
+                  } else {
+                    const stats = ann.responses!.reduce((acc, r) => {
+                      acc[r.answer] = (acc[r.answer] || 0) + 1;
+                      return acc;
+                    }, {} as Record<string, number>);
+                    return Object.entries(stats).map(([ans, count]) => (
+                      <div key={ans} className="flex justify-between items-center p-3 bg-muted/30 rounded-xl text-left">
+                        <span className="font-medium">{ans}</span>
+                        <Badge variant="secondary" className="font-bold">{count} voto(s)</Badge>
+                      </div>
+                    ));
+                  }
+                })()}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">Nenhuma resposta registrada ainda.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!deleteConfirmInfo} onOpenChange={(open) => !open && setDeleteConfirmInfo(null)}>
         <AlertDialogContent className="glass-modal rounded-3xl border-primary/20 bg-background/95 backdrop-blur-xl">

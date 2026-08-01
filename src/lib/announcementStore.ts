@@ -1,5 +1,17 @@
 import { syncToCloud } from "./cloudSync";
 
+export interface AnnouncementQuestion {
+  text: string;
+  type: "boolean" | "options" | "text";
+  options?: string[]; // for "options" type
+}
+
+export interface AnnouncementResponse {
+  userEmail: string;
+  answer: string;
+  timestamp: number;
+}
+
 export interface Announcement {
   id: string;
   title: string;
@@ -7,6 +19,8 @@ export interface Announcement {
   startDate: string; // "YYYY-MM-DD"
   endDate: string; // "YYYY-MM-DD"
   icon: string; // Lucide icon name, e.g. "Bell", "PartyPopper", "AlertTriangle"
+  question?: AnnouncementQuestion;
+  responses?: AnnouncementResponse[];
 }
 
 const STORE_KEY = 'sweet_spot_announcements';
@@ -69,5 +83,21 @@ export const announcementStore = {
       const end = new Date(a.endDate + "T23:59:59");
       return today >= start && today <= end;
     });
+  },
+
+  addResponse: (announcementId: string, response: AnnouncementResponse) => {
+    const all = announcementStore.getAll();
+    const idx = all.findIndex((a) => a.id === announcementId);
+    if (idx !== -1) {
+      const ann = all[idx];
+      if (!ann.responses) ann.responses = [];
+      const existingIdx = ann.responses.findIndex(r => r.userEmail === response.userEmail);
+      if (existingIdx !== -1) {
+        ann.responses[existingIdx] = response;
+      } else {
+        ann.responses.push(response);
+      }
+      announcementStore.saveAll(all);
+    }
   }
 };

@@ -16,11 +16,12 @@ import Cropper from "react-easy-crop";
 import { activityStore, Activity } from "@/lib/activityStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { SquadDetailModal } from "@/components/squads/SquadDetailModal";
-import { Activity as ActivityIcon, Bell, Flame, Clock, CalendarDays, MessageSquare, PartyPopper, AlertTriangle, Info } from "lucide-react";
+import { Activity as ActivityIcon, Bell, Flame, Clock, CalendarDays, MessageSquare, PartyPopper, AlertTriangle, Info, Check } from "lucide-react";
 import { isDailyDay } from "@/lib/dailyStore";
 import { announcementStore, Announcement } from "@/lib/announcementStore";
 import { eventStore } from "@/lib/eventStore";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -95,6 +96,9 @@ function Index() {
   const [activeAnnouncements, setActiveAnnouncements] = useState<Announcement[]>([]);
   const [currentAnnouncementIndex, setCurrentAnnouncementIndex] = useState(0);
   const [showAnnouncementPopup, setShowAnnouncementPopup] = useState(false);
+  const [announcementAnswer, setAnnouncementAnswer] = useState("");
+  const [announcementStats, setAnnouncementStats] = useState<number | null>(null);
+  const [hasAnsweredCurrent, setHasAnsweredCurrent] = useState(false);
 
   const loadData = async () => {
     if (!user) return;
@@ -263,6 +267,48 @@ function Index() {
     };
   }, [user, isAdmin]);
 
+  useEffect(() => {
+    if (activeAnnouncements.length > 0 && profile) {
+      const current = activeAnnouncements[currentAnnouncementIndex];
+      const existingResponse = current.responses?.find(r => r.userEmail === (profile.email || profile.id));
+      if (existingResponse) {
+        setHasAnsweredCurrent(true);
+        setAnnouncementAnswer(existingResponse.answer);
+        if (current.question?.type !== 'text') {
+           const count = current.responses!.filter(r => r.answer === existingResponse.answer).length;
+           setAnnouncementStats(count);
+        }
+      } else {
+        setHasAnsweredCurrent(false);
+        setAnnouncementAnswer("");
+        setAnnouncementStats(null);
+      }
+    }
+  }, [currentAnnouncementIndex, activeAnnouncements, profile]);
+
+  const handleSubmitAnswer = () => {
+    if (!profile) return;
+    const current = activeAnnouncements[currentAnnouncementIndex];
+    if (current && announcementAnswer.trim()) {
+      announcementStore.addResponse(current.id, {
+        userEmail: profile.email || profile.id,
+        answer: announcementAnswer,
+        timestamp: Date.now()
+      });
+      const updatedAll = announcementStore.getAll();
+      const updatedAnn = updatedAll.find(a => a.id === current.id);
+      
+      if (updatedAnn?.responses && current.question?.type !== 'text') {
+        const sameAnswerCount = updatedAnn.responses.filter(r => r.answer === announcementAnswer).length;
+        setAnnouncementStats(sameAnswerCount);
+      }
+      setHasAnsweredCurrent(true);
+      
+      // Update local activeAnnouncements state so it reflects the new response immediately
+      setActiveAnnouncements(prev => prev.map((a, i) => i === currentAnnouncementIndex ? updatedAnn! : a));
+    }
+  };
+
   const handleCloseAnnouncement = () => {
     if (activeAnnouncements.length > 0) {
       const current = activeAnnouncements[currentAnnouncementIndex];
@@ -271,6 +317,9 @@ function Index() {
 
       if (currentAnnouncementIndex < activeAnnouncements.length - 1) {
         setCurrentAnnouncementIndex(prev => prev + 1);
+        setAnnouncementAnswer("");
+        setHasAnsweredCurrent(false);
+        setAnnouncementStats(null);
       } else {
         setShowAnnouncementPopup(false);
       }
@@ -763,29 +812,88 @@ function Index() {
       {/* Announcement Popup */}
       <Dialog open={showAnnouncementPopup} onOpenChange={setShowAnnouncementPopup}>
         {activeAnnouncements.length > 0 && (
-          <DialogContent className="sm:max-w-md p-6 glass-modal rounded-3xl border-primary/20 bg-background/95 backdrop-blur-xl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-3 text-2xl font-bold text-foreground justify-center">
-                {activeAnnouncements[currentAnnouncementIndex].icon === "AlertTriangle" && <AlertTriangle className="w-8 h-8 text-yellow-500" />}
-                {activeAnnouncements[currentAnnouncementIndex].icon === "PartyPopper" && <PartyPopper className="w-8 h-8 text-green-500" />}
-                {activeAnnouncements[currentAnnouncementIndex].icon === "Info" && <Info className="w-8 h-8 text-blue-500" />}
-                {activeAnnouncements[currentAnnouncementIndex].icon === "Calendar" && <CalendarDays className="w-8 h-8 text-primary" />}
-                {activeAnnouncements[currentAnnouncementIndex].icon === "Bell" && <Bell className="w-8 h-8 text-orange-500" />}
+          <DialogContent className="sm:max-w-md p-0 overflow-hidden glass-modal rounded-3xl border-primary/20 bg-background/95 backdrop-blur-xl">
+            {/* Top decorative area with large icon */}
+            <div className="bg-primary/5 pt-10 pb-6 px-6 relative flex flex-col items-center border-b border-primary/10">
+              <div className="w-24 h-24 bg-background rounded-full p-2 shadow-sm border border-primary/20 flex items-center justify-center mb-4 z-10 relative">
+                <div className="w-full h-full bg-primary/10 rounded-full flex items-center justify-center">
+                  {activeAnnouncements[currentAnnouncementIndex].icon === "AlertTriangle" && <AlertTriangle className="w-10 h-10 text-yellow-500" />}
+                  {activeAnnouncements[currentAnnouncementIndex].icon === "PartyPopper" && <PartyPopper className="w-10 h-10 text-green-500" />}
+                  {activeAnnouncements[currentAnnouncementIndex].icon === "Info" && <Info className="w-10 h-10 text-blue-500" />}
+                  {activeAnnouncements[currentAnnouncementIndex].icon === "Calendar" && <CalendarDays className="w-10 h-10 text-primary" />}
+                  {activeAnnouncements[currentAnnouncementIndex].icon === "Bell" && <Bell className="w-10 h-10 text-orange-500" />}
+                </div>
+              </div>
+              <DialogTitle className="text-center text-2xl sm:text-3xl font-black text-foreground uppercase tracking-tight leading-tight">
                 {activeAnnouncements[currentAnnouncementIndex].title}
               </DialogTitle>
-            </DialogHeader>
-            <div className="py-6 text-center space-y-4">
-              <p className="text-muted-foreground text-lg whitespace-pre-wrap">
+            </div>
+            
+            <div className="px-6 py-6 text-center space-y-6">
+              <p className="text-muted-foreground text-lg whitespace-pre-wrap leading-relaxed">
                 {activeAnnouncements[currentAnnouncementIndex].content}
               </p>
+              
+              {/* Question Area */}
+              {activeAnnouncements[currentAnnouncementIndex].question && (
+                <div className="bg-muted/30 p-5 rounded-2xl border border-border/50 text-left animate-in fade-in slide-in-from-bottom-2">
+                  <p className="font-bold text-foreground mb-4 text-center">{activeAnnouncements[currentAnnouncementIndex].question!.text}</p>
+                  
+                  {!hasAnsweredCurrent ? (
+                    <div className="space-y-3">
+                      {activeAnnouncements[currentAnnouncementIndex].question!.type === 'boolean' && (
+                        <div className="flex gap-2">
+                          <Button variant={announcementAnswer === 'Sim' ? 'default' : 'outline'} onClick={() => setAnnouncementAnswer('Sim')} className="flex-1 font-bold">Sim</Button>
+                          <Button variant={announcementAnswer === 'Não' ? 'default' : 'outline'} onClick={() => setAnnouncementAnswer('Não')} className="flex-1 font-bold">Não</Button>
+                        </div>
+                      )}
+                      {activeAnnouncements[currentAnnouncementIndex].question!.type === 'options' && (
+                        <div className="grid grid-cols-1 gap-2">
+                          {activeAnnouncements[currentAnnouncementIndex].question!.options?.map(opt => (
+                            <Button key={opt} variant={announcementAnswer === opt ? 'default' : 'outline'} onClick={() => setAnnouncementAnswer(opt)} className="w-full justify-start font-medium">{opt}</Button>
+                          ))}
+                        </div>
+                      )}
+                      {activeAnnouncements[currentAnnouncementIndex].question!.type === 'text' && (
+                        <Textarea 
+                          placeholder="Digite sua resposta..."
+                          value={announcementAnswer}
+                          onChange={e => setAnnouncementAnswer(e.target.value)}
+                          className="resize-none"
+                        />
+                      )}
+                      
+                      <Button onClick={handleSubmitAnswer} disabled={!announcementAnswer.trim()} className="w-full mt-4 font-bold">Enviar Resposta</Button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-2 space-y-2 animate-in zoom-in-95 duration-300">
+                      <div className="w-12 h-12 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <Check className="w-6 h-6" />
+                      </div>
+                      <p className="font-bold text-green-600">Resposta enviada!</p>
+                      {announcementStats !== null && (
+                        <p className="text-sm text-muted-foreground">
+                          <strong className="text-foreground">{announcementStats}</strong> {announcementStats === 1 ? 'pessoa escolheu' : 'pessoas escolheram'} a mesma opção que você.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              
               {activeAnnouncements.length > 1 && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground font-medium">
                   Mensagem {currentAnnouncementIndex + 1} de {activeAnnouncements.length}
                 </p>
               )}
             </div>
-            <div className="flex justify-center">
-              <Button onClick={handleCloseAnnouncement} className="w-full sm:w-auto px-8 rounded-full font-bold">
+            
+            <div className="flex justify-center pb-6 px-6 bg-background">
+              <Button 
+                onClick={handleCloseAnnouncement} 
+                className="w-full rounded-full font-bold h-12 text-base"
+                disabled={!!activeAnnouncements[currentAnnouncementIndex].question && !hasAnsweredCurrent}
+              >
                 {currentAnnouncementIndex < activeAnnouncements.length - 1 ? "Próxima Mensagem" : "Entendido!"}
               </Button>
             </div>
