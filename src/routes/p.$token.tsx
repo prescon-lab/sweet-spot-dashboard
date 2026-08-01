@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pencil, ListChecks, ChevronDown, ChevronRight, Activity as ActivityIcon, Flame, Trophy } from "lucide-react";
-import { useState, useEffect } from "react";
+import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pencil, ListChecks, ChevronDown, ChevronRight, Activity as ActivityIcon, Flame, Trophy, Timer, CalendarClock } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
@@ -19,6 +19,46 @@ import { mentionStore, Mention } from "@/lib/mentionStore";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAccessRole } from "@/lib/access";
+
+// --- Countdown Component ---
+function useCountdown(targetDate?: string) {
+  const getTimeLeft = useCallback(() => {
+    if (!targetDate) return null;
+    const diff = new Date(targetDate).getTime() - Date.now();
+    if (diff <= 0) return null;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return { days, hours, minutes, seconds };
+  }, [targetDate]);
+
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
+
+  useEffect(() => {
+    setTimeLeft(getTimeLeft());
+    const id = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
+    return () => clearInterval(id);
+  }, [getTimeLeft]);
+
+  return timeLeft;
+}
+
+function CountdownDisplay({ label, targetDate, large = false, color = "text-primary" }: { label: string; targetDate?: string; large?: boolean; color?: string }) {
+  const time = useCountdown(targetDate);
+  if (!targetDate || !time) return null;
+  return (
+    <div className={`flex flex-col items-center gap-1 ${large ? 'py-3' : 'py-2'}`}>
+      <p className={`font-bold uppercase tracking-wider text-muted-foreground ${large ? 'text-xs' : 'text-[10px]'}`}>{label}</p>
+      <div className={`flex items-center gap-1 font-black tabular-nums ${color} ${large ? 'text-2xl md:text-3xl' : 'text-base md:text-lg'}`}>
+        {time.days > 0 && <span>{time.days}d</span>}
+        <span>{String(time.hours).padStart(2,'0')}h</span>
+        <span>{String(time.minutes).padStart(2,'0')}m</span>
+        <span>{String(time.seconds).padStart(2,'0')}s</span>
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/p/$token")({
   head: () => ({
@@ -139,6 +179,28 @@ function DashboardPanel() {
                   </Button>
                 )}
               </CardHeader>
+
+              {/* Countdowns */}
+              {(event.auditDate || event.endDate) && (() => {
+                const auditPassed = event.auditDate ? new Date(event.auditDate).getTime() <= Date.now() : true;
+                return (
+                  <div className="bg-gradient-to-r from-muted/30 to-muted/10 border-b border-border/50 px-6 py-4 flex flex-wrap items-center justify-around gap-6">
+                    {!auditPassed && (
+                      <div className="flex flex-col items-center">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-orange-500 mb-1">⏰ Prazo de Auditoria</p>
+                        <CountdownDisplay targetDate={event.auditDate} color="text-orange-500" label="" />
+                      </div>
+                    )}
+                    {event.endDate && (
+                      <div className="flex flex-col items-center">
+                        <p className={`font-bold uppercase tracking-widest text-primary mb-1 ${auditPassed ? 'text-xs' : 'text-[10px]'}`}>🎯 Data do Evento</p>
+                        <CountdownDisplay targetDate={event.endDate} large={auditPassed} color="text-primary" label="" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {(event.ejGoals || []).filter(Boolean).map(goal => {
