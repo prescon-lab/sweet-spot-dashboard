@@ -70,38 +70,38 @@ function EjsPanel() {
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-fade-in space-y-6">
       
       {/* Top Bar */}
-      <div className="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4">
-        <div className="relative w-full md:w-96">
+      <div className="glass-card rounded-2xl p-3 flex flex-col sm:flex-row items-center gap-3">
+        <div className="relative flex-1 w-full">
           <Input 
             type="search" 
-            placeholder="BUSCAR POR NOME DE EJ OU GUARDIÃO" 
-            className="w-full bg-background/50 text-foreground placeholder:text-muted-foreground rounded-full h-10 px-6 font-semibold border border-border/50 focus:border-primary/50 transition-colors"
+            placeholder="Buscar por nome de EJ ou Guardião" 
+            className="w-full bg-background/50 text-foreground placeholder:text-muted-foreground rounded-full h-9 px-5 text-sm font-medium border border-border/50 focus:border-primary/50 transition-colors"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         
-        <div className="flex gap-4">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="relative">
             <select
-              className={`appearance-none outline-none cursor-pointer rounded-full pl-6 pr-10 h-10 font-bold border transition-all ${filterGuardian ? 'bg-primary text-primary-foreground border-primary' : 'bg-background/50 text-foreground border-border/50 hover:border-primary/50 hover:bg-accent/50'}`}
+              className={`appearance-none outline-none cursor-pointer rounded-full pl-4 pr-8 h-9 text-xs font-semibold border transition-all ${filterGuardian ? 'bg-primary text-primary-foreground border-primary' : 'bg-background/50 text-foreground border-border/50 hover:border-primary/50 hover:bg-accent/50'}`}
               value={filterGuardian}
               onChange={(e) => setFilterGuardian(e.target.value)}
             >
-              <option value="">GUARDIÃO</option>
+              <option value="">Guardião</option>
               {uniqueGuardians.map(g => (
                 <option key={g} value={g}>{g}</option>
               ))}
             </select>
-            <ChevronDown className={`absolute right-3 top-2.5 w-5 h-5 pointer-events-none ${filterGuardian ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+            <ChevronDown className={`absolute right-2.5 top-2.5 w-3.5 h-3.5 pointer-events-none ${filterGuardian ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
           </div>
 
           <Button 
             variant="ghost" 
-            className={`rounded-full px-8 h-10 font-bold border transition-all ${filterBets ? 'bg-primary text-primary-foreground border-primary' : 'bg-background/50 text-foreground border-border/50 hover:border-primary/50 hover:bg-accent/50'}`}
+            className={`rounded-full px-5 h-9 text-xs font-semibold border transition-all ${filterBets ? 'bg-primary text-primary-foreground border-primary' : 'bg-background/50 text-foreground border-border/50 hover:border-primary/50 hover:bg-accent/50'}`}
             onClick={() => setFilterBets(!filterBets)}
           >
-            APOSTAS
+            Apostas
           </Button>
         </div>
       </div>
