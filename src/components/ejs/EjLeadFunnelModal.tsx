@@ -83,7 +83,7 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
 
   return (
     <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)}>
-      <DialogContent {...dirtyGuard.containerProps} className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto glass-modal">
+      <DialogContent {...dirtyGuard.containerProps} className="modal-shell max-w-4xl glass-modal">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between gap-2 text-xl">
             <div className="flex items-center gap-2">

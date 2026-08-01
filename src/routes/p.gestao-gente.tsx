@@ -132,7 +132,7 @@ function GestaoGentePage() {
   );
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-scale-in">
+    <div className="page-shell space-y-8 animate-scale-in">
       <div className="flex items-center gap-3">
         <div className="bg-primary/10 p-3 rounded-2xl">
           <Trophy className="w-8 h-8 text-primary" />
@@ -407,7 +407,7 @@ function GestaoGentePage() {
 
       {/* MODAL DE LANÇAMENTO DE PONTOS */}
       <Dialog open={!!selectedPerson} onOpenChange={(open) => !open && setSelectedPerson(null)}>
-        <DialogContent className="max-w-2xl bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
+        <DialogContent className="modal-shell max-w-2xl bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">

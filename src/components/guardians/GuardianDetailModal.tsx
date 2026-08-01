@@ -204,7 +204,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
         setCropModalOpen(open);
         if (!open) setTempImageUrl(null);
       }}>
-        <DialogContent className="max-w-md glass-modal p-6 rounded-3xl z-[100] border-none">
+        <DialogContent className="modal-shell max-w-md glass-modal p-6 rounded-3xl z-[100] border-none">
           <h3 className="text-xl font-bold mb-4 text-foreground text-center">Ajustar Foto</h3>
           <div className="relative w-full h-[300px] bg-black/5 rounded-2xl overflow-hidden mb-6">
             {tempImageUrl && (

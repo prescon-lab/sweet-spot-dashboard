@@ -56,7 +56,7 @@ function ProfilePage() {
   const guardianConfig = profile?.guardian_name ? guardianStore.get(profile.guardian_name) : null;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="page-shell space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Meu Perfil</h1>
         <p className="text-muted-foreground mt-1">Acompanhe suas atualizações e menções.</p>

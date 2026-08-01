@@ -207,7 +207,7 @@ export function DashboardCalendar() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px] glass-modal rounded-3xl">
+        <DialogContent className="modal-shell sm:max-w-[425px] glass-modal rounded-3xl">
           <DialogHeader>
             <DialogTitle>Agendar Reunião</DialogTitle>
           </DialogHeader>

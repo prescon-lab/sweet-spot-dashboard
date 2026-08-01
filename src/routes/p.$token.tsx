@@ -131,7 +131,7 @@ function DashboardPanel() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-scale-in">
+    <div className="page-shell space-y-8 animate-scale-in">
       {/* Header and Actions */}
       <div className="flex flex-col lg:flex-row lg:justify-between items-start lg:items-center gap-4">
         <div className="min-w-0">
@@ -453,7 +453,7 @@ function DashboardPanel() {
       
       {/* View Goal Checkers Dialog */}
       <Dialog open={!!selectedGoal} onOpenChange={(open) => !open && setSelectedGoal(null)}>
-        <DialogContent className="max-w-md bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
+        <DialogContent className="modal-shell max-w-md bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
               EJs que concluíram
@@ -479,7 +479,7 @@ function DashboardPanel() {
 
       {/* Global Leads Modal */}
       <Dialog open={leadsModalOpen} onOpenChange={setLeadsModalOpen}>
-        <DialogContent className="max-w-4xl bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
+        <DialogContent className="modal-shell max-w-4xl bg-[#FAF8F5] border-border/50 shadow-2xl rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />

@@ -66,7 +66,7 @@ function GuardiansPanel() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-fade-in space-y-6">
+    <div className="page-shell animate-fade-in space-y-6">
       {/* Top Bar */}
       <div className="glass-card rounded-2xl p-4 mb-6 shadow-sm">
         <div className="relative max-w-md w-full">
