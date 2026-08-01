@@ -271,9 +271,9 @@ function Index() {
           </button>
         </div>
 
-        {/* Name + Badges */}
-        <div className="text-center md:text-left flex-1 space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{profile.full_name}</h1>
+        {/* Name + Badges — centered with avatar */}
+        <div className="flex-1 space-y-2">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center md:text-left">{profile.full_name}</h1>
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
             {profile.guardian_name && (
               <Badge variant="secondary" className="px-3 py-1 text-sm bg-blue-500/10 text-blue-600 border-none">
@@ -294,27 +294,6 @@ function Index() {
             )}
           </div>
         </div>
-
-        {/* Points Card — clickable */}
-        {activeGameName && (
-          <button
-            onClick={() => setShowScoreModal(true)}
-            className="text-center md:text-right bg-primary/5 hover:bg-primary/10 transition-colors p-4 rounded-2xl border border-primary/20 min-w-[200px] cursor-pointer group"
-          >
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Meus Pontos</p>
-            <div className="flex items-center justify-center md:justify-end gap-2 text-primary">
-              <Trophy className="w-6 h-6 text-yellow-500" />
-              <span className="text-4xl font-black">{myScore}</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">{activeGameName}</p>
-            {myRankPosition && (
-              <p className="text-xs text-primary font-semibold mt-1">
-                🏅 {myRankPosition}º lugar no ranking
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground group-hover:text-primary mt-1 transition-colors">Ver detalhes →</p>
-          </button>
-        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -358,8 +337,30 @@ function Index() {
           )}
         </div>
 
-        {/* Sidebar — Ranking */}
-        <div className="space-y-8">
+        {/* Sidebar — Points + Ranking */}
+        <div className="space-y-4">
+          {/* Points Card */}
+          {activeGameName && (
+            <button
+              onClick={() => setShowScoreModal(true)}
+              className="w-full text-center bg-primary/5 hover:bg-primary/10 transition-colors p-5 rounded-2xl border border-primary/20 cursor-pointer group"
+            >
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Meus Pontos</p>
+              <div className="flex items-center justify-center gap-2 text-primary">
+                <Trophy className="w-6 h-6 text-yellow-500" />
+                <span className="text-4xl font-black">{myScore}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{activeGameName}</p>
+              {myRankPosition && (
+                <p className="text-xs text-primary font-semibold mt-1">
+                  🏅 #{myRankPosition} no ranking
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground group-hover:text-primary mt-2 transition-colors">Clique para ver detalhes →</p>
+            </button>
+          )}
+
+          {/* Ranking Card */}
           {activeGameName && ranking.length > 0 && (
             <Card
               className="glass-card border-primary/20 cursor-pointer hover:shadow-lg transition-shadow"
@@ -421,7 +422,7 @@ function Index() {
             </div>
             {myRankPosition && (
               <p className="text-center text-sm font-semibold text-primary">
-                🏅 Você está em {myRankPosition}º lugar no ranking!
+                🏅 Você está em <span className="font-black text-lg">#{myRankPosition}</span> no ranking!
               </p>
             )}
           </div>
