@@ -514,7 +514,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 />
                 <div className="grid grid-cols-[2fr_1fr_1fr] gap-3 sm:gap-6 w-full">
                   <div className="flex flex-col gap-1 min-w-0">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-1 truncate">Guardiã(o) da EJ</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-1 truncate">Guardião(ã) da EJ</span>
                     <Input placeholder="Guardião" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} className="h-10 text-sm font-medium bg-muted/30 border-transparent w-full" />
                   </div>
                   <div className="flex flex-col gap-1 min-w-0">
