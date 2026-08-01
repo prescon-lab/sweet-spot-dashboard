@@ -186,14 +186,20 @@ function DashboardPanel() {
                 return (
                   <div className="bg-gradient-to-r from-muted/30 to-muted/10 border-b border-border/50 px-6 py-4 flex flex-wrap items-center justify-around gap-6">
                     {!auditPassed && (
-                      <div className="flex flex-col items-center">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-orange-500 mb-1">⏰ Prazo de Auditoria</p>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <Timer className="w-3.5 h-3.5 text-orange-500" />
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-orange-500">Fim das Auditorias</p>
+                        </div>
                         <CountdownDisplay targetDate={event.auditDate} color="text-orange-500" label="" />
                       </div>
                     )}
                     {event.endDate && (
-                      <div className="flex flex-col items-center">
-                        <p className={`font-bold uppercase tracking-widest text-primary mb-1 ${auditPassed ? 'text-xs' : 'text-[10px]'}`}>🎯 Data do Evento</p>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <CalendarClock className={`text-primary ${auditPassed ? 'w-4 h-4' : 'w-3.5 h-3.5'}`} />
+                          <p className={`font-bold uppercase tracking-widest text-primary ${auditPassed ? 'text-xs' : 'text-[10px]'}`}>Data do Evento</p>
+                        </div>
                         <CountdownDisplay targetDate={event.endDate} large={auditPassed} color="text-primary" label="" />
                       </div>
                     )}
