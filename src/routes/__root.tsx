@@ -236,7 +236,7 @@ function NotificationsDropdown() {
                 onClick={() => {
                   mentionStore.markAsRead(mention.id);
                   setMentions(prev => prev.filter(m => m.id !== mention.id));
-                  navigate({ to: "/p/dashboard" });
+                  navigate({ to: "/p/$token", params: { token: "dashboard" } });
                 }}
               >
                 <div className="flex items-center gap-2 w-full">
