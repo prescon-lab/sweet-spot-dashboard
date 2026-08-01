@@ -82,27 +82,45 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="modal-shell max-w-4xl p-0 gap-0 glass-modal border-none shadow-2xl rounded-2xl">
-        <div className="w-full h-40 bg-gradient-to-r from-primary/80 to-primary flex items-end p-8 relative rounded-t-2xl">
+        <div className="w-full bg-gradient-to-r from-primary/80 to-primary flex flex-col md:flex-row md:items-end justify-between p-8 relative rounded-t-2xl gap-6">
           <div className="text-white z-10 flex gap-4 items-center">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl overflow-hidden shrink-0">
-            {leaderAvatar ? (
-              <img src={leaderAvatar} alt={`Líder ${squad.leader}`} className="w-full h-full object-cover" />
-            ) : (
-              <Users className="w-10 h-10 text-white" />
-            )}
+            <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl overflow-hidden shrink-0">
+              {leaderAvatar ? (
+                <img src={leaderAvatar} alt={`Líder ${squad.leader}`} className="w-full h-full object-cover" />
+              ) : (
+                <Users className="w-10 h-10 text-white" />
+              )}
+            </div>
+            <div>
+              <h1 className="text-4xl font-extrabold drop-shadow-md">{squad.name}</h1>
+              <p className="text-primary-foreground/90 font-medium text-lg flex items-center gap-2 mt-1">
+                Líder: {squad.leader}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-4xl font-extrabold drop-shadow-md">{squad.name}</h1>
-            <p className="text-primary-foreground/90 font-medium text-lg flex items-center gap-2 mt-1">
-              Líder: {squad.leader}
-            </p>
+          
+          <div className="text-white z-10 flex flex-col md:items-end gap-2">
+            <span className="text-white/80 font-medium text-sm">Guardiões ({guardianNames.length})</span>
+            <div className="flex gap-2 items-center flex-wrap">
+              {guardianNames.map(name => {
+                const avatar = guardianStore.get(name)?.avatarUrl;
+                return (
+                  <div key={name} title={name} className="w-12 h-12 rounded-full overflow-hidden bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/30 shadow-md transition-transform hover:scale-110">
+                    {avatar ? (
+                      <img src={avatar} alt={name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-white font-bold text-lg">{name.charAt(0)}</span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="p-8 max-w-7xl mx-auto w-full flex flex-col gap-8">
         
-        <div className="lg:col-span-2 space-y-8">
+        <div className="space-y-8 w-full">
           <Card className="glass-card overflow-hidden border-primary/20">
             <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent pb-4">
               <CardTitle className="text-xl flex items-center gap-2 text-primary">
@@ -165,41 +183,6 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
             </CardContent>
           </Card>
         </div>
-
-        <div className="space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Guardiões ({guardianNames.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {guardianNames.map(name => {
-                  const avatar = guardianStore.get(name)?.avatarUrl;
-                  return (
-                  <li key={name} className="flex items-center gap-4 p-2 rounded-xl hover:bg-muted/30 transition-colors">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center shrink-0 shadow-sm border border-primary/20">
-                      {avatar ? (
-                        <img src={avatar} alt={name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-primary font-bold text-lg">{name.charAt(0)}</span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-base leading-tight">{name}</p>
-                      {name === squad.leader && (
-                        <span className="text-sm text-primary font-bold">Líder</span>
-                      )}
-                    </div>
-                  </li>
-                )})}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-
         </div>
       </DialogContent>
     </Dialog>
