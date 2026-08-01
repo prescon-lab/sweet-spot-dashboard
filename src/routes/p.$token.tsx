@@ -33,7 +33,7 @@ function useCountdown(targetDate?: string) {
     return { days, hours, minutes, seconds };
   }, [targetDate]);
 
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
 
   useEffect(() => {
     setTimeLeft(getTimeLeft());
@@ -47,19 +47,22 @@ function useCountdown(targetDate?: string) {
 function CountdownDisplay({ title, targetDate, large = false, color = "text-primary", icon: Icon }: { title: string; targetDate?: string; large?: boolean; color?: string; icon: any }) {
   const time = useCountdown(targetDate);
   if (!targetDate || !time) return null;
+
+  const bgClass = color === "text-primary" ? "bg-primary/10" : color.replace('text-', 'bg-').replace('-500', '-500/10');
+
   return (
     <div className={`flex items-center gap-3 md:gap-4 ${large ? 'py-2' : 'py-1'}`}>
-      <div className={`flex shrink-0 items-center justify-center rounded-2xl ${color.replace('text-', 'bg-').replace('-500', '-500/10').replace('text-primary', 'bg-primary/10')} ${large ? 'w-12 h-12 md:w-14 md:h-14' : 'w-10 h-10 md:w-12 md:h-12'}`}>
+      <div className={`flex shrink-0 items-center justify-center rounded-2xl ${bgClass} ${large ? 'w-12 h-12 md:w-14 md:h-14' : 'w-10 h-10 md:w-12 md:h-12'}`}>
         <Icon className={`${color} ${large ? 'w-6 h-6 md:w-7 md:h-7' : 'w-5 h-5 md:w-6 md:h-6'}`} />
       </div>
       <div className="flex flex-col items-start justify-center gap-0.5">
-        <div className={`flex items-center gap-1 font-black tabular-nums ${color} ${large ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'}`}>
+        <div className={`flex items-baseline gap-1 font-black tracking-tight ${color} ${large ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'}`}>
           {time.days > 0 && <span>{time.days}d</span>}
           <span>{String(time.hours).padStart(2,'0')}h</span>
           <span>{String(time.minutes).padStart(2,'0')}m</span>
           <span>{String(time.seconds).padStart(2,'0')}s</span>
         </div>
-        <p className={`font-bold uppercase tracking-wider opacity-80 ${color} ${large ? 'text-xs md:text-sm' : 'text-[10px] md:text-xs'}`}>{title}</p>
+        <span className={`text-[10px] md:text-xs font-bold uppercase tracking-wider ${color}/70`}>{title}</span>
       </div>
     </div>
   );

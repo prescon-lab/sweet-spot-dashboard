@@ -68,12 +68,12 @@ function GuardiansPanel() {
   return (
     <div className="page-shell animate-fade-in space-y-6">
       {/* Top Bar */}
-      <div className="glass-card rounded-2xl p-4 mb-6 shadow-sm">
-        <div className="relative max-w-md w-full">
+      <div className="glass-card rounded-2xl p-3 flex flex-col sm:flex-row items-center gap-3 mb-6 shadow-sm">
+        <div className="relative flex-1 w-full">
           <Input 
             type="search" 
             placeholder="BUSCAR POR NOME DO GUARDIÃO" 
-            className="w-full bg-background/50 text-foreground placeholder:text-muted-foreground rounded-full h-10 px-6 font-semibold border border-border/50 focus:border-primary/50 transition-colors"
+            className="w-full bg-background/50 text-foreground placeholder:text-muted-foreground rounded-full h-9 px-5 text-sm font-medium border border-border/50 focus:border-primary/50 transition-colors"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

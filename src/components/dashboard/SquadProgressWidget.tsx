@@ -5,7 +5,7 @@ import { ejListStore } from "@/lib/ejListStore";
 import { leadStore } from "@/lib/leadStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Users, Trophy, TrendingUp } from "lucide-react";
+import { Users, Trophy, TrendingUp, Medal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SquadDetailModal } from "@/components/squads/SquadDetailModal";
 
@@ -130,9 +130,9 @@ export function SquadProgressWidget() {
               <div className="flex justify-between items-end">
                 <div>
                   <h4 className="font-semibold text-foreground flex items-center gap-2">
-                    {index === 0 && <span className="text-xl">🥇</span>}
-                    {index === 1 && <span className="text-xl">🥈</span>}
-                    {index === 2 && <span className="text-xl">🥉</span>}
+                    {index === 0 && <Medal className="w-5 h-5 text-yellow-500" />}
+                    {index === 1 && <Medal className="w-5 h-5 text-slate-400" />}
+                    {index === 2 && <Medal className="w-5 h-5 text-amber-600" />}
                     {squad.name}
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">

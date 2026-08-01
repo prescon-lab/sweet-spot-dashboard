@@ -905,28 +905,34 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                 <label className="text-sm font-semibold text-foreground">Próxima Reunião</label>
                 
                 {proximaReuniao ? (
-                  <div className="flex items-center gap-2 mb-3 bg-primary/10 text-primary px-3 py-2 rounded-lg font-medium border border-primary/20">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span>Reunião marcada para: {proximaReuniao.split('-').reverse().join('/')}</span>
+                  <div className="flex flex-col gap-1 mb-3 bg-primary/10 text-primary p-3 rounded-xl border border-primary/20">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <CalendarIcon className="w-4 h-4" />
+                      <span>Reunião marcada para:</span>
+                    </div>
+                    <span className="text-xl font-bold ml-6">{proximaReuniao.split('-').reverse().join('/')}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 mb-3 text-muted-foreground italic px-3 py-2 bg-card rounded-lg border">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span>Sem reunião marcada</span>
+                  <div className="flex flex-col gap-1 mb-3 bg-muted/30 text-muted-foreground p-3 rounded-xl border">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <CalendarIcon className="w-4 h-4" />
+                      <span>Próxima Reunião</span>
+                    </div>
+                    <span className="text-sm italic ml-6">Nenhuma data definida</span>
                   </div>
                 )}
 
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <Input 
                       type="date" 
-                      className="bg-card pl-10" 
+                      className="bg-card pl-10 h-10 w-full" 
                       value={proximaReuniao}
                       onChange={(e) => setProximaReuniao(e.target.value)}
                     />
                     <CalendarIcon className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                   </div>
-                  <Button size="sm" onClick={saveProximaReuniaoDate} className="h-10">
+                  <Button size="sm" onClick={saveProximaReuniaoDate} className="h-10 px-4 shrink-0 font-semibold">
                     <Save className="w-4 h-4 mr-2" />
                     Salvar
                   </Button>
