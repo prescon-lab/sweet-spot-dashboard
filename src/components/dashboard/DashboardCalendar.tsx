@@ -242,8 +242,8 @@ export function DashboardCalendar() {
                       </div>
                     )}
                     {hasSystemEvent && !hasSystemAudit && (
-                      <div className="text-[9px] sm:text-[11px] font-bold text-blue-700 dark:text-blue-400 leading-tight">
-                        Evento:<br className="hidden sm:block"/> {hasSystemEvent.title}
+                      <div className="text-[9px] sm:text-[11px] font-bold text-blue-700 dark:text-blue-400 leading-tight truncate">
+                        {hasSystemEvent.title}
                       </div>
                     )}
                     
