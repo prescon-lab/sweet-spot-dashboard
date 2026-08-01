@@ -31,11 +31,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const loadRole = async (userId: string | undefined) => {
+  const loadRole = async (userId: string | undefined, userEmail: string | undefined) => {
     if (!userId) {
       setIsAdmin(false);
       return;
     }
+
+    const emailLower = (userEmail || "").toLowerCase();
+    if (emailLower === SUPER_ADMIN_EMAIL || emailLower === "prescon.nucleovertentes@gmail.com" || emailLower === "prescon@nucleovertentes") {
+      setIsAdmin(true);
+      return;
+    }
+
     const { data } = await supabase
       .from("user_roles")
       .select("role")
@@ -51,13 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!active) return;
       setSession(newSession);
-      void loadRole(newSession?.user?.id);
+      void loadRole(newSession?.user?.id, newSession?.user?.email);
     });
 
     supabase.auth.getSession().then(async ({ data }) => {
       if (!active) return;
       setSession(data.session);
-      await loadRole(data.session?.user?.id);
+      await loadRole(data.session?.user?.id, data.session?.user?.email);
       setLoading(false);
     });
 
@@ -78,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setIsAdmin(false);
     },
-    refreshRole: async () => loadRole(session?.user?.id),
+    refreshRole: async () => loadRole(session?.user?.id, session?.user?.email),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
