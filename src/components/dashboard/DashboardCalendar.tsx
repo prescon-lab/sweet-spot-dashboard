@@ -151,8 +151,8 @@ export function DashboardCalendar() {
   return (
     <div className="flex flex-col lg:flex-row gap-6 mx-auto w-full">
       {/* Coluna Principal do Calendário */}
-      <div className="flex-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+      <div className="flex-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-3 sm:p-5 shadow-sm overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2 sm:gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2 text-foreground">
               <CalendarIcon className="w-6 h-6 text-primary" />
@@ -181,7 +181,7 @@ export function DashboardCalendar() {
         </div>
 
         <div className="w-full">
-          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+          <div className="grid grid-cols-7 gap-1 mb-1">
             {weekDays.map(day => (
               <div key={day} className="text-center font-semibold text-[10px] sm:text-sm text-muted-foreground py-1">
                 {day}
@@ -189,7 +189,7 @@ export function DashboardCalendar() {
             ))}
           </div>
           
-          <div className="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr">
+          <div className="grid grid-cols-7 gap-1 auto-rows-fr">
             {days.map((day, idx) => {
               const dateKey = format(day, "yyyy-MM-dd");
               const dayEvents = eventsByDay[dateKey] || [];
@@ -217,9 +217,9 @@ export function DashboardCalendar() {
                 <div 
                   key={idx}
                   onClick={() => handleDayClick(day)}
-                  className={`min-h-[70px] sm:min-h-[90px] p-1 sm:p-2 rounded-xl border transition-all cursor-pointer group flex flex-col overflow-hidden ${cellBg} ${ringClass}`}
+                  className={`min-h-[60px] sm:min-h-[75px] p-1 sm:p-1.5 rounded-xl border transition-all cursor-pointer group flex flex-col overflow-hidden ${cellBg} ${ringClass}`}
                 >
-                  <div className="flex justify-between items-start mb-1 sm:mb-2">
+                  <div className="flex justify-between items-start mb-0.5 sm:mb-1">
                     <span className={`text-xs sm:text-sm font-medium w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full ${
                       isToday ? "bg-primary text-primary-foreground" : hasSystemAudit ? "text-red-700 dark:text-red-400" : hasSystemEvent ? "text-blue-700 dark:text-blue-400" : "text-foreground"
                     }`}>
@@ -270,8 +270,8 @@ export function DashboardCalendar() {
       </div>
 
       {/* Painel Lateral Fixo de Detalhes - Somente Agenda */}
-      <div className="w-full lg:w-[320px] xl:w-[380px] shrink-0 bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-5 shadow-sm flex flex-col lg:sticky lg:top-6 h-fit max-h-none lg:max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
-        <div className="mb-6">
+      <div className="w-full lg:w-[320px] xl:w-[380px] shrink-0 bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col lg:sticky lg:top-4 h-fit max-h-none lg:max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+        <div className="mb-4">
           <h3 className="text-xl font-bold flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-primary" />
             {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
