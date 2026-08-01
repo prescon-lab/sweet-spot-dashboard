@@ -65,8 +65,7 @@ function Configuracoes() {
   const [cleanOptions, setCleanOptions] = useState({
     announcements: true,
     events: true,
-    activities: true,
-    ejs: false,
+    activities: true
   });
 
   // Announcements State
@@ -161,7 +160,7 @@ function Configuracoes() {
   };
 
   const handleCleanTestData = async () => {
-    if (!cleanOptions.announcements && !cleanOptions.events && !cleanOptions.activities && !cleanOptions.ejs) {
+    if (!cleanOptions.announcements && !cleanOptions.events && !cleanOptions.activities) {
       toast.error("Selecione pelo menos um tipo de dado para limpar.");
       return;
     }
@@ -187,13 +186,8 @@ function Configuracoes() {
         acts.forEach(a => activityStore.deleteActivity(a.id));
       }
 
-      if (cleanOptions.ejs) {
-        const ejs = ejListStore.getEjs();
-        ejs.forEach(e => ejListStore.deleteEj(e.id));
-      }
-
       toast.success("Dados selecionados foram apagados com sucesso!");
-      setCleanOptions({ announcements: false, events: false, activities: false, ejs: false });
+      setCleanOptions({ announcements: false, events: false, activities: false });
     } catch (e) {
       console.error(e);
       toast.error("Ocorreu um erro ao limpar os dados.");
@@ -759,18 +753,9 @@ function Configuracoes() {
             />
             <span className="font-medium text-foreground">Atividades (Histórico de Ações)</span>
           </label>
-          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-red-500/10 transition-colors text-red-600">
-            <input 
-              type="checkbox" 
-              checked={cleanOptions.ejs}
-              onChange={(e) => setCleanOptions(prev => ({...prev, ejs: e.target.checked}))}
-              className="w-5 h-5 accent-red-500"
-            />
-            <span className="font-bold">EJs Cadastradas (CUIDADO)</span>
-          </label>
         </div>
 
-        <Button 
+        <Button  
           variant="destructive" 
           onClick={handleCleanTestData} 
           disabled={isCleaning}
