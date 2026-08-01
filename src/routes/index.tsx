@@ -245,7 +245,7 @@ function Index() {
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
 
       {/* Header Profile */}
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 bg-card p-6 md:p-8 rounded-3xl border shadow-sm">
+      <div className="flex flex-col items-center gap-6 bg-card p-6 md:p-8 rounded-3xl border shadow-sm">
         {/* Avatar with edit */}
         <div className="relative group shrink-0">
           <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-4 border-background shadow-lg">
@@ -271,10 +271,10 @@ function Index() {
           </button>
         </div>
 
-        {/* Name + Badges — centered with avatar */}
-        <div className="flex-1 space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center md:text-left">{profile.full_name}</h1>
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+        {/* Name + Badges — centered */}
+        <div className="flex-1 space-y-2 text-center w-full">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{profile.full_name}</h1>
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {profile.guardian_name && (
               <Badge variant="secondary" className="px-3 py-1 text-sm bg-blue-500/10 text-blue-600 border-none">
                 Guardião(ã): {profile.guardian_name}
