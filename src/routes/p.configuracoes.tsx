@@ -4,6 +4,9 @@ import { linksStore, UsefulLink } from "@/lib/linksStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash, Edit, Save, X, ShieldCheck, Users, Zap } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
 import { useAccessRole } from "@/lib/access";
 import { toast } from "sonner";
 import { dailyStore, DailyConfig } from "@/lib/dailyStore";
@@ -41,25 +44,42 @@ function Configuracoes() {
     endDate: "",
     daysOfWeek: [1, 2, 3, 4, 5]
   });
+  const [savedDailyConfig, setSavedDailyConfig] = useState<DailyConfig | null>(null);
+  const [isEditingDaily, setIsEditingDaily] = useState(false);
 
   useEffect(() => {
     loadLinks();
     
-    const dConfig = dailyStore.getConfig();
-    if (dConfig) {
-      setDailyConfig({
-        startDate: dConfig.startDate ?? "",
-        endDate: dConfig.endDate ?? "",
-        daysOfWeek: Array.isArray(dConfig.daysOfWeek) ? dConfig.daysOfWeek : [1, 2, 3, 4, 5],
-      });
-    }
+    const loadDaily = () => {
+      const dConfig = dailyStore.getConfig();
+      setSavedDailyConfig(dConfig);
+      if (dConfig) {
+        setDailyConfig({
+          startDate: dConfig.startDate ?? "",
+          endDate: dConfig.endDate ?? "",
+          daysOfWeek: Array.isArray(dConfig.daysOfWeek) ? dConfig.daysOfWeek : [1, 2, 3, 4, 5],
+        });
+      } else {
+        setDailyConfig({
+          startDate: "",
+          endDate: "",
+          daysOfWeek: [1, 2, 3, 4, 5],
+        });
+      }
+    };
+    
+    loadDaily();
     
     const handleUpdate = () => {
       loadLinks();
     };
     
     window.addEventListener('linksStoreUpdated', handleUpdate);
-    return () => window.removeEventListener('linksStoreUpdated', handleUpdate);
+    window.addEventListener('dailyConfigUpdated', loadDaily);
+    return () => {
+      window.removeEventListener('linksStoreUpdated', handleUpdate);
+      window.removeEventListener('dailyConfigUpdated', loadDaily);
+    };
   }, []);
 
   const loadLinks = () => {
@@ -115,8 +135,20 @@ function Configuracoes() {
   };
 
   const handleSaveDailyConfig = () => {
+    if (!dailyConfig.startDate || !dailyConfig.endDate) {
+      toast.error("Por favor preencha as datas inicial e final.");
+      return;
+    }
     dailyStore.saveConfig(dailyConfig);
+    setIsEditingDaily(false);
     toast.success("Configurações de Dailys salvas com sucesso!");
+  };
+
+  const handleRemoveDaily = () => {
+    if (confirm("Tem certeza que deseja remover as Dailys?")) {
+      dailyStore.removeConfig();
+      toast.success("Dailys removidas.");
+    }
   };
 
   const toggleDayOfWeek = (day: number) => {
@@ -178,54 +210,91 @@ function Configuracoes() {
           Defina o período em que as Dailys estarão ativas e em quais dias da semana elas ocorrem. Isso exibirá o ícone ⚡ no calendário e avisará os usuários na página inicial.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Data Inicial</label>
-            <Input 
-              type="date"
-              value={dailyConfig.startDate}
-              onChange={(e) => setDailyConfig(prev => ({ ...prev, startDate: e.target.value }))}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Data Final</label>
-            <Input 
-              type="date"
-              value={dailyConfig.endDate}
-              onChange={(e) => setDailyConfig(prev => ({ ...prev, endDate: e.target.value }))}
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-2 mt-4">
-          <label className="text-sm font-medium">Dias da Semana</label>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { id: 1, label: "Seg" },
-              { id: 2, label: "Ter" },
-              { id: 3, label: "Qua" },
-              { id: 4, label: "Qui" },
-              { id: 5, label: "Sex" },
-              { id: 6, label: "Sáb" },
-              { id: 0, label: "Dom" }
-            ].map(day => (
-              <Button
-                key={day.id}
-                variant={(dailyConfig.daysOfWeek ?? []).includes(day.id) ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleDayOfWeek(day.id)}
-                className="w-12 h-10 font-bold"
-              >
-                {day.label}
+        {savedDailyConfig && !isEditingDaily ? (
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex justify-between items-center mt-4">
+            <div>
+              <h3 className="font-bold text-primary flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Daily Ativa
+              </h3>
+              <p className="text-sm text-foreground mt-1 font-medium">
+                De {format(new Date(savedDailyConfig.startDate + "T12:00:00"), "dd 'de' MMM", { locale: ptBR })} até {format(new Date(savedDailyConfig.endDate + "T12:00:00"), "dd 'de' MMM", { locale: ptBR })}
+              </p>
+              <div className="flex gap-1 mt-2">
+                {savedDailyConfig.daysOfWeek.map(d => {
+                   const labels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+                   return <Badge key={d} variant="secondary" className="text-[10px]">{labels[d]}</Badge>;
+                })}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" onClick={() => setIsEditingDaily(true)}>
+                <Edit className="w-4 h-4" />
               </Button>
-            ))}
+              <Button variant="outline" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-500/10 border-red-200" onClick={handleRemoveDaily}>
+                <Trash className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Data Inicial</label>
+                <Input 
+                  type="date"
+                  value={dailyConfig.startDate}
+                  onChange={(e) => setDailyConfig(prev => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Data Final</label>
+                <Input 
+                  type="date"
+                  value={dailyConfig.endDate}
+                  onChange={(e) => setDailyConfig(prev => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2 mt-4">
+              <label className="text-sm font-medium">Dias da Semana</label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 1, label: "Seg" },
+                  { id: 2, label: "Ter" },
+                  { id: 3, label: "Qua" },
+                  { id: 4, label: "Qui" },
+                  { id: 5, label: "Sex" },
+                  { id: 6, label: "Sáb" },
+                  { id: 0, label: "Dom" }
+                ].map(day => (
+                  <Button
+                    key={day.id}
+                    variant={(dailyConfig.daysOfWeek ?? []).includes(day.id) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleDayOfWeek(day.id)}
+                    className="w-12 h-10 font-bold"
+                  >
+                    {day.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
 
-        <Button onClick={handleSaveDailyConfig} className="mt-4 min-h-[44px] gap-2">
-          <Save className="w-4 h-4" />
-          Salvar Configurações de Dailys
-        </Button>
+            <div className="flex gap-2 mt-4">
+              <Button onClick={handleSaveDailyConfig} className="min-h-[44px] gap-2">
+                <Save className="w-4 h-4" />
+                Salvar
+              </Button>
+              {savedDailyConfig && (
+                <Button variant="ghost" onClick={() => setIsEditingDaily(false)} className="min-h-[44px]">
+                  Cancelar
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="glass-card p-6 rounded-3xl mb-8 space-y-6">

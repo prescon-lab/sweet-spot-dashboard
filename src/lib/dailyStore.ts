@@ -32,6 +32,13 @@ export const dailyStore = {
         console.error("Failed to save daily config", e);
       }
     }
+  },
+  removeConfig: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORE_KEY);
+      syncToCloud(STORE_KEY, []);
+      window.dispatchEvent(new Event('dailyConfigUpdated'));
+    }
   }
 };
 
