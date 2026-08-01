@@ -44,17 +44,22 @@ function useCountdown(targetDate?: string) {
   return timeLeft;
 }
 
-function CountdownDisplay({ label, targetDate, large = false, color = "text-primary" }: { label: string; targetDate?: string; large?: boolean; color?: string }) {
+function CountdownDisplay({ title, targetDate, large = false, color = "text-primary", icon: Icon }: { title: string; targetDate?: string; large?: boolean; color?: string; icon: any }) {
   const time = useCountdown(targetDate);
   if (!targetDate || !time) return null;
   return (
-    <div className={`flex flex-col items-center gap-1 ${large ? 'py-3' : 'py-2'}`}>
-      <p className={`font-bold uppercase tracking-wider text-muted-foreground ${large ? 'text-xs' : 'text-[10px]'}`}>{label}</p>
-      <div className={`flex items-center gap-1 font-black tabular-nums ${color} ${large ? 'text-2xl md:text-3xl' : 'text-base md:text-lg'}`}>
-        {time.days > 0 && <span>{time.days}d</span>}
-        <span>{String(time.hours).padStart(2,'0')}h</span>
-        <span>{String(time.minutes).padStart(2,'0')}m</span>
-        <span>{String(time.seconds).padStart(2,'0')}s</span>
+    <div className={`flex items-center gap-3 md:gap-4 ${large ? 'py-2' : 'py-1'}`}>
+      <div className={`flex shrink-0 items-center justify-center rounded-2xl ${color.replace('text-', 'bg-').replace('-500', '-500/10').replace('text-primary', 'bg-primary/10')} ${large ? 'w-12 h-12 md:w-14 md:h-14' : 'w-10 h-10 md:w-12 md:h-12'}`}>
+        <Icon className={`${color} ${large ? 'w-6 h-6 md:w-7 md:h-7' : 'w-5 h-5 md:w-6 md:h-6'}`} />
+      </div>
+      <div className="flex flex-col items-start justify-center gap-0.5">
+        <div className={`flex items-center gap-1 font-black tabular-nums ${color} ${large ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'}`}>
+          {time.days > 0 && <span>{time.days}d</span>}
+          <span>{String(time.hours).padStart(2,'0')}h</span>
+          <span>{String(time.minutes).padStart(2,'0')}m</span>
+          <span>{String(time.seconds).padStart(2,'0')}s</span>
+        </div>
+        <p className={`font-bold uppercase tracking-wider opacity-80 ${color} ${large ? 'text-xs md:text-sm' : 'text-[10px] md:text-xs'}`}>{title}</p>
       </div>
     </div>
   );
@@ -186,22 +191,10 @@ function DashboardPanel() {
                 return (
                   <div className="bg-gradient-to-r from-muted/30 to-muted/10 border-b border-border/50 px-6 py-4 flex flex-wrap items-center justify-around gap-6">
                     {!auditPassed && (
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="flex items-center gap-1.5">
-                          <Timer className="w-3.5 h-3.5 text-orange-500" />
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-orange-500">Fim das Auditorias</p>
-                        </div>
-                        <CountdownDisplay targetDate={event.auditDate} color="text-orange-500" label="" />
-                      </div>
+                      <CountdownDisplay targetDate={event.auditDate} color="text-orange-500" title="Fim das Auditorias" icon={Timer} />
                     )}
                     {event.endDate && (
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="flex items-center gap-1.5">
-                          <CalendarClock className={`text-primary ${auditPassed ? 'w-4 h-4' : 'w-3.5 h-3.5'}`} />
-                          <p className={`font-bold uppercase tracking-widest text-primary ${auditPassed ? 'text-xs' : 'text-[10px]'}`}>Data do Evento</p>
-                        </div>
-                        <CountdownDisplay targetDate={event.endDate} large={auditPassed} color="text-primary" label="" />
-                      </div>
+                      <CountdownDisplay targetDate={event.endDate} large={auditPassed} color="text-primary" title="Data do Evento" icon={CalendarClock} />
                     )}
                   </div>
                 );
