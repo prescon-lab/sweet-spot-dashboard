@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import Cropper from "react-easy-crop";
 import { activityStore, Activity } from "@/lib/activityStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
+import { SquadDetailModal } from "@/components/squads/SquadDetailModal";
 import { Activity as ActivityIcon, Bell, Flame, Clock, CalendarDays } from "lucide-react";
 import { isDailyDay } from "@/lib/dailyStore";
 import { eventStore } from "@/lib/eventStore";
