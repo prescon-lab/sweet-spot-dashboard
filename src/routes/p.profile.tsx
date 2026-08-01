@@ -19,7 +19,7 @@ function ProfilePage() {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      const { data, error } = await supabase.from("profiles").select("id, full_name, avatar_url, guardian_name, created_at").eq("id", user.id).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -74,7 +74,7 @@ function ProfilePage() {
             </CardHeader>
             <CardContent>
               <p className="font-medium text-lg">{profile?.full_name || 'Sem nome definido'}</p>
-              <p className="text-muted-foreground text-sm">{profile?.email}</p>
+              <p className="text-muted-foreground text-sm">{user.email}</p>
             </CardContent>
           </Card>
 
