@@ -148,20 +148,24 @@ function SquadsPage() {
             >
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      {leaderAvatar ? (
-                        <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 shadow-sm border border-primary/20">
-                          <img src={leaderAvatar} alt={squad.leader} className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <Users className="w-5 h-5 text-primary" />
-                      )}
-                      {squad.name}
-                    </CardTitle>
-                    <CardDescription className="mt-1">
-                      Líder: <strong className="text-foreground">{squad.leader}</strong>
-                    </CardDescription>
+                  <div className="flex items-center gap-3">
+                    {leaderAvatar ? (
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 shadow-sm border border-primary/20">
+                        <img src={leaderAvatar} alt={squad.leader} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 shadow-sm border border-primary/20 flex items-center justify-center bg-primary/10">
+                        <Users className="w-6 h-6 text-primary" />
+                      </div>
+                    )}
+                    <div>
+                      <CardTitle className="text-xl flex items-center gap-2">
+                        {squad.name}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        Líder: <strong className="text-foreground">{squad.leader}</strong>
+                      </CardDescription>
+                    </div>
                   </div>
                   <Button 
                     variant="ghost" 
@@ -180,10 +184,21 @@ function SquadsPage() {
               <CardContent className="flex-1 flex flex-col gap-4">
                 <div>
                   <h4 className="text-sm font-medium mb-2">Membros ({squad.squad_members?.length || 0})</h4>
-                  <ul className="space-y-2">
-                    {squad.squad_members?.map(member => (
-                      <li key={member.guardian_name} className="flex justify-between items-center text-sm bg-muted/50 p-2 rounded-md">
-                        {member.guardian_name}
+                  <ul className="space-y-3">
+                    {squad.squad_members?.map(member => {
+                      const memberAvatar = guardianStore.get(member.guardian_name)?.avatarUrl;
+                      return (
+                      <li key={member.guardian_name} className="flex justify-between items-center text-sm bg-muted/30 p-2.5 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 bg-primary/10 flex items-center justify-center shadow-sm">
+                            {memberAvatar ? (
+                              <img src={memberAvatar} alt={member.guardian_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="font-bold text-primary text-xs">{member.guardian_name.charAt(0)}</span>
+                            )}
+                          </div>
+                          <span className="font-medium">{member.guardian_name}</span>
+                        </div>
                         <button 
                           onClick={() => removeMemberMutation.mutate({ squadId: squad.id, guardianName: member.guardian_name })}
                           className="text-destructive text-xs hover:underline"
@@ -191,7 +206,7 @@ function SquadsPage() {
                           Remover
                         </button>
                       </li>
-                    ))}
+                    )})}
                     {(!squad.squad_members || squad.squad_members.length === 0) && (
                       <li className="text-sm text-muted-foreground italic">Nenhum membro adicionado</li>
                     )}

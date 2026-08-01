@@ -175,20 +175,26 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
-                {guardianNames.map(name => (
-                  <li key={name} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                      {name.charAt(0)}
+              <ul className="space-y-4">
+                {guardianNames.map(name => {
+                  const avatar = guardianStore.get(name)?.avatarUrl;
+                  return (
+                  <li key={name} className="flex items-center gap-4 p-2 rounded-xl hover:bg-muted/30 transition-colors">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center shrink-0 shadow-sm border border-primary/20">
+                      {avatar ? (
+                        <img src={avatar} alt={name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-primary font-bold text-lg">{name.charAt(0)}</span>
+                      )}
                     </div>
                     <div>
-                      <p className="font-medium leading-none">{name}</p>
+                      <p className="font-semibold text-base leading-tight">{name}</p>
                       {name === squad.leader && (
-                        <span className="text-xs text-primary font-semibold">Líder</span>
+                        <span className="text-sm text-primary font-bold">Líder</span>
                       )}
                     </div>
                   </li>
-                ))}
+                )})}
               </ul>
             </CardContent>
           </Card>
