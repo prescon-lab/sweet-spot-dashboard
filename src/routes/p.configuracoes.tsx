@@ -211,7 +211,7 @@ function Configuracoes() {
             ].map(day => (
               <Button
                 key={day.id}
-                variant={dailyConfig.daysOfWeek.includes(day.id) ? "default" : "outline"}
+                variant={(dailyConfig.daysOfWeek ?? []).includes(day.id) ? "default" : "outline"}
                 size="sm"
                 onClick={() => toggleDayOfWeek(day.id)}
                 className="w-12 h-10 font-bold"
