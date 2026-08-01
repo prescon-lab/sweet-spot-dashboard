@@ -16,8 +16,9 @@ import Cropper from "react-easy-crop";
 import { activityStore, Activity } from "@/lib/activityStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { SquadDetailModal } from "@/components/squads/SquadDetailModal";
-import { Activity as ActivityIcon, Bell, Flame, Clock, CalendarDays } from "lucide-react";
+import { Activity as ActivityIcon, Bell, Flame, Clock, CalendarDays, MessageSquare, PartyPopper, AlertTriangle, Info } from "lucide-react";
 import { isDailyDay } from "@/lib/dailyStore";
+import { announcementStore, Announcement } from "@/lib/announcementStore";
 import { eventStore } from "@/lib/eventStore";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -89,6 +90,11 @@ function Index() {
   const [showDailyPopup, setShowDailyPopup] = useState(false);
   const [auditCountdownDays, setAuditCountdownDays] = useState<number | null>(null);
   const [hasDailyToday, setHasDailyToday] = useState(false);
+
+  // Announcements
+  const [activeAnnouncements, setActiveAnnouncements] = useState<Announcement[]>([]);
+  const [currentAnnouncementIndex, setCurrentAnnouncementIndex] = useState(0);
+  const [showAnnouncementPopup, setShowAnnouncementPopup] = useState(false);
 
   const loadData = async () => {
     if (!user) return;
@@ -216,13 +222,26 @@ function Index() {
     }
 
     // Popup logic
+    const todayStr = new Date().toLocaleDateString("pt-BR");
     if (isDaily) {
-      const todayStr = new Date().toLocaleDateString("pt-BR");
       const lastSeen = localStorage.getItem("lastDailyPopupDate");
       if (lastSeen !== todayStr) {
         setShowDailyPopup(true);
         localStorage.setItem("lastDailyPopupDate", todayStr);
       }
+    }
+
+    // Announcements Logic
+    const activeAnns = announcementStore.getActiveAnnouncements();
+    const unseenAnns = activeAnns.filter(ann => {
+      const lastSeenAnn = localStorage.getItem(`announcement_seen_${ann.id}`);
+      return lastSeenAnn !== todayStr;
+    });
+
+    if (unseenAnns.length > 0) {
+      setActiveAnnouncements(unseenAnns);
+      setShowAnnouncementPopup(true);
+      setCurrentAnnouncementIndex(0);
     }
   };
 
@@ -230,6 +249,7 @@ function Index() {
     loadData();
     window.addEventListener("gamificationUpdated", loadData);
     window.addEventListener("dailyConfigUpdated", loadData);
+    window.addEventListener("announcementsUpdated", loadData);
     const handleActivitiesUpdated = () => {
       if (isAdmin) setActivities(activityStore.getActivities());
     };
@@ -238,9 +258,24 @@ function Index() {
     return () => {
       window.removeEventListener("gamificationUpdated", loadData);
       window.removeEventListener("dailyConfigUpdated", loadData);
+      window.removeEventListener("announcementsUpdated", loadData);
       window.removeEventListener("activitiesUpdated", handleActivitiesUpdated);
     };
   }, [user, isAdmin]);
+
+  const handleCloseAnnouncement = () => {
+    if (activeAnnouncements.length > 0) {
+      const current = activeAnnouncements[currentAnnouncementIndex];
+      const todayStr = new Date().toLocaleDateString("pt-BR");
+      localStorage.setItem(`announcement_seen_${current.id}`, todayStr);
+
+      if (currentAnnouncementIndex < activeAnnouncements.length - 1) {
+        setCurrentAnnouncementIndex(prev => prev + 1);
+      } else {
+        setShowAnnouncementPopup(false);
+      }
+    }
+  };
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -674,6 +709,7 @@ function Index() {
             </Button>
             <Button className="flex-1" disabled={savingCrop} onClick={handleSaveCrop}>
               {savingCrop ? "Salvando..." : "Salvar Foto"}
+
             </Button>
           </div>
         </DialogContent>
@@ -723,6 +759,39 @@ function Index() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Announcement Popup */}
+      <Dialog open={showAnnouncementPopup} onOpenChange={setShowAnnouncementPopup}>
+        {activeAnnouncements.length > 0 && (
+          <DialogContent className="sm:max-w-md p-6 glass-modal rounded-3xl border-primary/20 bg-background/95 backdrop-blur-xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 text-2xl font-bold text-foreground justify-center">
+                {activeAnnouncements[currentAnnouncementIndex].icon === "AlertTriangle" && <AlertTriangle className="w-8 h-8 text-yellow-500" />}
+                {activeAnnouncements[currentAnnouncementIndex].icon === "PartyPopper" && <PartyPopper className="w-8 h-8 text-green-500" />}
+                {activeAnnouncements[currentAnnouncementIndex].icon === "Info" && <Info className="w-8 h-8 text-blue-500" />}
+                {activeAnnouncements[currentAnnouncementIndex].icon === "Calendar" && <CalendarDays className="w-8 h-8 text-primary" />}
+                {activeAnnouncements[currentAnnouncementIndex].icon === "Bell" && <Bell className="w-8 h-8 text-orange-500" />}
+                {activeAnnouncements[currentAnnouncementIndex].title}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-6 text-center space-y-4">
+              <p className="text-muted-foreground text-lg whitespace-pre-wrap">
+                {activeAnnouncements[currentAnnouncementIndex].content}
+              </p>
+              {activeAnnouncements.length > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Mensagem {currentAnnouncementIndex + 1} de {activeAnnouncements.length}
+                </p>
+              )}
+            </div>
+            <div className="flex justify-center">
+              <Button onClick={handleCloseAnnouncement} className="w-full sm:w-auto px-8 rounded-full font-bold">
+                {currentAnnouncementIndex < activeAnnouncements.length - 1 ? "Próxima Mensagem" : "Entendido!"}
+              </Button>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 }

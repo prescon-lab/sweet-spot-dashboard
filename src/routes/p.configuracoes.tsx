@@ -3,13 +3,15 @@ import { useState, useEffect } from "react";
 import { linksStore, UsefulLink } from "@/lib/linksStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash, Edit, Save, X, ShieldCheck, Users, Zap } from "lucide-react";
+import { Plus, Trash, Edit, Save, X, ShieldCheck, Users, Zap, MessageSquare, PartyPopper, AlertTriangle, Bell, Info, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { useAccessRole } from "@/lib/access";
 import { toast } from "sonner";
 import { dailyStore, DailyConfig } from "@/lib/dailyStore";
+import { announcementStore, Announcement } from "@/lib/announcementStore";
+import { Textarea } from "@/components/ui/textarea";
 
 function isValidDate(value?: string) {
   if (!value) return false;
@@ -53,8 +55,17 @@ function Configuracoes() {
   const [savedDailyConfig, setSavedDailyConfig] = useState<DailyConfig | null>(null);
   const [isEditingDaily, setIsEditingDaily] = useState(false);
 
+  // Announcements State
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [newAnnTitle, setNewAnnTitle] = useState("");
+  const [newAnnContent, setNewAnnContent] = useState("");
+  const [newAnnStart, setNewAnnStart] = useState("");
+  const [newAnnEnd, setNewAnnEnd] = useState("");
+  const [newAnnIcon, setNewAnnIcon] = useState("Bell");
+
   useEffect(() => {
     loadLinks();
+    setAnnouncements(announcementStore.getAll());
     
     const loadDaily = () => {
       const dConfig = dailyStore.getConfig();
@@ -79,12 +90,17 @@ function Configuracoes() {
     const handleUpdate = () => {
       loadLinks();
     };
+    const handleAnnouncementsUpdate = () => {
+      setAnnouncements(announcementStore.getAll());
+    };
     
     window.addEventListener('linksStoreUpdated', handleUpdate);
     window.addEventListener('dailyConfigUpdated', loadDaily);
+    window.addEventListener('announcementsUpdated', handleAnnouncementsUpdate);
     return () => {
       window.removeEventListener('linksStoreUpdated', handleUpdate);
       window.removeEventListener('dailyConfigUpdated', loadDaily);
+      window.removeEventListener('announcementsUpdated', handleAnnouncementsUpdate);
     };
   }, []);
 
@@ -165,6 +181,34 @@ function Configuracoes() {
         : [...current, day].sort();
       return { ...prev, daysOfWeek: days };
     });
+  };
+
+  const handleAddAnnouncement = () => {
+    if (!newAnnTitle.trim() || !newAnnContent.trim() || !newAnnStart || !newAnnEnd) {
+      toast.error("Preencha todos os campos do aviso.");
+      return;
+    }
+    announcementStore.add({
+      id: Date.now().toString(),
+      title: newAnnTitle,
+      content: newAnnContent,
+      startDate: newAnnStart,
+      endDate: newAnnEnd,
+      icon: newAnnIcon
+    });
+    setNewAnnTitle("");
+    setNewAnnContent("");
+    setNewAnnStart("");
+    setNewAnnEnd("");
+    setNewAnnIcon("Bell");
+    toast.success("Aviso adicionado!");
+  };
+
+  const handleDeleteAnnouncement = (id: string) => {
+    if (confirm("Tem certeza que deseja remover este aviso?")) {
+      announcementStore.remove(id);
+      toast.success("Aviso removido.");
+    }
   };
 
   if (role === "guardian") {
@@ -298,6 +342,107 @@ function Configuracoes() {
                   Cancelar
                 </Button>
               )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="glass-card p-6 rounded-3xl mb-8 space-y-6">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-semibold">Mensagens Globais (Pop-ups)</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Crie mensagens personalizadas para aparecerem na página inicial assim que as pessoas abrirem a plataforma. Você pode escolher um ícone e o período de exibição.
+        </p>
+        
+        <div className="grid grid-cols-1 gap-4 p-4 bg-muted/20 border border-border/50 rounded-2xl">
+          <Input 
+            placeholder="Título da Mensagem" 
+            value={newAnnTitle} 
+            onChange={e => setNewAnnTitle(e.target.value)} 
+          />
+          <Textarea 
+            placeholder="Conteúdo principal da mensagem..." 
+            value={newAnnContent} 
+            onChange={e => setNewAnnContent(e.target.value)}
+            className="min-h-[80px]"
+          />
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Ícone do Pop-up</label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { name: "Bell", icon: <Bell className="w-4 h-4" /> },
+                { name: "AlertTriangle", icon: <AlertTriangle className="w-4 h-4" /> },
+                { name: "Info", icon: <Info className="w-4 h-4" /> },
+                { name: "PartyPopper", icon: <PartyPopper className="w-4 h-4" /> },
+                { name: "Calendar", icon: <Calendar className="w-4 h-4" /> },
+              ].map(ic => (
+                <Button 
+                  key={ic.name}
+                  variant={newAnnIcon === ic.name ? "default" : "outline"}
+                  onClick={() => setNewAnnIcon(ic.name)}
+                  size="icon"
+                  className="w-10 h-10"
+                >
+                  {ic.icon}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Data Inicial</label>
+              <Input 
+                type="date"
+                value={newAnnStart}
+                onChange={(e) => setNewAnnStart(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Data Final</label>
+              <Input 
+                type="date"
+                value={newAnnEnd}
+                onChange={(e) => setNewAnnEnd(e.target.value)}
+              />
+            </div>
+          </div>
+          <Button onClick={handleAddAnnouncement} className="mt-2 w-full sm:w-auto self-start gap-2">
+            <Plus className="w-4 h-4" />
+            Adicionar Aviso
+          </Button>
+        </div>
+
+        {announcements.length > 0 && (
+          <div className="space-y-3 mt-6">
+            <h3 className="font-semibold text-lg">Avisos Configurados</h3>
+            <div className="grid gap-3">
+              {announcements.map((ann) => (
+                <div key={ann.id} className="flex justify-between items-center p-4 bg-background border border-border/50 rounded-xl shadow-sm">
+                  <div>
+                    <h4 className="font-bold flex items-center gap-2">
+                      {ann.icon === "AlertTriangle" && <AlertTriangle className="w-4 h-4 text-yellow-500" />}
+                      {ann.icon === "PartyPopper" && <PartyPopper className="w-4 h-4 text-green-500" />}
+                      {ann.icon === "Info" && <Info className="w-4 h-4 text-blue-500" />}
+                      {ann.icon === "Calendar" && <Calendar className="w-4 h-4 text-primary" />}
+                      {ann.icon === "Bell" && <Bell className="w-4 h-4 text-orange-500" />}
+                      {ann.title}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{ann.content}</p>
+                    <div className="flex gap-2 mt-2">
+                      <Badge variant="secondary" className="text-[10px]">
+                        De {format(new Date(ann.startDate + "T12:00:00"), "dd/MM/yy")} até {format(new Date(ann.endDate + "T12:00:00"), "dd/MM/yy")}
+                      </Badge>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-500/10 shrink-0" onClick={() => handleDeleteAnnouncement(ann.id)}>
+                    <Trash className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
           </div>
         )}
