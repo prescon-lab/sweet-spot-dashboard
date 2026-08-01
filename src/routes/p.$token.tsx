@@ -159,9 +159,6 @@ function DashboardPanel() {
         </div>
       </div>
 
-      {/* Squad Progress Widget */}
-      <SquadProgressWidget />
-
       {/* KPI Cards (Grid) -> Replaced by Goal Progress Charts */}
       <div className="grid grid-cols-1 gap-6">
         {events.length === 0 ? (
@@ -245,6 +242,9 @@ function DashboardPanel() {
           ))
         )}
       </div>
+
+      {/* Squad Progress Widget */}
+      <SquadProgressWidget />
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
