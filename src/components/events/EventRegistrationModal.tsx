@@ -117,7 +117,7 @@ export function EventRegistrationModal({ open, onOpenChange, eventToEdit }: Even
 
   return (
     <Dialog open={open} onOpenChange={dirtyGuard.guardOpenChange(onOpenChange)}>
-      <DialogContent {...dirtyGuard.containerProps} className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-[#FAF8F5] border-border/50 shadow-2xl p-5 sm:p-8 rounded-3xl">
+      <DialogContent {...dirtyGuard.containerProps} className="modal-shell max-w-4xl bg-[#FAF8F5] border-border/50 shadow-2xl p-5 sm:p-8 rounded-3xl">
         <div className="flex flex-col space-y-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-center tracking-tight text-foreground uppercase">
             {eventToEdit ? "Editar Evento" : "Cadastro de Evento"}

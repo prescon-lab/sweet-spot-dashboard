@@ -160,7 +160,7 @@ export function TodayTomorrowMeetings({ onEjClick }: TodayTomorrowMeetingsProps 
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px] glass-modal rounded-3xl">
+        <DialogContent className="modal-shell sm:max-w-[425px] glass-modal rounded-3xl">
           <DialogHeader>
             <DialogTitle>Agendar Nova Reunião</DialogTitle>
           </DialogHeader>

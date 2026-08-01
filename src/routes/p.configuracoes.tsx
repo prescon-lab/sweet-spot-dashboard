@@ -100,7 +100,7 @@ function Configuracoes() {
 
   if (role === "guardian") {
     return (
-      <div className="p-4 md:p-8 max-w-3xl mx-auto animate-fade-in">
+      <div className="page-shell-narrow animate-fade-in">
         <div className="glass-card rounded-3xl p-10 text-center space-y-3">
           <ShieldCheck className="w-10 h-10 text-primary mx-auto" />
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Área do administrador</h1>
@@ -113,7 +113,7 @@ function Configuracoes() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-fade-in space-y-6">
+    <div className="page-shell animate-fade-in space-y-6">
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Configurações</h1>
         <p className="text-muted-foreground mt-2">

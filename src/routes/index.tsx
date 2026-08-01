@@ -131,7 +131,7 @@ function Index() {
             return {
               ...r,
               name: u?.full_name || u?.email || "Usuário",
-              avatar_url: u?.avatar_url,
+              avatar_url: u?.avatar_url ?? undefined,
             };
           });
           setRanking(enrichedRank);
@@ -266,7 +266,7 @@ function Index() {
   );
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-scale-in">
+    <div className="page-shell space-y-8 animate-scale-in">
       {/* Hidden file input for avatar */}
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
 
@@ -404,7 +404,7 @@ function Index() {
 
       {/* Modal: Score Breakdown */}
       <Dialog open={showScoreModal} onOpenChange={setShowScoreModal}>
-        <DialogContent className="max-w-lg rounded-3xl">
+        <DialogContent className="modal-shell max-w-lg rounded-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-500" />
@@ -450,7 +450,7 @@ function Index() {
 
       {/* Modal: Full Ranking */}
       <Dialog open={showRankingModal} onOpenChange={setShowRankingModal}>
-        <DialogContent className="max-w-lg rounded-3xl">
+        <DialogContent className="modal-shell max-w-lg rounded-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-500" />
@@ -465,7 +465,7 @@ function Index() {
 
       {/* Modal: Crop Avatar */}
       <Dialog open={cropModalOpen} onOpenChange={(open) => { if (!open) { setCropModalOpen(false); setTempImageUrl(null); } }}>
-        <DialogContent className="max-w-md rounded-3xl">
+        <DialogContent className="modal-shell max-w-md rounded-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Camera className="w-4 h-4 text-primary" />
