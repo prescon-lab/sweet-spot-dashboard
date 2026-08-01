@@ -12,7 +12,9 @@ const SYNC_KEYS = [
   "sweet_spot_ej_data",
   "vertentes_links",
   "sweet_spot_daily_config",
-  "vertentes_user_activities"
+  "vertentes_user_activities",
+  "sweet_spot_announcements",
+  "vertentes_gamification"
 ];
 
 let isSyncing = false;
@@ -55,6 +57,8 @@ export async function initCloudSync() {
         window.dispatchEvent(new Event("linksStoreUpdated"));
         window.dispatchEvent(new Event("dailyConfigUpdated"));
         window.dispatchEvent(new Event("userActivitiesUpdated"));
+        window.dispatchEvent(new Event("announcementsUpdated"));
+        window.dispatchEvent(new Event("gamificationUpdated"));
       }
     }
   } catch (e) {
@@ -84,6 +88,8 @@ export async function initCloudSync() {
           if (row.key === "vertentes_links") window.dispatchEvent(new Event("linksStoreUpdated"));
           if (row.key === "sweet_spot_daily_config") window.dispatchEvent(new Event("dailyConfigUpdated"));
           if (row.key === "vertentes_user_activities") window.dispatchEvent(new Event("userActivitiesUpdated"));
+          if (row.key === "sweet_spot_announcements") window.dispatchEvent(new Event("announcementsUpdated"));
+          if (row.key === "vertentes_gamification") window.dispatchEvent(new Event("gamificationUpdated"));
         }
       }
     })
