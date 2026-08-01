@@ -14,30 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_data: {
+        Row: {
+          data: Json
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          data: Json
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
-          id: string
           guardian_name: string | null
+          id: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
-          id: string
           guardian_name?: string | null
+          id: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
-          id?: string
           guardian_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      squad_members: {
+        Row: {
+          created_at: string
+          guardian_name: string
+          id: string
+          squad_id: string
+        }
+        Insert: {
+          created_at?: string
+          guardian_name: string
+          id?: string
+          squad_id: string
+        }
+        Update: {
+          created_at?: string
+          guardian_name?: string
+          id?: string
+          squad_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_members_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      squads: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          leader: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          leader: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          leader?: string
+          name?: string
         }
         Relationships: []
       }
@@ -59,131 +160,6 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
-        }
-        Relationships: []
-      }
-      squads: {
-        Row: {
-          id: string
-          name: string
-          leader: string
-          color: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          leader: string
-          color?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          leader?: string
-          color?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      squad_members: {
-        Row: {
-          id: string
-          squad_id: string
-          guardian_name: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          squad_id: string
-          guardian_name: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          squad_id?: string
-          guardian_name?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "squad_members_squad_id_fkey"
-            columns: ["squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      app_data: {
-        Row: {
-          key: string
-          data: Json
-          updated_at: string
-        }
-        Insert: {
-          key: string
-          data: Json
-          updated_at?: string
-        }
-        Update: {
-          key?: string
-          data?: Json
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      notifications: {
-        Row: {
-          id: string
-          user_id: string
-          title: string
-          content: string
-          type: string
-          is_read: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          title: string
-          content: string
-          type: string
-          is_read?: boolean
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          title?: string
-          content?: string
-          type?: string
-          is_read?: boolean
-          created_at?: string
-        }
-        Relationships: []
-      }
-      daily_reports: {
-        Row: {
-          id: string
-          author_id: string
-          content: string
-          type: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          author_id: string
-          content: string
-          type: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          author_id?: string
-          content?: string
-          type?: string
-          created_at?: string
         }
         Relationships: []
       }
