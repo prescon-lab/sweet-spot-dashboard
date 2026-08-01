@@ -12,6 +12,9 @@ import { ejListStore } from "@/lib/ejListStore";
 import { squadStore, Squad } from "@/lib/squadStore";
 import { Badge } from "@/components/ui/badge";
 import Cropper from "react-easy-crop";
+import { activityStore, Activity } from "@/lib/activityStore";
+import { EjDetailModal } from "@/components/ejs/EjDetailModal";
+import { Activity as ActivityIcon, Bell } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -71,6 +74,10 @@ function Index() {
   // User Data
   const [myEjs, setMyEjs] = useState<any[]>([]);
   const [mySquad, setMySquad] = useState<Squad | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedEjForDetail, setSelectedEjForDetail] = useState<{name: string} | null>(null);
 
   const loadData = async () => {
     if (!user) return;
@@ -94,9 +101,15 @@ function Index() {
 
     // Fetch EJs if guardian or prescon
     const isPrescon = profileData.email === "prescon@nucleovertentes" || profileData.email === "prescon@nucleovertentes.com" || profileData.email === "prescon.nucleovertentes@gmail.com";
+    setIsAdmin(isPrescon);
+
     if (p.guardian_name || isPrescon) {
       const ejs = ejListStore.getEjs().filter((ej) => isPrescon || ej.guardian === p.guardian_name);
       setMyEjs(ejs);
+      
+      if (isPrescon) {
+        setActivities(activityStore.getActivities());
+      }
 
       try {
         const squads = await squadStore.getSquads();
@@ -162,8 +175,16 @@ function Index() {
   useEffect(() => {
     loadData();
     window.addEventListener("gamificationUpdated", loadData);
-    return () => window.removeEventListener("gamificationUpdated", loadData);
-  }, [user]);
+    const handleActivitiesUpdated = () => {
+      if (isAdmin) setActivities(activityStore.getActivities());
+    };
+    window.addEventListener("activitiesUpdated", handleActivitiesUpdated);
+
+    return () => {
+      window.removeEventListener("gamificationUpdated", loadData);
+      window.removeEventListener("activitiesUpdated", handleActivitiesUpdated);
+    };
+  }, [user, isAdmin]);
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -321,39 +342,70 @@ function Index() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Minhas EJs */}
-          {(profile.guardian_name || profile.email?.includes("prescon")) && (
+          {/* Minhas EJs / Notificações Gerais */}
+          {(profile.guardian_name || isAdmin) && (
             <section className="space-y-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-primary" />
-                Minhas EJs
+                {isAdmin ? <Bell className="w-5 h-5 text-primary" /> : <Building2 className="w-5 h-5 text-primary" />}
+                {isAdmin ? "Notificações Recentes" : "Minhas EJs"}
               </h2>
-              {myEjs.length === 0 ? (
-                <Card className="bg-muted/30 border-dashed">
-                  <CardContent className="p-8 text-center text-muted-foreground">
-                    <p>Você não é guardião(ã) de nenhuma EJ atualmente.</p>
-                  </CardContent>
-                </Card>
+              {isAdmin ? (
+                activities.length === 0 ? (
+                  <Card className="bg-muted/30 border-dashed">
+                    <CardContent className="p-8 text-center text-muted-foreground">
+                      <p>Nenhuma notificação recente registrada.</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3 max-h-[500px] overflow-y-auto pr-2">
+                    {activities.map((activity) => (
+                      <div 
+                        key={activity.id} 
+                        className="bg-card hover:bg-muted/50 p-4 rounded-xl border border-border/50 cursor-pointer transition-colors shadow-sm flex flex-col gap-2"
+                        onClick={() => { setSelectedEjForDetail({ name: activity.ejName }); setDetailModalOpen(true); }}
+                      >
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-bold text-sm text-primary flex items-center gap-1.5">
+                            <Building2 className="w-3.5 h-3.5" />
+                            {activity.ejName}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                            {new Date(activity.timestamp).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground/90">{activity.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                )
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {myEjs.map((ej) => (
-                    <Card
-                      key={ej.id}
-                      className="cursor-pointer hover:border-primary/50 transition-colors group"
-                      onClick={() => navigate({ to: "/p/ejs" })}
-                    >
-                      <CardContent className="p-4 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold shrink-0">
-                          {ej.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-bold group-hover:text-primary transition-colors">{ej.name}</p>
-                          <p className="text-xs text-muted-foreground">{ej.cluster || "Sem cluster"}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                myEjs.length === 0 ? (
+                  <Card className="bg-muted/30 border-dashed">
+                    <CardContent className="p-8 text-center text-muted-foreground">
+                      <p>Você não é guardião(ã) de nenhuma EJ atualmente.</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {myEjs.map((ej) => (
+                      <Card
+                        key={ej.id}
+                        className="cursor-pointer hover:border-primary/50 transition-colors group"
+                        onClick={() => navigate({ to: "/p/ejs" })}
+                      >
+                        <CardContent className="p-4 flex items-center gap-4">
+                          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold shrink-0">
+                            {ej.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold group-hover:text-primary transition-colors">{ej.name}</p>
+                            <p className="text-xs text-muted-foreground">{ej.cluster || "Sem cluster"}</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )
               )}
             </section>
           )}
@@ -519,6 +571,13 @@ function Index() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Detail Modal for Admin */}
+      <EjDetailModal 
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        ejData={selectedEjForDetail}
+      />
     </div>
   );
 }

@@ -188,7 +188,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     }
     if (JSON.stringify(reunioes) !== JSON.stringify(previousData.reunioes || [])) {
       hasChanges = true;
-      activityStore.addActivity({ ejName, description: `Anotações de reunião atualizadas`, type: "update" });
+      activityStore.addActivity({ ejName, description: `Histórico de reuniões atualizado`, type: "update" });
     }
     if (JSON.stringify(tasks) !== JSON.stringify(previousData.tarefas || [])) {
       hasChanges = true;
@@ -236,7 +236,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     setReunioes(novasReunioes);
     
     ejDataStore.saveEjData(ejName, { reunioes: novasReunioes });
-    activityStore.addActivity({ ejName, description: "Nova anotação de reunião adicionada", type: "update" });
+    activityStore.addActivity({ ejName, description: `Nova anotação de reunião: "${truncate(novaReuniao)}"`, type: "update" });
     
     setNovaReuniao("");
     toast.success("Anotação da reunião salva com sucesso!");
@@ -248,6 +248,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     const ejName = ejData?.name || "Nova EJ";
     mentionStore.extractAndSaveMentions(newTaskText, ejName, "Dailys");
     
+    activityStore.addActivity({ ejName, description: `Nova tarefa adicionada na Daily: "${truncate(newTaskText)}"`, type: "update" });
+
     setTasks([
       ...tasks,
       {
@@ -289,6 +291,9 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const handleAddPrescon = () => {
     if (!newPresconText.trim()) return;
     
+    const ejName = ejData?.name || "Nova EJ";
+    activityStore.addActivity({ ejName, description: `Nova demanda Prescon adicionada: "${truncate(newPresconText)}"`, type: "update" });
+
     setPresconTasks([
       {
         id: Date.now(),
