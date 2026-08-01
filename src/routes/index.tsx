@@ -94,20 +94,34 @@ function Index() {
     if (!user) return;
 
     // Fetch Profile
-    const { data: profileData } = await supabase
+    const { data: profileData, error } = await supabase
       .from("profiles")
       .select("id, full_name, guardian_name, avatar_url")
       .eq("id", user.id)
-      .single();
-    if (!profileData) return;
+      .maybeSingle();
+      
+    if (error) {
+      console.error("Error fetching profile:", error);
+    }
 
-    const p: ProfileData = {
-      id: profileData.id,
-      full_name: profileData.full_name || user.email || "Usuário",
-      guardian_name: profileData.guardian_name || "",
-      avatar_url: profileData.avatar_url || "",
-      email: user.email || undefined,
-    };
+    let p: ProfileData;
+    if (!profileData) {
+      p = {
+        id: user.id,
+        full_name: user.user_metadata?.full_name || user.email || "Usuário",
+        guardian_name: "",
+        avatar_url: user.user_metadata?.avatar_url || "",
+        email: user.email || undefined,
+      };
+    } else {
+      p = {
+        id: profileData.id,
+        full_name: profileData.full_name || user.user_metadata?.full_name || user.email || "Usuário",
+        guardian_name: profileData.guardian_name || "",
+        avatar_url: profileData.avatar_url || user.user_metadata?.avatar_url || "",
+        email: user.email || undefined,
+      };
+    }
     setProfile(p);
 
     // Fetch EJs if guardian or prescon
