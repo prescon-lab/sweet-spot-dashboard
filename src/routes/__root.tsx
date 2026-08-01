@@ -121,9 +121,19 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { useRouterState, useNavigate } from "@tanstack/react-router";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, LogOut, Bell, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { initCloudSync } from "@/lib/cloudSync";
+import { supabase } from "@/integrations/supabase/client";
+import { mentionStore, Mention } from "@/lib/mentionStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 function UserChip() {
   const { user, isAdmin, signOut } = useAuth();
@@ -132,6 +142,8 @@ function UserChip() {
 
   return (
     <div className="flex items-center gap-2 min-w-0">
+      <NotificationsDropdown />
+      
       <Link to="/p/profile" className="flex items-center gap-2 min-w-0 hover:bg-accent p-1.5 rounded-md transition-colors cursor-pointer">
         <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[180px]">
           {user.email}
@@ -153,6 +165,78 @@ function UserChip() {
         <span className="hidden sm:inline">Sair</span>
       </Button>
     </div>
+  );
+}
+
+function NotificationsDropdown() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [mentions, setMentions] = useState<Mention[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadMentions = async () => {
+      const { data: profile } = await supabase.from("profiles").select("guardian_name").eq("id", user.id).single();
+      if (profile?.guardian_name) {
+        const allMentions = mentionStore.getMentions().filter(m => !m.read && m.guardianName === profile.guardian_name);
+        setMentions(allMentions);
+      }
+    };
+    
+    loadMentions();
+    // Optional: add interval or listen to events
+    const interval = setInterval(loadMentions, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative mr-2 h-9 w-9 rounded-full">
+          <Bell className="h-5 w-5" />
+          {mentions.length > 0 && (
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-500 text-white border-none">
+              {mentions.length}
+            </Badge>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80 p-0 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="bg-primary/5 p-4 border-b">
+          <h3 className="font-semibold text-primary flex items-center gap-2">
+            <Bell className="w-4 h-4" /> Notificações
+          </h3>
+        </div>
+        <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
+          {mentions.length === 0 ? (
+            <div className="p-6 text-center text-muted-foreground flex flex-col items-center gap-2">
+              <CheckCircle2 className="w-8 h-8 opacity-20" />
+              <p className="text-sm">Nenhuma notificação pendente.</p>
+            </div>
+          ) : (
+            mentions.map(mention => (
+              <DropdownMenuItem 
+                key={mention.id} 
+                className="flex flex-col items-start p-3 gap-1 cursor-pointer focus:bg-accent rounded-xl"
+                onClick={() => {
+                  mentionStore.markAsRead(mention.id);
+                  setMentions(prev => prev.filter(m => m.id !== mention.id));
+                  navigate({ to: "/p/dashboard" });
+                }}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <AlertCircle className="w-4 h-4 text-primary shrink-0" />
+                  <p className="text-sm font-semibold truncate flex-1">Mencionado em {mention.ejName}</p>
+                </div>
+                <p className="text-xs text-muted-foreground pl-6">{new Date(mention.date).toLocaleString('pt-BR')}</p>
+                <p className="text-xs bg-muted/50 p-2 rounded-md mt-1 w-full italic truncate">"{mention.contextText}"</p>
+              </DropdownMenuItem>
+            ))
+          )}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
