@@ -147,6 +147,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
     @apply antialiased selection:bg-primary/20 transition-colors duration-300;
     
     /* Firefox */
