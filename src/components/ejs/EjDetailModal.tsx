@@ -923,8 +923,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   </div>
                 )}
 
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
+                <div className="flex flex-col gap-2">
+                  <div className="relative w-full">
                     <Input 
                       type="date" 
                       className="bg-card pl-10 h-10 w-full text-sm" 
@@ -933,7 +933,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                     />
                     <CalendarIcon className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                   </div>
-                  <Button onClick={saveProximaReuniaoDate} className="h-10 px-4 shrink-0 font-semibold">
+                  <Button onClick={saveProximaReuniaoDate} className="h-10 w-full font-semibold">
                     <Save className="w-4 h-4 mr-2" />
                     Salvar
                   </Button>
