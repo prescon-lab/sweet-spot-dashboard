@@ -74,7 +74,7 @@ function ProfilePage() {
             </CardHeader>
             <CardContent>
               <p className="font-medium text-lg">{profile?.full_name || 'Sem nome definido'}</p>
-              <p className="text-muted-foreground text-sm">{profile?.email}</p>
+              <p className="text-muted-foreground text-sm">{user.email}</p>
             </CardContent>
           </Card>
 
