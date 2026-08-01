@@ -36,7 +36,7 @@ export const dailyStore = {
   removeConfig: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(STORE_KEY);
-      syncToCloud(STORE_KEY, null);
+      syncToCloud(STORE_KEY, {}); // Use {} instead of null to avoid violating Postgres not-null constraint on jsonb
       window.dispatchEvent(new Event('dailyConfigUpdated'));
     }
   }
