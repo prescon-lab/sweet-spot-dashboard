@@ -44,5 +44,19 @@ export const activityStore = {
         console.error("Failed to save activity", e);
       }
     }
+  },
+  deleteActivity: (id: string) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const activities = activityStore.getActivities();
+        const updated = activities.filter(a => a.id !== id);
+        localStorage.setItem(STORE_KEY, JSON.stringify(updated));
+        syncToCloud(STORE_KEY, updated);
+        window.dispatchEvent(new Event('ejActivitiesUpdated'));
+        window.dispatchEvent(new Event('activitiesUpdated'));
+      } catch (e) {
+        console.error("Failed to delete activity", e);
+      }
+    }
   }
 };

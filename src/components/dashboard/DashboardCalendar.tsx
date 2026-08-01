@@ -12,7 +12,7 @@ import {
   subMonths
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Flame } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Flame, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -323,9 +323,28 @@ export function DashboardCalendar() {
                 }
 
                 return (
-                  <div key={i} className={`p-3 rounded-xl border ${bgClass}`}>
-                    <p className={`font-bold text-sm ${textClass}`}>{evt.ejName}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{evt.title}</p>
+                  <div key={i} className={`p-3 rounded-xl border flex items-center justify-between group ${bgClass}`}>
+                    <div>
+                      <p className={`font-bold text-sm ${textClass}`}>{evt.ejName}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{evt.title}</p>
+                    </div>
+                    {evt.type === 'reuniao' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Deseja desmarcar a reunião com ${evt.ejName}?`)) {
+                            ejDataStore.saveEjData(evt.ejName, { proximaReuniao: "" });
+                            toast.success("Reunião desmarcada.");
+                            loadMeetings();
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 );
               })}

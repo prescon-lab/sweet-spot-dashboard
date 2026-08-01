@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pencil, ListChecks, ChevronDown, ChevronRight, Activity as ActivityIcon, Flame, Trophy, Timer, CalendarClock } from "lucide-react";
+import { AlertCircle, Target, TrendingUp, Users, Search, PlusCircle, Printer, Pencil, ListChecks, ChevronDown, ChevronRight, Activity as ActivityIcon, Flame, Trophy, Timer, CalendarClock, Trash2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
@@ -407,14 +407,30 @@ function DashboardPanel() {
                         {isExpanded && (
                           <div className="border-t border-border/50 bg-muted/5 p-4 space-y-3">
                             {ejActivities.map(activity => (
-                              <div key={activity.id} className="flex items-start gap-2 relative before:absolute before:left-[3px] before:top-4 before:bottom-[-16px] before:w-[2px] before:bg-border last:before:hidden">
+                              <div key={activity.id} className="flex items-start gap-2 relative group before:absolute before:left-[3px] before:top-4 before:bottom-[-16px] before:w-[2px] before:bg-border last:before:hidden">
                                 <div className="w-2 h-2 rounded-full bg-primary/40 mt-1.5 relative z-10 shrink-0" />
-                                <div>
+                                <div className="flex-1">
                                   <p className="text-xs text-foreground/80">{activity.description}</p>
                                   <p className="text-[10px] text-muted-foreground/60 mt-0.5 font-medium uppercase">
                                     {new Date(activity.timestamp).toLocaleString('pt-BR')}
                                   </p>
                                 </div>
+                                {canEditEvents && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 transition-all shrink-0 -mt-1"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (confirm("Tem certeza que deseja apagar esta atualização?")) {
+                                        activityStore.deleteActivity(activity.id);
+                                        toast.success("Atualização apagada com sucesso.");
+                                      }
+                                    }}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                )}
                               </div>
                             ))}
                           </div>
