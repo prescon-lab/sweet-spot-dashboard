@@ -168,16 +168,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      admin_list_profiles: {
-        Args: never
-        Returns: {
-          avatar_url: string
-          email: string
-          full_name: string
-          guardian_name: string
-          id: string
-        }[]
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
