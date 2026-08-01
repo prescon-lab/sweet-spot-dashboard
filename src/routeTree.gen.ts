@@ -9,67 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as PTokenRouteImport } from './routes/p.$token'
-import { Route as PAdminRouteImport } from './routes/p.admin'
-import { Route as PCalendarioRouteImport } from './routes/p.calendario'
-import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
-import { Route as PEjsRouteImport } from './routes/p.ejs'
-import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
-import { Route as PHistoricoEventosRouteImport } from './routes/p.historico-eventos'
-import { Route as PProfileRouteImport } from './routes/p.profile'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as PSquadsRouteImport } from './routes/p.squads'
-import { Route as PUsersRouteImport } from './routes/p.users'
+import { Route as PProfileRouteImport } from './routes/p.profile'
+import { Route as PHistoricoEventosRouteImport } from './routes/p.historico-eventos'
+import { Route as PGuardioesRouteImport } from './routes/p.guardioes'
+import { Route as PGestaoGenteRouteImport } from './routes/p.gestao-gente'
+import { Route as PEjsRouteImport } from './routes/p.ejs'
+import { Route as PConfiguracoesRouteImport } from './routes/p.configuracoes'
+import { Route as PCalendarioRouteImport } from './routes/p.calendario'
+import { Route as PAdminRouteImport } from './routes/p.admin'
+import { Route as PTokenRouteImport } from './routes/p.$token'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PTokenRoute = PTokenRouteImport.update({
-  id: '/p/$token',
-  path: '/p/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PAdminRoute = PAdminRouteImport.update({
-  id: '/p/admin',
-  path: '/p/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PCalendarioRoute = PCalendarioRouteImport.update({
-  id: '/p/calendario',
-  path: '/p/calendario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PConfiguracoesRoute = PConfiguracoesRouteImport.update({
-  id: '/p/configuracoes',
-  path: '/p/configuracoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PEjsRoute = PEjsRouteImport.update({
-  id: '/p/ejs',
-  path: '/p/ejs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PGuardioesRoute = PGuardioesRouteImport.update({
-  id: '/p/guardioes',
-  path: '/p/guardioes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
-  id: '/p/historico-eventos',
-  path: '/p/historico-eventos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PProfileRoute = PProfileRouteImport.update({
-  id: '/p/profile',
-  path: '/p/profile',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PSquadsRoute = PSquadsRouteImport.update({
@@ -77,9 +37,49 @@ const PSquadsRoute = PSquadsRouteImport.update({
   path: '/p/squads',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PUsersRoute = PUsersRouteImport.update({
-  id: '/p/users',
-  path: '/p/users',
+const PProfileRoute = PProfileRouteImport.update({
+  id: '/p/profile',
+  path: '/p/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PHistoricoEventosRoute = PHistoricoEventosRouteImport.update({
+  id: '/p/historico-eventos',
+  path: '/p/historico-eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PGuardioesRoute = PGuardioesRouteImport.update({
+  id: '/p/guardioes',
+  path: '/p/guardioes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PGestaoGenteRoute = PGestaoGenteRouteImport.update({
+  id: '/p/gestao-gente',
+  path: '/p/gestao-gente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PEjsRoute = PEjsRouteImport.update({
+  id: '/p/ejs',
+  path: '/p/ejs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PConfiguracoesRoute = PConfiguracoesRouteImport.update({
+  id: '/p/configuracoes',
+  path: '/p/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PCalendarioRoute = PCalendarioRouteImport.update({
+  id: '/p/calendario',
+  path: '/p/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PAdminRoute = PAdminRouteImport.update({
+  id: '/p/admin',
+  path: '/p/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PTokenRoute = PTokenRouteImport.update({
+  id: '/p/$token',
+  path: '/p/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -91,11 +91,11 @@ export interface FileRoutesByFullPath {
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
+  '/p/gestao-gente': typeof PGestaoGenteRoute
   '/p/guardioes': typeof PGuardioesRoute
   '/p/historico-eventos': typeof PHistoricoEventosRoute
   '/p/profile': typeof PProfileRoute
   '/p/squads': typeof PSquadsRoute
-  '/p/users': typeof PUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -105,11 +105,11 @@ export interface FileRoutesByTo {
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
+  '/p/gestao-gente': typeof PGestaoGenteRoute
   '/p/guardioes': typeof PGuardioesRoute
   '/p/historico-eventos': typeof PHistoricoEventosRoute
   '/p/profile': typeof PProfileRoute
   '/p/squads': typeof PSquadsRoute
-  '/p/users': typeof PUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -120,11 +120,11 @@ export interface FileRoutesById {
   '/p/calendario': typeof PCalendarioRoute
   '/p/configuracoes': typeof PConfiguracoesRoute
   '/p/ejs': typeof PEjsRoute
+  '/p/gestao-gente': typeof PGestaoGenteRoute
   '/p/guardioes': typeof PGuardioesRoute
   '/p/historico-eventos': typeof PHistoricoEventosRoute
   '/p/profile': typeof PProfileRoute
   '/p/squads': typeof PSquadsRoute
-  '/p/users': typeof PUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -136,11 +136,11 @@ export interface FileRouteTypes {
     | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
+    | '/p/gestao-gente'
     | '/p/guardioes'
     | '/p/historico-eventos'
     | '/p/profile'
     | '/p/squads'
-    | '/p/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -150,11 +150,11 @@ export interface FileRouteTypes {
     | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
+    | '/p/gestao-gente'
     | '/p/guardioes'
     | '/p/historico-eventos'
     | '/p/profile'
     | '/p/squads'
-    | '/p/users'
   id:
     | '__root__'
     | '/'
@@ -164,11 +164,11 @@ export interface FileRouteTypes {
     | '/p/calendario'
     | '/p/configuracoes'
     | '/p/ejs'
+    | '/p/gestao-gente'
     | '/p/guardioes'
     | '/p/historico-eventos'
     | '/p/profile'
     | '/p/squads'
-    | '/p/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -179,22 +179,15 @@ export interface RootRouteChildren {
   PCalendarioRoute: typeof PCalendarioRoute
   PConfiguracoesRoute: typeof PConfiguracoesRoute
   PEjsRoute: typeof PEjsRoute
+  PGestaoGenteRoute: typeof PGestaoGenteRoute
   PGuardioesRoute: typeof PGuardioesRoute
   PHistoricoEventosRoute: typeof PHistoricoEventosRoute
   PProfileRoute: typeof PProfileRoute
   PSquadsRoute: typeof PSquadsRoute
-  PUsersRoute: typeof PUsersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -202,60 +195,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/p/$token': {
-      id: '/p/$token'
-      path: '/p/$token'
-      fullPath: '/p/$token'
-      preLoaderRoute: typeof PTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/admin': {
-      id: '/p/admin'
-      path: '/p/admin'
-      fullPath: '/p/admin'
-      preLoaderRoute: typeof PAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/calendario': {
-      id: '/p/calendario'
-      path: '/p/calendario'
-      fullPath: '/p/calendario'
-      preLoaderRoute: typeof PCalendarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/configuracoes': {
-      id: '/p/configuracoes'
-      path: '/p/configuracoes'
-      fullPath: '/p/configuracoes'
-      preLoaderRoute: typeof PConfiguracoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/ejs': {
-      id: '/p/ejs'
-      path: '/p/ejs'
-      fullPath: '/p/ejs'
-      preLoaderRoute: typeof PEjsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/guardioes': {
-      id: '/p/guardioes'
-      path: '/p/guardioes'
-      fullPath: '/p/guardioes'
-      preLoaderRoute: typeof PGuardioesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/historico-eventos': {
-      id: '/p/historico-eventos'
-      path: '/p/historico-eventos'
-      fullPath: '/p/historico-eventos'
-      preLoaderRoute: typeof PHistoricoEventosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/profile': {
-      id: '/p/profile'
-      path: '/p/profile'
-      fullPath: '/p/profile'
-      preLoaderRoute: typeof PProfileRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/squads': {
@@ -265,11 +209,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PSquadsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/p/users': {
-      id: '/p/users'
-      path: '/p/users'
-      fullPath: '/p/users'
-      preLoaderRoute: typeof PUsersRouteImport
+    '/p/profile': {
+      id: '/p/profile'
+      path: '/p/profile'
+      fullPath: '/p/profile'
+      preLoaderRoute: typeof PProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/historico-eventos': {
+      id: '/p/historico-eventos'
+      path: '/p/historico-eventos'
+      fullPath: '/p/historico-eventos'
+      preLoaderRoute: typeof PHistoricoEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/guardioes': {
+      id: '/p/guardioes'
+      path: '/p/guardioes'
+      fullPath: '/p/guardioes'
+      preLoaderRoute: typeof PGuardioesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/gestao-gente': {
+      id: '/p/gestao-gente'
+      path: '/p/gestao-gente'
+      fullPath: '/p/gestao-gente'
+      preLoaderRoute: typeof PGestaoGenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/ejs': {
+      id: '/p/ejs'
+      path: '/p/ejs'
+      fullPath: '/p/ejs'
+      preLoaderRoute: typeof PEjsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/configuracoes': {
+      id: '/p/configuracoes'
+      path: '/p/configuracoes'
+      fullPath: '/p/configuracoes'
+      preLoaderRoute: typeof PConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/calendario': {
+      id: '/p/calendario'
+      path: '/p/calendario'
+      fullPath: '/p/calendario'
+      preLoaderRoute: typeof PCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/admin': {
+      id: '/p/admin'
+      path: '/p/admin'
+      fullPath: '/p/admin'
+      preLoaderRoute: typeof PAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$token': {
+      id: '/p/$token'
+      path: '/p/$token'
+      fullPath: '/p/$token'
+      preLoaderRoute: typeof PTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -283,22 +283,12 @@ const rootRouteChildren: RootRouteChildren = {
   PCalendarioRoute: PCalendarioRoute,
   PConfiguracoesRoute: PConfiguracoesRoute,
   PEjsRoute: PEjsRoute,
+  PGestaoGenteRoute: PGestaoGenteRoute,
   PGuardioesRoute: PGuardioesRoute,
   PHistoricoEventosRoute: PHistoricoEventosRoute,
   PProfileRoute: PProfileRoute,
   PSquadsRoute: PSquadsRoute,
-  PUsersRoute: PUsersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
