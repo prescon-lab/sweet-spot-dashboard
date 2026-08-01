@@ -20,8 +20,13 @@ import { ejDataStore, EjData, Task, ReuniaoNota } from "@/lib/ejDataStore";
 import { activityStore } from "@/lib/activityStore";
 import { mentionStore } from "@/lib/mentionStore";
 import { ejListStore } from "@/lib/ejListStore";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+const truncate = (str: string) => str.length > 50 ? str.slice(0, 50) + "..." : str;
+
+type TabType = "resumo" | "planejamento" | "eventos" | "anotacoes";
 
 interface EjDetailModalProps {
   open: boolean;
@@ -134,7 +139,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
     // Fetch users for mentions
     supabase.from("profiles").select("full_name, guardian_name").then(({ data }) => {
       if (data) {
-        const names = data.map(d => d.guardian_name || d.full_name).filter(Boolean);
+        const names = data.map(d => d.guardian_name || d.full_name).filter(Boolean) as string[];
         setMentionUsers([...new Set(names)]);
       }
     });

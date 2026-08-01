@@ -196,7 +196,9 @@ export function DashboardCalendar() {
                     </span>
                     <div className="flex gap-1 items-center">
                       {dailyDay && (
-                        <Flame className="w-4 h-4 text-orange-500" title="Dia de Daily" />
+                        <div title="Dia de Daily">
+                          <Flame className="w-4 h-4 text-orange-500" />
+                        </div>
                       )}
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                         <Plus className="w-4 h-4 text-muted-foreground" />
@@ -242,7 +244,11 @@ export function DashboardCalendar() {
           <div className="mb-8 space-y-4">
             <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2">
               Agenda do Dia
-              {selectedIsDaily && <Flame className="w-5 h-5 text-orange-500 ml-auto" title="Dia de Daily" />}
+              {selectedIsDaily && (
+                <div title="Dia de Daily" className="ml-auto">
+                  <Flame className="w-5 h-5 text-orange-500" />
+                </div>
+              )}
             </h3>
             
             {selectedIsDaily && (

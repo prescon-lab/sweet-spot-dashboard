@@ -6,14 +6,7 @@ import { Trophy, Medal, Building2, Camera, ZoomIn, ZoomOut } from "lucide-react"
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trophy, Medal, Building2, Camera, ZoomIn, ZoomOut } from "lucide-react";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+
 import { gamificationStore, GameRule } from "@/lib/gamificationStore";
 import { useAuth } from "@/lib/auth";
 import { ejListStore } from "@/lib/ejListStore";
@@ -111,7 +104,7 @@ function Index() {
       full_name: profileData.full_name || profileData.email || "Usuário",
       guardian_name: profileData.guardian_name || "",
       avatar_url: profileData.avatar_url || "",
-      email: profileData.email,
+      email: profileData.email || undefined,
     };
     setProfile(p);
 
