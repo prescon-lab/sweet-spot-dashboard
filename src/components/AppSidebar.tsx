@@ -53,11 +53,13 @@ const items = [
     title: "Squads",
     url: "/p/squads",
     icon: Users2,
+    adminOnly: true,
   },
   {
     title: "Histórico de Eventos",
     url: "/p/historico-eventos",
     icon: History,
+    adminOnly: true,
   },
   {
     title: "Calendário",

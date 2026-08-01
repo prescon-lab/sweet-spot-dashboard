@@ -19,6 +19,9 @@ import { activityStore } from "@/lib/activityStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { Settings, Image as ImageIcon, Trash2 } from "lucide-react";
 import Cropper from "react-easy-crop";
+import { useAuth } from "@/lib/auth";
+import { useAccessRole } from "@/lib/access";
+import { supabase } from "@/integrations/supabase/client";
 
 // Helper function to calculate brightness and return black or white for text contrast
 function getContrastColor(hexColor: string) {
@@ -38,6 +41,20 @@ interface GuardianDetailModalProps {
 }
 
 export function GuardianDetailModal({ open, onOpenChange, guardianData }: GuardianDetailModalProps) {
+  const role = useAccessRole();
+  const { user } = useAuth();
+  const [currentUserGuardianName, setCurrentUserGuardianName] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (user) {
+      supabase.from("profiles").select("guardian_name").eq("id", user.id).single().then(({ data }) => {
+        if (data) setCurrentUserGuardianName(data.guardian_name);
+      });
+    }
+  }, [user]);
+
+  const canEdit = role === "admin" || (currentUserGuardianName && currentUserGuardianName === guardianData?.name);
+
   const dirtyGuard = useDirtyGuard(open);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedEj, setSelectedEj] = useState<any>(null);
@@ -267,16 +284,18 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               className="relative w-full min-h-[250px] flex items-end p-5 sm:p-8 md:p-12 z-20"
             >
               {/* Settings Toggle Button */}
-              <div className="absolute top-4 right-4 z-30">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-sm"
-                  onClick={() => setShowSettings(!showSettings)}
-                >
-                  <Settings className="w-5 h-5" />
-                </Button>
-              </div>
+              {canEdit && (
+                <div className="absolute top-4 right-4 z-30">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-sm"
+                    onClick={() => setShowSettings(!showSettings)}
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Button>
+                </div>
+              )}
 
               {/* Settings Panel (Absolute) */}
               {showSettings && (
@@ -337,7 +356,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
               {/* Guardian Info Content */}
               <div className="relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 w-full">
                 {/* Photo */}
-                <div className="relative group cursor-pointer flex-shrink-0" onClick={() => fileInputRef.current?.click()}>
+                <div className={`relative group flex-shrink-0 ${canEdit ? 'cursor-pointer' : ''}`} onClick={() => canEdit && fileInputRef.current?.click()}>
                   <Avatar 
                     className="h-40 w-40 md:h-48 md:w-48 border-0 transition-transform group-hover:scale-105 bg-black/5 overflow-hidden flex flex-col items-center justify-center shadow-md"
                   >
@@ -349,22 +368,27 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                       </span>
                     )}
                   </Avatar>
-                  <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
-                    <ImageIcon className="w-8 h-8 text-white" />
-                  </div>
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={(e) => handleImageUpload(e, 'avatar')} 
-                    accept="image/*" 
-                    className="hidden" 
-                  />
+                  {canEdit && (
+                    <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
+                      <ImageIcon className="w-8 h-8 text-white" />
+                    </div>
+                  )}
+                  {canEdit && (
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={(e) => handleImageUpload(e, 'avatar')} 
+                      accept="image/*" 
+                      className="hidden" 
+                    />
+                  )}
                 </div>
 
                 {/* Name and Quote */}
                 <div className="flex-1 text-center md:text-left space-y-2 mb-2">
                   <Input
                     defaultValue={guardianData?.name || "NOME DO GUARDIÃO"}
+                    readOnly={!canEdit}
                     className="text-3xl md:text-4xl font-bold h-14 border-transparent bg-transparent hover:bg-black/10 focus-visible:bg-black/20 transition-colors px-2 -ml-2 w-full max-w-md uppercase tracking-wider"
                     style={{ color: getContrastColor(bannerColor) }}
                   />
@@ -372,6 +396,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
                     <Input 
                       placeholder="FRASE DO DIA" 
                       value={quote}
+                      readOnly={!canEdit}
                       onChange={(e) => { setQuote(e.target.value); updateConfig('quote', e.target.value); }}
                       className="h-auto py-2 text-sm md:text-base bg-black/20 border-transparent w-full rounded-2xl px-6 text-center md:text-left focus-visible:ring-white/30 uppercase tracking-widest" 
                       style={{ color: getContrastColor(bannerColor) }}
@@ -622,8 +647,10 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
           
           {/* Bottom Actions Bar */}
           <div className="bg-black/20 backdrop-blur-md p-4 flex justify-end gap-3 z-20">
-            <Button variant="ghost" onClick={() => dirtyGuard.requestClose(onOpenChange)} className="rounded-full px-6 font-bold hover:bg-white/10 text-white">Fechar sem salvar</Button>
-            <Button onClick={() => { dirtyGuard.markClean(); onOpenChange(false); }} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-lg">Salvar Perfil</Button>
+            <Button variant="ghost" onClick={() => dirtyGuard.requestClose(onOpenChange)} className="rounded-full px-6 font-bold hover:bg-white/10 text-white">Fechar</Button>
+            {canEdit && (
+              <Button onClick={() => { dirtyGuard.markClean(); onOpenChange(false); }} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-lg">Salvar Perfil</Button>
+            )}
           </div>
         </div>
       )}
