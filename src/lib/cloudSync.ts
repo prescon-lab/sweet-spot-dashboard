@@ -1,7 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Mapeia chaves do localStorage que devem ser sincronizadas
 const SYNC_KEYS = [
   "vertentes_ej_list",
   "sweet_spot_events",
@@ -11,7 +10,8 @@ const SYNC_KEYS = [
   "vertentes_guardian_prescon",
   "sweet_spot_activities",
   "sweet_spot_ej_data",
-  "vertentes_links"
+  "vertentes_links",
+  "sweet_spot_daily_config"
 ];
 
 let isSyncing = false;

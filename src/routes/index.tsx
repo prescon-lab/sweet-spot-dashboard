@@ -6,6 +6,14 @@ import { Trophy, Medal, Building2, Camera, ZoomIn, ZoomOut } from "lucide-react"
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Trophy, Medal, Building2, Camera, ZoomIn, ZoomOut } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { gamificationStore, GameRule } from "@/lib/gamificationStore";
 import { useAuth } from "@/lib/auth";
 import { ejListStore } from "@/lib/ejListStore";
@@ -14,7 +22,10 @@ import { Badge } from "@/components/ui/badge";
 import Cropper from "react-easy-crop";
 import { activityStore, Activity } from "@/lib/activityStore";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
-import { Activity as ActivityIcon, Bell } from "lucide-react";
+import { Activity as ActivityIcon, Bell, Flame, Clock, CalendarDays } from "lucide-react";
+import { isDailyDay } from "@/lib/dailyStore";
+import { eventStore } from "@/lib/eventStore";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -78,6 +89,11 @@ function Index() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedEjForDetail, setSelectedEjForDetail] = useState<{name: string} | null>(null);
+
+  // Daily Notice
+  const [showDailyPopup, setShowDailyPopup] = useState(false);
+  const [auditCountdownDays, setAuditCountdownDays] = useState<number | null>(null);
+  const [hasDailyToday, setHasDailyToday] = useState(false);
 
   const loadData = async () => {
     if (!user) return;
@@ -169,6 +185,34 @@ function Index() {
       setActiveGameId("");
       setMyScore(0);
       setMyRankPosition(null);
+    }
+
+    // Check Daily
+    const isDaily = isDailyDay(new Date());
+    setHasDailyToday(isDaily);
+
+    // Calculate Audit Countdown
+    const events = eventStore.getEvents();
+    const activeEvent = events.find(e => e.status !== "completed");
+    if (activeEvent?.auditDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const auditDate = new Date(activeEvent.auditDate + "T23:59:59");
+      const diffTime = auditDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      setAuditCountdownDays(diffDays >= 0 ? diffDays : null);
+    } else {
+      setAuditCountdownDays(null);
+    }
+
+    // Popup logic
+    if (isDaily) {
+      const todayStr = new Date().toLocaleDateString("pt-BR");
+      const lastSeen = localStorage.getItem("lastDailyPopupDate");
+      if (lastSeen !== todayStr) {
+        setShowDailyPopup(true);
+        localStorage.setItem("lastDailyPopupDate", todayStr);
+      }
     }
   };
 
@@ -342,6 +386,56 @@ function Index() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
+          
+          {/* Recados e Informações Importantes */}
+          <section className="space-y-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Bell className="w-5 h-5 text-primary" />
+              Recados Importantes
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {hasDailyToday && (
+                <Card className="bg-orange-500/10 border-orange-500/20">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0">
+                      <Flame className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-orange-700 dark:text-orange-400">Hoje tem Daily!</p>
+                      <p className="text-xs text-orange-600/80 dark:text-orange-400/80 mt-1">
+                        Momento de aceleração. Mantenha as EJs engajadas.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {auditCountdownDays !== null && (
+                <Card className="bg-red-500/10 border-red-500/20">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                      <Clock className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-red-700 dark:text-red-400">Fim das Auditorias</p>
+                      <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">
+                        {auditCountdownDays === 0 ? "O prazo termina HOJE!" : `Faltam ${auditCountdownDays} dias para o encerramento.`}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {!hasDailyToday && auditCountdownDays === null && (
+                <Card className="bg-muted/30 border-dashed sm:col-span-2">
+                  <CardContent className="p-6 text-center text-muted-foreground text-sm">
+                    Nenhum recado importante no momento.
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </section>
+
           {/* Minhas EJs / Notificações Gerais */}
           {(profile.guardian_name || isAdmin) && (
             <section className="space-y-4">
@@ -578,6 +672,39 @@ function Index() {
         onOpenChange={setDetailModalOpen}
         ejData={selectedEjForDetail}
       />
+
+      {/* Daily Popup */}
+      <AlertDialog open={showDailyPopup} onOpenChange={setShowDailyPopup}>
+        <AlertDialogContent className="max-w-md rounded-3xl border-orange-500/20 bg-card">
+          <AlertDialogHeader>
+            <div className="mx-auto w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mb-4">
+              <Flame className="w-8 h-8 text-orange-500" />
+            </div>
+            <AlertDialogTitle className="text-center text-2xl font-bold text-foreground">
+              HOJE TEM DAILY! ⚡
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base mt-2">
+              É dia de aceleração com as EJs! Atualize os progressos e mantenha a energia em alta.
+              {auditCountdownDays !== null && (
+                <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                  <p className="font-bold text-red-700 dark:text-red-400 flex items-center justify-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    Prazo de Auditoria
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                    {auditCountdownDays === 0 ? "O prazo termina HOJE!" : `Faltam apenas ${auditCountdownDays} dias para o encerramento.`}
+                  </p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center mt-6">
+            <AlertDialogAction onClick={() => setShowDailyPopup(false)} className="w-full sm:w-auto font-bold px-8">
+              Vamos lá!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

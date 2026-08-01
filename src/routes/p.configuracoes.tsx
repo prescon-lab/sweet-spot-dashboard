@@ -3,9 +3,10 @@ import { useState, useEffect } from "react";
 import { linksStore, UsefulLink } from "@/lib/linksStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash, Edit, Save, X, ShieldCheck, Users } from "lucide-react";
+import { Plus, Trash, Edit, Save, X, ShieldCheck, Users, Zap } from "lucide-react";
 import { useAccessRole } from "@/lib/access";
 import { toast } from "sonner";
+import { dailyStore, DailyConfig } from "@/lib/dailyStore";
 
 export const Route = createFileRoute("/p/configuracoes")({
   head: () => ({
@@ -35,8 +36,19 @@ function Configuracoes() {
   const [editUrl, setEditUrl] = useState("");
   const [editCategory, setEditCategory] = useState("");
 
+  const [dailyConfig, setDailyConfig] = useState<DailyConfig>({
+    startDate: "",
+    endDate: "",
+    daysOfWeek: [1, 2, 3, 4, 5]
+  });
+
   useEffect(() => {
     loadLinks();
+    
+    const dConfig = dailyStore.getConfig();
+    if (dConfig) {
+      setDailyConfig(dConfig);
+    }
     
     const handleUpdate = () => {
       loadLinks();
@@ -98,6 +110,20 @@ function Configuracoes() {
     toast.success("Link atualizado!");
   };
 
+  const handleSaveDailyConfig = () => {
+    dailyStore.saveConfig(dailyConfig);
+    toast.success("Configurações de Dailys salvas com sucesso!");
+  };
+
+  const toggleDayOfWeek = (day: number) => {
+    setDailyConfig(prev => {
+      const days = prev.daysOfWeek.includes(day)
+        ? prev.daysOfWeek.filter(d => d !== day)
+        : [...prev.daysOfWeek, day].sort();
+      return { ...prev, daysOfWeek: days };
+    });
+  };
+
   if (role === "guardian") {
     return (
       <div className="page-shell-narrow animate-fade-in">
@@ -138,7 +164,64 @@ function Configuracoes() {
         </Button>
       </div>
 
+      <div className="glass-card p-6 rounded-3xl mb-8 space-y-4">
+        <div className="flex items-center gap-2">
+          <Zap className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-semibold">Configuração de Dailys</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Defina o período em que as Dailys estarão ativas e em quais dias da semana elas ocorrem. Isso exibirá o ícone ⚡ no calendário e avisará os usuários na página inicial.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Data Inicial</label>
+            <Input 
+              type="date"
+              value={dailyConfig.startDate}
+              onChange={(e) => setDailyConfig(prev => ({ ...prev, startDate: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Data Final</label>
+            <Input 
+              type="date"
+              value={dailyConfig.endDate}
+              onChange={(e) => setDailyConfig(prev => ({ ...prev, endDate: e.target.value }))}
+            />
+          </div>
+        </div>
+        
+        <div className="space-y-2 mt-4">
+          <label className="text-sm font-medium">Dias da Semana</label>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: 1, label: "Seg" },
+              { id: 2, label: "Ter" },
+              { id: 3, label: "Qua" },
+              { id: 4, label: "Qui" },
+              { id: 5, label: "Sex" },
+              { id: 6, label: "Sáb" },
+              { id: 0, label: "Dom" }
+            ].map(day => (
+              <Button
+                key={day.id}
+                variant={dailyConfig.daysOfWeek.includes(day.id) ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleDayOfWeek(day.id)}
+                className="w-12 h-10 font-bold"
+              >
+                {day.label}
+              </Button>
+            ))}
+          </div>
+        </div>
 
+        <Button onClick={handleSaveDailyConfig} className="mt-4 min-h-[44px] gap-2">
+          <Save className="w-4 h-4" />
+          Salvar Configurações de Dailys
+        </Button>
+      </div>
 
       <div className="glass-card p-6 rounded-3xl mb-8 space-y-6">
         <h2 className="text-xl font-semibold">Adicionar Novo Link</h2>

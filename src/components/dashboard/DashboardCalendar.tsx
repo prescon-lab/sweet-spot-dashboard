@@ -12,13 +12,14 @@ import {
   subMonths
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ejDataStore, EjData } from "@/lib/ejDataStore";
 import { ejListStore } from "@/lib/ejListStore";
 import { toast } from "sonner";
+import { isDailyDay } from "@/lib/dailyStore";
 
 type CalendarDayData = {
   ejName: string;
@@ -75,7 +76,11 @@ export function DashboardCalendar() {
     
     const handleUpdate = () => loadMeetings();
     window.addEventListener("ejDataUpdated", handleUpdate);
-    return () => window.removeEventListener("ejDataUpdated", handleUpdate);
+    window.addEventListener("dailyConfigUpdated", handleUpdate); // Re-render if daily config changes
+    return () => {
+      window.removeEventListener("ejDataUpdated", handleUpdate);
+      window.removeEventListener("dailyConfigUpdated", handleUpdate);
+    };
   }, []);
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
@@ -130,9 +135,14 @@ export function DashboardCalendar() {
 
   const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
+  // Helper for rendering selected day events
+  const selectedDateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
+  const selectedDayEvents = selectedDateKey ? (eventsByDay[selectedDateKey] || []) : [];
+  const selectedIsDaily = selectedDate ? isDailyDay(selectedDate) : false;
+
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 shadow-sm animate-fade-in max-w-4xl mx-auto w-full">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 shadow-sm animate-fade-in mx-auto w-full overflow-hidden">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2 text-foreground">
             <CalendarIcon className="w-6 h-6 text-primary" />
@@ -141,83 +151,129 @@ export function DashboardCalendar() {
           <p className="text-muted-foreground text-sm mt-1">Acompanhe e agende suas próximas reuniões com as EJs.</p>
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handlePrevMonth} className="rounded-full">
+          <Button variant="outline" size="icon" onClick={handlePrevMonth} className="rounded-full shrink-0">
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <span className="font-semibold text-lg min-w-[150px] text-center capitalize text-foreground">
             {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
           </span>
-          <Button variant="outline" size="icon" onClick={handleNextMonth} className="rounded-full">
+          <Button variant="outline" size="icon" onClick={handleNextMonth} className="rounded-full shrink-0">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
-        {weekDays.map(day => (
-          <div key={day} className="text-center font-semibold text-sm text-muted-foreground py-2">
-            {day}
+      <div className="overflow-x-auto pb-4">
+        <div className="min-w-[700px]">
+          <div className="grid grid-cols-7 gap-2">
+            {weekDays.map(day => (
+              <div key={day} className="text-center font-semibold text-sm text-muted-foreground py-2">
+                {day}
+              </div>
+            ))}
+            
+            {days.map((day, idx) => {
+              const dateKey = format(day, "yyyy-MM-dd");
+              const dayEvents = eventsByDay[dateKey] || [];
+              const isCurrentMonth = isSameMonth(day, monthStart);
+              const isToday = isSameDay(day, new Date());
+              const dailyDay = isDailyDay(day);
+              
+              return (
+                <div 
+                  key={idx}
+                  onClick={() => handleDayClick(day)}
+                  className={`min-h-[100px] p-2 rounded-xl border transition-all cursor-pointer hover:border-primary/50 group flex flex-col ${
+                    !isCurrentMonth ? "bg-muted/10 opacity-50 border-transparent" : 
+                    isToday ? "bg-primary/5 border-primary/30" : "bg-card border-border/40 hover:bg-muted/10"
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full ${
+                      isToday ? "bg-primary text-primary-foreground" : "text-foreground"
+                    }`}>
+                      {format(day, "d")}
+                    </span>
+                    <div className="flex gap-1 items-center">
+                      {dailyDay && (
+                        <Flame className="w-4 h-4 text-orange-500" title="Dia de Daily" />
+                      )}
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Plus className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-1 flex-1 overflow-y-auto custom-scrollbar mt-1">
+                    {dayEvents.map((evt, i) => (
+                      <div 
+                        key={i} 
+                        className={`text-xs px-2 py-1 font-medium rounded-md truncate ${
+                          evt.isMultiDay 
+                            ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" 
+                            : "bg-primary/10 text-primary border border-primary/10"
+                        }`} 
+                        title={`${evt.ejName} - ${evt.title}`}
+                      >
+                        <span className="font-bold">{evt.ejName}</span>: {evt.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
-        
-        {days.map((day, idx) => {
-          const dateKey = format(day, "yyyy-MM-dd");
-          const dayEvents = eventsByDay[dateKey] || [];
-          const isCurrentMonth = isSameMonth(day, monthStart);
-          const isToday = isSameDay(day, new Date());
-          
-          return (
-            <div 
-              key={idx}
-              onClick={() => handleDayClick(day)}
-              className={`min-h-[100px] p-2 rounded-xl border transition-all cursor-pointer hover:border-primary/50 group flex flex-col ${
-                !isCurrentMonth ? "bg-muted/10 opacity-50 border-transparent" : 
-                isToday ? "bg-primary/5 border-primary/30" : "bg-card border-border/40 hover:bg-muted/10"
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full ${
-                  isToday ? "bg-primary text-primary-foreground" : "text-foreground"
-                }`}>
-                  {format(day, "d")}
-                </span>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Plus className="w-4 h-4 text-muted-foreground" />
+        </div>
+      </div>
+
+      <Sheet open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="text-2xl flex items-center gap-2">
+              <CalendarIcon className="w-5 h-5 text-primary" />
+              {selectedDate && format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+            </SheetTitle>
+            <SheetDescription>
+              Visualize os compromissos deste dia e agende novos encontros.
+            </SheetDescription>
+          </SheetHeader>
+
+          {/* Existing Events for this day */}
+          <div className="mb-8 space-y-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2">
+              Agenda do Dia
+              {selectedIsDaily && <Flame className="w-5 h-5 text-orange-500 ml-auto" title="Dia de Daily" />}
+            </h3>
+            
+            {selectedIsDaily && (
+              <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-3 flex items-start gap-3">
+                <Flame className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-orange-700 dark:text-orange-400 text-sm">Momento de Aceleração</p>
+                  <p className="text-xs text-orange-600/80 dark:text-orange-400/80 mt-1">Hoje tem Daily! Mantenha a energia alta.</p>
                 </div>
               </div>
-              
-              <div className="flex flex-col gap-1 flex-1 overflow-y-auto custom-scrollbar mt-1">
-                {dayEvents.map((evt, i) => (
-                  <div 
-                    key={i} 
-                    className={`text-xs px-2 py-1 font-medium rounded-md truncate ${
-                      evt.isMultiDay 
-                        ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" 
-                        : "bg-primary/10 text-primary border border-primary/10"
-                    }`} 
-                    title={`${evt.ejName} - ${evt.title}`}
-                  >
-                    <span className="font-bold">{evt.ejName}</span>: {evt.title}
+            )}
+
+            {selectedDayEvents.length === 0 && !selectedIsDaily ? (
+              <p className="text-sm text-muted-foreground italic text-center py-4 bg-muted/30 rounded-xl">
+                Nenhum compromisso marcado.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {selectedDayEvents.map((evt, i) => (
+                  <div key={i} className={`p-3 rounded-xl border ${evt.isMultiDay ? "border-orange-500/20 bg-orange-500/5" : "border-primary/20 bg-primary/5"}`}>
+                    <p className="font-bold text-sm">{evt.ejName}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{evt.title}</p>
                   </div>
                 ))}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            )}
+          </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="modal-shell sm:max-w-[425px] glass-modal rounded-3xl">
-          <DialogHeader>
-            <DialogTitle>Agendar Reunião</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Data Selecionada</label>
-              <div className="p-3 bg-muted/20 rounded-xl font-medium text-foreground">
-                {selectedDate && format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-              </div>
-            </div>
+          {/* Add New Event Form */}
+          <div className="border-t pt-6 space-y-4">
+            <h3 className="font-semibold text-lg">Agendar Novo</h3>
             
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Selecione a EJ</label>
@@ -232,6 +288,7 @@ export function DashboardCalendar() {
                 </SelectContent>
               </Select>
             </div>
+            
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Tipo de Agendamento</label>
               <Select value={eventType} onValueChange={setEventType}>
@@ -268,13 +325,14 @@ export function DashboardCalendar() {
                 </div>
               </>
             )}
+
+            <div className="pt-4 flex gap-3">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1">Cancelar</Button>
+              <Button onClick={handleSaveMeeting} className="flex-1">Salvar</Button>
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSaveMeeting}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
