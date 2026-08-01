@@ -61,6 +61,13 @@ function Configuracoes() {
   const [savedDailyConfig, setSavedDailyConfig] = useState<DailyConfig | null>(null);
   const [isEditingDaily, setIsEditingDaily] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
+  
+  const [cleanOptions, setCleanOptions] = useState({
+    announcements: true,
+    events: true,
+    activities: true,
+    ejs: false,
+  });
 
   // Announcements State
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -154,45 +161,39 @@ function Configuracoes() {
   };
 
   const handleCleanTestData = async () => {
-    if (!confirm("Tem certeza que deseja apagar TODOS os dados (Avisos, Eventos, EJs, Atividades) que contenham a palavra 'teste' no nome? Essa ação não pode ser desfeita.")) {
+    if (!cleanOptions.announcements && !cleanOptions.events && !cleanOptions.activities && !cleanOptions.ejs) {
+      toast.error("Selecione pelo menos um tipo de dado para limpar.");
+      return;
+    }
+
+    if (!confirm("Atenção! Você está prestes a apagar TODOS os dados das categorias selecionadas. Isso irá ZERAR essas informações. Deseja realmente prosseguir?")) {
       return;
     }
     
     setIsCleaning(true);
     try {
-      // Clean Announcements
-      const anns = announcementStore.getAll();
-      anns.forEach(a => {
-        if (a.title.toLowerCase().includes('teste') || a.content.toLowerCase().includes('teste')) {
-          announcementStore.remove(a.id);
-        }
-      });
+      if (cleanOptions.announcements) {
+        const anns = announcementStore.getAll();
+        anns.forEach(a => announcementStore.remove(a.id));
+      }
 
-      // Clean Events
-      const evts = eventStore.getEvents();
-      evts.forEach(e => {
-        if (e.name.toLowerCase().includes('teste')) {
-          eventStore.deleteEvent(e.id);
-        }
-      });
+      if (cleanOptions.events) {
+        const evts = eventStore.getEvents();
+        evts.forEach(e => eventStore.deleteEvent(e.id));
+      }
 
-      // Clean Activities
-      const acts = activityStore.getActivities();
-      acts.forEach(a => {
-        if (a.ejName.toLowerCase().includes('teste') || a.description.toLowerCase().includes('teste')) {
-          activityStore.deleteActivity(a.id);
-        }
-      });
+      if (cleanOptions.activities) {
+        const acts = activityStore.getActivities();
+        acts.forEach(a => activityStore.deleteActivity(a.id));
+      }
 
-      // Clean EJs
-      const ejs = ejListStore.getEjs();
-      ejs.forEach(e => {
-        if (e.name.toLowerCase().includes('teste')) {
-          ejListStore.deleteEj(e.id);
-        }
-      });
+      if (cleanOptions.ejs) {
+        const ejs = ejListStore.getEjs();
+        ejs.forEach(e => ejListStore.deleteEj(e.id));
+      }
 
-      toast.success("Limpeza de dados de teste concluída!");
+      toast.success("Dados selecionados foram apagados com sucesso!");
+      setCleanOptions({ announcements: false, events: false, activities: false, ejs: false });
     } catch (e) {
       console.error(e);
       toast.error("Ocorreu um erro ao limpar os dados.");
@@ -719,25 +720,63 @@ function Configuracoes() {
       </AlertDialog>
 
       {/* ZONA DE PERIGO / LIMPEZA */}
-      <section className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6 md:p-8 space-y-6">
+      <section className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6 md:p-8 space-y-6 mt-8">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2 text-red-600">
             <AlertTriangle className="w-5 h-5" />
-            Zona de Limpeza (Testes)
+            Zona de Limpeza (Zerar Plataforma)
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Para publicar a plataforma limpa, use o botão abaixo para excluir tudo que você criou com a palavra "Teste" no nome. 
-            Isso vai procurar por Avisos, Eventos, EJs e Atividades e excluí-los automaticamente.
+            Selecione quais dados você deseja <strong>apagar completamente</strong> da plataforma. Isso é útil para limpar todos os dados criados durante os testes e iniciar a plataforma do zero.
           </p>
         </div>
         
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-background/50 p-6 rounded-2xl border border-red-500/10">
+          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-red-500/10 transition-colors">
+            <input 
+              type="checkbox" 
+              checked={cleanOptions.announcements}
+              onChange={(e) => setCleanOptions(prev => ({...prev, announcements: e.target.checked}))}
+              className="w-5 h-5 accent-red-500"
+            />
+            <span className="font-medium text-foreground">Avisos e Notificações</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-red-500/10 transition-colors">
+            <input 
+              type="checkbox" 
+              checked={cleanOptions.events}
+              onChange={(e) => setCleanOptions(prev => ({...prev, events: e.target.checked}))}
+              className="w-5 h-5 accent-red-500"
+            />
+            <span className="font-medium text-foreground">Eventos (ENEJ, etc.)</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-red-500/10 transition-colors">
+            <input 
+              type="checkbox" 
+              checked={cleanOptions.activities}
+              onChange={(e) => setCleanOptions(prev => ({...prev, activities: e.target.checked}))}
+              className="w-5 h-5 accent-red-500"
+            />
+            <span className="font-medium text-foreground">Atividades (Histórico de Ações)</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-red-500/10 transition-colors text-red-600">
+            <input 
+              type="checkbox" 
+              checked={cleanOptions.ejs}
+              onChange={(e) => setCleanOptions(prev => ({...prev, ejs: e.target.checked}))}
+              className="w-5 h-5 accent-red-500"
+            />
+            <span className="font-bold">EJs Cadastradas (CUIDADO)</span>
+          </label>
+        </div>
+
         <Button 
           variant="destructive" 
           onClick={handleCleanTestData} 
           disabled={isCleaning}
           className="w-full sm:w-auto font-bold rounded-xl"
         >
-          {isCleaning ? "Limpando..." : "Limpar Dados de Teste"}
+          {isCleaning ? "Limpando..." : "Apagar Selecionados"}
         </Button>
       </section>
     </div>
