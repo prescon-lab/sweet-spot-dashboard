@@ -251,4 +251,23 @@
   .interactive-lift {
     @apply transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-[0.99];
   }
+
+  /* Container padrão de página: mesmo respiro e alinhamento em todos os menus */
+  .page-shell {
+    @apply w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-8;
+  }
+
+  .page-shell-narrow {
+    @apply w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-8;
+  }
+
+  /* Cabeçalho de página responsivo (título + ações) */
+  .page-header {
+    @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-between;
+  }
+
+  /* Modais: nunca estouram a viewport em nenhum dispositivo */
+  .modal-shell {
+    @apply w-[calc(100vw-1.5rem)] sm:w-[95vw] max-h-[88vh] overflow-y-auto overflow-x-hidden;
+  }
 }
