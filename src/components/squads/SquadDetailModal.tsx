@@ -9,6 +9,7 @@ import { eventStore, AppEvent } from "@/lib/eventStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useQuery } from "@tanstack/react-query";
 
 interface SquadDetailModalProps {
   open: boolean;
@@ -20,6 +21,11 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
   const [ejs, setEjs] = useState(ejListStore.getEjs());
   const [leads, setLeads] = useState(leadStore.getLeads());
   const [events, setEvents] = useState<AppEvent[]>([]);
+
+  const { data: squads = [] } = useQuery({
+    queryKey: ["squads"],
+    queryFn: squadStore.getSquads,
+  });
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -79,6 +85,29 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
     ? Math.round((completedEjGoals / totalPossibleEjGoals) * 100) 
     : 0;
 
+  // Calculate Ranking Position
+  const getSquadProgress = (sq: Squad) => {
+    const gNames = sq.squad_members?.map(m => m.guardian_name) || [];
+    if (!gNames.includes(sq.leader)) gNames.push(sq.leader);
+    const sEjs = ejs.filter(ej => gNames.includes(ej.guardian));
+    const sEjNames = sEjs.map(ej => ej.name);
+    let tot = 0;
+    let comp = 0;
+    events.forEach(event => {
+      event.ejGoals.forEach(goal => {
+        tot += sEjNames.length;
+        sEjNames.forEach(ejName => {
+          if (goal.checkedBy?.includes(ejName) || goal.checked) comp++;
+        });
+      });
+    });
+    return tot > 0 ? Math.round((comp / tot) * 100) : 0;
+  };
+
+  const squadsRanked = [...squads].sort((a, b) => getSquadProgress(b) - getSquadProgress(a));
+  const myRankIndex = squadsRanked.findIndex(s => s.id === squad.id);
+  const myRank = myRankIndex >= 0 ? myRankIndex + 1 : null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="modal-shell max-w-4xl p-0 gap-0 glass-modal border-none shadow-2xl rounded-2xl">
@@ -93,9 +122,17 @@ export function SquadDetailModal({ open, onOpenChange, squad }: SquadDetailModal
             </div>
             <div>
               <h1 className="text-4xl font-extrabold drop-shadow-md">{squad.name}</h1>
-              <p className="text-primary-foreground/90 font-medium text-lg flex items-center gap-2 mt-1">
-                Líder: {squad.leader}
-              </p>
+              <div className="flex items-center gap-4 mt-2">
+                <p className="text-primary-foreground/90 font-medium text-lg flex items-center gap-2">
+                  Líder: {squad.leader}
+                </p>
+                {myRank !== null && (
+                  <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1.5 backdrop-blur-md shadow-sm border border-white/10">
+                    <Trophy className="w-4 h-4 text-yellow-300 drop-shadow-sm" />
+                    {myRank}º no Ranking
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           

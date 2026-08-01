@@ -82,6 +82,7 @@ function Index() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedEjForDetail, setSelectedEjForDetail] = useState<{name: string} | null>(null);
+  const [squadModalOpen, setSquadModalOpen] = useState(false);
 
   // Daily Notice
   const [showDailyPopup, setShowDailyPopup] = useState(false);
@@ -365,7 +366,8 @@ function Index() {
             {mySquad && (
               <Badge
                 variant="secondary"
-                className="px-3 py-1 text-sm border-none"
+                className="px-3 py-1 text-sm border-none cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setSquadModalOpen(true)}
                 style={{
                   backgroundColor: mySquad.color ? `${mySquad.color}20` : "rgba(0,0,0,0.1)",
                   color: mySquad.color || "inherit",
@@ -661,11 +663,16 @@ function Index() {
         </DialogContent>
       </Dialog>
 
-      {/* Detail Modal for Admin */}
+      {/* Modals */}
       <EjDetailModal 
-        open={detailModalOpen}
+        open={detailModalOpen} 
         onOpenChange={setDetailModalOpen}
         ejData={selectedEjForDetail}
+      />
+      <SquadDetailModal
+        open={squadModalOpen}
+        onOpenChange={setSquadModalOpen}
+        squad={mySquad}
       />
 
       {/* Daily Popup */}
