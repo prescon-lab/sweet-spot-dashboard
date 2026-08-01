@@ -96,22 +96,23 @@ function Index() {
     // Fetch Profile
     const { data: profileData } = await supabase
       .from("profiles")
-      .select("id, full_name, guardian_name, avatar_url, email")
+      .select("id, full_name, guardian_name, avatar_url")
       .eq("id", user.id)
       .single();
     if (!profileData) return;
 
     const p: ProfileData = {
       id: profileData.id,
-      full_name: profileData.full_name || profileData.email || "Usuário",
+      full_name: profileData.full_name || user.email || "Usuário",
       guardian_name: profileData.guardian_name || "",
       avatar_url: profileData.avatar_url || "",
-      email: profileData.email || undefined,
+      email: user.email || undefined,
     };
     setProfile(p);
 
     // Fetch EJs if guardian or prescon
-    const isPrescon = profileData.email === "prescon@nucleovertentes" || profileData.email === "prescon@nucleovertentes.com" || profileData.email === "prescon.nucleovertentes@gmail.com";
+    const emailLower = (user.email || "").toLowerCase();
+    const isPrescon = emailLower === "prescon@nucleovertentes" || emailLower === "prescon@nucleovertentes.com" || emailLower === "prescon.nucleovertentes@gmail.com";
     setIsAdmin(isPrescon);
 
     if (p.guardian_name || isPrescon) {
@@ -149,7 +150,7 @@ function Index() {
         const profileIds = rank.map((r) => r.profileId);
         const { data } = await supabase
           .from("profiles")
-          .select("id, full_name, email, avatar_url")
+          .select("id, full_name, avatar_url")
           .in("id", profileIds);
 
         if (data) {
@@ -157,7 +158,7 @@ function Index() {
             const u = data.find((d) => d.id === r.profileId);
             return {
               ...r,
-              name: u?.full_name || u?.email || "Usuário",
+              name: u?.full_name || "Usuário",
               avatar_url: u?.avatar_url ?? undefined,
             };
           });

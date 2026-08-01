@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { listProfilesWithEmail } from "@/lib/adminUsers.functions";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,10 +83,8 @@ function GestaoGentePage() {
     
     const fetchProfiles = async () => {
       setLoadingProfiles(true);
-      const { data } = await supabase.from("profiles").select("id, email, full_name, avatar_url, guardian_name").order("full_name");
-      if (data) {
-        setPeople(data as Person[]);
-      }
+      const data = await listProfilesWithEmail().catch(() => []);
+      setPeople([...data].sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "")) as Person[]);
       setLoadingProfiles(false);
     };
     
