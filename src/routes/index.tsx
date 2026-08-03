@@ -90,6 +90,8 @@ function Index() {
   // Daily Notice
   const [showDailyPopup, setShowDailyPopup] = useState(false);
   const [auditCountdownDays, setAuditCountdownDays] = useState<number | null>(null);
+  const [auditDateStr, setAuditDateStr] = useState<string | null>(null);
+
   const [hasDailyToday, setHasDailyToday] = useState(false);
 
   // Announcements
@@ -217,13 +219,15 @@ function Index() {
     if (activeEvent?.auditDate) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const auditDate = new Date(activeEvent.auditDate + "T23:59:59");
-      const diffTime = auditDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const auditDate = new Date(activeEvent.auditDate + "T00:00:00");
+      const diffDays = Math.round((auditDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       setAuditCountdownDays(diffDays >= 0 ? diffDays : null);
+      setAuditDateStr(diffDays >= 0 ? activeEvent.auditDate : null);
     } else {
       setAuditCountdownDays(null);
+      setAuditDateStr(null);
     }
+
 
     // Popup logic
     const todayStr = new Date().toLocaleDateString("pt-BR");
@@ -515,8 +519,16 @@ function Index() {
                     <div>
                       <p className="font-bold text-red-700 dark:text-red-400">Fim das Auditorias</p>
                       <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">
-                        {auditCountdownDays === 0 ? "O prazo termina HOJE!" : `Faltam ${auditCountdownDays} dias para o encerramento.`}
+                        {auditCountdownDays === 0
+                          ? "O prazo termina HOJE!"
+                          : `${auditCountdownDays === 1 ? "Falta 1 dia" : `Faltam ${auditCountdownDays} dias`} para o encerramento.`}
                       </p>
+                      {auditDateStr && (
+                        <p className="text-xs font-semibold text-red-700/90 dark:text-red-300/90 mt-1">
+                          Encerra em {new Date(auditDateStr + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                        </p>
+                      )}
+
                     </div>
                   </CardContent>
                 </Card>
@@ -794,8 +806,16 @@ function Index() {
                     Prazo de Auditoria
                   </p>
                   <p className="text-sm text-red-600 dark:text-red-300 mt-1">
-                    {auditCountdownDays === 0 ? "O prazo termina HOJE!" : `Faltam apenas ${auditCountdownDays} dias para o encerramento.`}
+                    {auditCountdownDays === 0
+                      ? "O prazo termina HOJE!"
+                      : `${auditCountdownDays === 1 ? "Falta apenas 1 dia" : `Faltam apenas ${auditCountdownDays} dias`} para o encerramento.`}
                   </p>
+                  {auditDateStr && (
+                    <p className="text-xs font-semibold text-red-700/90 dark:text-red-300/90 mt-1">
+                      Encerra em {new Date(auditDateStr + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                    </p>
+                  )}
+
                 </div>
               )}
             </AlertDialogDescription>
