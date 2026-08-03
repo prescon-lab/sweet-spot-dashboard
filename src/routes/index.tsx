@@ -806,8 +806,16 @@ function Index() {
                     Prazo de Auditoria
                   </p>
                   <p className="text-sm text-red-600 dark:text-red-300 mt-1">
-                    {auditCountdownDays === 0 ? "O prazo termina HOJE!" : `Faltam apenas ${auditCountdownDays} dias para o encerramento.`}
+                    {auditCountdownDays === 0
+                      ? "O prazo termina HOJE!"
+                      : `${auditCountdownDays === 1 ? "Falta apenas 1 dia" : `Faltam apenas ${auditCountdownDays} dias`} para o encerramento.`}
                   </p>
+                  {auditDateStr && (
+                    <p className="text-xs font-semibold text-red-700/90 dark:text-red-300/90 mt-1">
+                      Encerra em {new Date(auditDateStr + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                    </p>
+                  )}
+
                 </div>
               )}
             </AlertDialogDescription>
