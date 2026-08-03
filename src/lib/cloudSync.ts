@@ -77,20 +77,9 @@ export async function initCloudSync() {
       });
       
       if (hasUpdates) {
-        window.dispatchEvent(new Event("ejListUpdated"));
-        window.dispatchEvent(new Event("eventsUpdated"));
-        window.dispatchEvent(new Event("leadsUpdated"));
-        window.dispatchEvent(new Event("guardianStoreUpdated"));
-        window.dispatchEvent(new Event("mentionsUpdated"));
-        window.dispatchEvent(new Event("presconUpdated"));
-        window.dispatchEvent(new Event("activitiesUpdated"));
-        window.dispatchEvent(new Event("ejDataUpdated"));
-        window.dispatchEvent(new Event("linksStoreUpdated"));
-        window.dispatchEvent(new Event("dailyConfigUpdated"));
-        window.dispatchEvent(new Event("userActivitiesUpdated"));
-        window.dispatchEvent(new Event("announcementsUpdated"));
-        window.dispatchEvent(new Event("gamificationUpdated"));
+        dispatchAll();
       }
+
     }
   } catch (e) {
     console.error("Erro na sincronização inicial", e);
