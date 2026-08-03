@@ -8,7 +8,8 @@ export interface UsefulLink {
 }
 
 class LinksStore {
-  private readonly STORAGE_KEY = 'vertentes_useful_links';
+  // Chave compartilhada na nuvem (app_data) — precisa estar em SYNC_KEYS
+  private readonly STORAGE_KEY = 'vertentes_links';
 
   private getLinks(): UsefulLink[] {
     const data = localStorage.getItem(this.STORAGE_KEY);
