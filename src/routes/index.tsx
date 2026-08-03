@@ -519,8 +519,16 @@ function Index() {
                     <div>
                       <p className="font-bold text-red-700 dark:text-red-400">Fim das Auditorias</p>
                       <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">
-                        {auditCountdownDays === 0 ? "O prazo termina HOJE!" : `Faltam ${auditCountdownDays} dias para o encerramento.`}
+                        {auditCountdownDays === 0
+                          ? "O prazo termina HOJE!"
+                          : `${auditCountdownDays === 1 ? "Falta 1 dia" : `Faltam ${auditCountdownDays} dias`} para o encerramento.`}
                       </p>
+                      {auditDateStr && (
+                        <p className="text-xs font-semibold text-red-700/90 dark:text-red-300/90 mt-1">
+                          Encerra em {new Date(auditDateStr + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                        </p>
+                      )}
+
                     </div>
                   </CardContent>
                 </Card>
