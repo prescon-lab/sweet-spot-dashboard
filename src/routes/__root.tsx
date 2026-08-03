@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  ScrollRestoration,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -323,6 +324,7 @@ function RootComponent() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vertentes-theme">
       <QueryClientProvider client={queryClient}>
+        <ScrollRestoration />
         <AuthProvider>
           <AppShell />
         </AuthProvider>
