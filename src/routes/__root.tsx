@@ -121,6 +121,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <ScrollRestoration />
         {children}
         <Scripts />
       </body>
@@ -324,7 +325,6 @@ function RootComponent() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vertentes-theme">
       <QueryClientProvider client={queryClient}>
-        <ScrollRestoration />
         <AuthProvider>
           <AppShell />
         </AuthProvider>
