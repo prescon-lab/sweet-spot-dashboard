@@ -251,7 +251,7 @@ export function GuardianDetailModal({ open, onOpenChange, guardianData }: Guardi
       {open && (
         <div 
           {...dirtyGuard.containerProps}
-          className="absolute inset-0 top-0 left-0 translate-x-0 translate-y-0 max-w-none w-full h-full p-0 m-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none transition-colors duration-300 animate-in slide-in-from-right-1/2 bg-background z-50"
+          className="fixed inset-0 top-0 left-0 translate-x-0 translate-y-0 max-w-none w-full h-full p-0 m-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none transition-colors duration-300 animate-in slide-in-from-right-1/2 bg-background z-50"
           style={{ backgroundColor: bannerColor }}
         >
           {/* Back Button Area */}

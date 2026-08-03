@@ -452,7 +452,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       </Dialog>
 
       {open && (
-        <div className="absolute inset-0 top-0 left-0 translate-x-0 translate-y-0 max-w-none w-full h-full m-0 p-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none bg-background animate-in slide-in-from-right-1/2 z-50" {...dirtyGuard.containerProps}>
+        <div className="fixed inset-0 top-0 left-0 translate-x-0 translate-y-0 max-w-none w-full h-full m-0 p-0 flex flex-col overflow-hidden gap-0 border-none shadow-none rounded-none bg-background animate-in slide-in-from-right-1/2 z-50" {...dirtyGuard.containerProps}>
           
           {/* Header Area with Back Button */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4 sm:p-6 lg:p-8 bg-card/40 backdrop-blur-md border-b border-border/50 shrink-0 overflow-y-auto max-h-[45vh] lg:max-h-none pt-12 lg:pt-8 relative">
