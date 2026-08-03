@@ -19,8 +19,37 @@ const SYNC_KEYS = [
 
 let isSyncing = false;
 let subscription: any = null;
+let authListenerAttached = false;
+
+function dispatchAll() {
+  [
+    "ejListUpdated", "eventsUpdated", "leadsUpdated", "guardianStoreUpdated",
+    "mentionsUpdated", "presconUpdated", "activitiesUpdated", "ejDataUpdated",
+    "linksStoreUpdated", "dailyConfigUpdated", "userActivitiesUpdated",
+    "announcementsUpdated", "gamificationUpdated", "guardiansUpdated",
+  ].forEach((e) => window.dispatchEvent(new Event(e)));
+}
 
 export async function initCloudSync() {
+  // Os dados compartilhados só são legíveis com sessão ativa (RLS).
+  // Portanto (re)sincronizamos sempre que houver login.
+  if (!authListenerAttached) {
+    authListenerAttached = true;
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "USER_UPDATED") {
+        isSyncing = false;
+        if (subscription) {
+          supabase.removeChannel(subscription);
+          subscription = null;
+        }
+        void initCloudSync();
+      }
+    });
+  }
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session) return;
+
   if (isSyncing) return;
   isSyncing = true;
 
@@ -29,8 +58,10 @@ export async function initCloudSync() {
     const { data, error } = await supabase.from('app_data').select('*');
     if (error) {
       console.error("Erro Supabase (select):", error);
+      isSyncing = false;
       return;
     }
+
     if (data) {
       let hasUpdates = false;
       data.forEach((row) => {
@@ -46,20 +77,9 @@ export async function initCloudSync() {
       });
       
       if (hasUpdates) {
-        window.dispatchEvent(new Event("ejListUpdated"));
-        window.dispatchEvent(new Event("eventsUpdated"));
-        window.dispatchEvent(new Event("leadsUpdated"));
-        window.dispatchEvent(new Event("guardianStoreUpdated"));
-        window.dispatchEvent(new Event("mentionsUpdated"));
-        window.dispatchEvent(new Event("presconUpdated"));
-        window.dispatchEvent(new Event("activitiesUpdated"));
-        window.dispatchEvent(new Event("ejDataUpdated"));
-        window.dispatchEvent(new Event("linksStoreUpdated"));
-        window.dispatchEvent(new Event("dailyConfigUpdated"));
-        window.dispatchEvent(new Event("userActivitiesUpdated"));
-        window.dispatchEvent(new Event("announcementsUpdated"));
-        window.dispatchEvent(new Event("gamificationUpdated"));
+        dispatchAll();
       }
+
     }
   } catch (e) {
     console.error("Erro na sincronização inicial", e);

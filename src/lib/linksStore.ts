@@ -8,10 +8,20 @@ export interface UsefulLink {
 }
 
 class LinksStore {
-  private readonly STORAGE_KEY = 'vertentes_useful_links';
+  // Chave compartilhada na nuvem (app_data) — precisa estar em SYNC_KEYS
+  private readonly STORAGE_KEY = 'vertentes_links';
 
   private getLinks(): UsefulLink[] {
-    const data = localStorage.getItem(this.STORAGE_KEY);
+    let data = localStorage.getItem(this.STORAGE_KEY);
+    if (!data) {
+      // Migração da chave antiga (só local, não compartilhada)
+      const legacy = localStorage.getItem('vertentes_useful_links');
+      if (legacy) {
+        localStorage.setItem(this.STORAGE_KEY, legacy);
+        localStorage.removeItem('vertentes_useful_links');
+        data = legacy;
+      }
+    }
     if (data) {
       try {
         return JSON.parse(data);
@@ -19,6 +29,7 @@ class LinksStore {
         console.error("Error parsing useful links", e);
       }
     }
+
     // Default links
     return [
       { id: '1', title: 'Drive EJs', url: '#', category: 'Documentos' },
