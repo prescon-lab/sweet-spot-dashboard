@@ -53,15 +53,15 @@ export const ejListStore = {
              syncToCloud(key, ej);
            });
            localStorage.setItem('vertentes_ejs_initialized', 'true');
-           return initialEjsList;
+           return initialEjsList.sort((a, b) => a.name.localeCompare(b.name));
         }
         
-        return ejs.length > 0 ? ejs : initialEjsList;
+        return ejs.length > 0 ? ejs.sort((a, b) => a.name.localeCompare(b.name)) : initialEjsList.sort((a, b) => a.name.localeCompare(b.name));
       } catch (e) {
         console.error("Failed to load ej list from localStorage", e);
       }
     }
-    return initialEjsList;
+    return initialEjsList.sort((a, b) => a.name.localeCompare(b.name));
   },
 
   updateEjGuardian(ejName: string, newGuardian: string) {
