@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { syncToCloud } from "./cloudSync";
+import { syncToCloud, deleteFromCloud } from "./cloudSync";
 
 export interface Mention {
   id: string;
@@ -11,16 +11,41 @@ export interface Mention {
   read: boolean;
 }
 
-const STORE_KEY = 'sweet_spot_mentions';
+const OLD_STORE_KEY = 'sweet_spot_mentions';
+const PREFIX = 'sweet_spot_mention_';
 
 export const mentionStore = {
   getMentions: (): Mention[] => {
     if (typeof window !== 'undefined') {
       try {
-        const data = localStorage.getItem(STORE_KEY);
-        if (data) {
-          return JSON.parse(data) || [];
+        const mentions: Mention[] = [];
+        
+        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
+        if (oldDataStr) {
+          try {
+            const oldMentions = JSON.parse(oldDataStr);
+            if (Array.isArray(oldMentions)) {
+              oldMentions.filter(Boolean).forEach((m: Mention) => {
+                const key = `${PREFIX}${m.id}`;
+                if (!localStorage.getItem(key)) {
+                  localStorage.setItem(key, JSON.stringify(m));
+                  syncToCloud(key, m);
+                }
+              });
+            }
+            localStorage.removeItem(OLD_STORE_KEY);
+          } catch(e) {}
         }
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(PREFIX)) {
+            try {
+              mentions.push(JSON.parse(localStorage.getItem(key) || '{}'));
+            } catch(e) {}
+          }
+        }
+        return mentions;
       } catch (e) {
         console.error("Failed to load mentions", e);
       }
@@ -31,16 +56,15 @@ export const mentionStore = {
   addMention: (mention: Omit<Mention, 'id' | 'date' | 'read'>) => {
     if (typeof window !== 'undefined') {
       try {
-        const mentions = mentionStore.getMentions();
         const newMention: Mention = {
           ...mention,
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
           date: new Date().toISOString(),
           read: false
         };
-        mentions.push(newMention);
-        localStorage.setItem(STORE_KEY, JSON.stringify(mentions));
-        syncToCloud(STORE_KEY, mentions);
+        const key = `${PREFIX}${newMention.id}`;
+        localStorage.setItem(key, JSON.stringify(newMention));
+        syncToCloud(key, newMention);
         window.dispatchEvent(new Event('mentionsUpdated'));
 
         // Disparar notificação pro usuário no Supabase
@@ -62,30 +86,32 @@ export const mentionStore = {
 
   markAsRead: (id: string) => {
     if (typeof window !== 'undefined') {
-      const mentions = mentionStore.getMentions();
-      const idx = mentions.findIndex(m => m.id === id);
-      if (idx !== -1) {
-        mentions[idx].read = true;
-        localStorage.setItem(STORE_KEY, JSON.stringify(mentions));
-        syncToCloud(STORE_KEY, mentions);
-        window.dispatchEvent(new Event('mentionsUpdated'));
+      try {
+        const key = `${PREFIX}${id}`;
+        const dataStr = localStorage.getItem(key);
+        if (dataStr) {
+          const mention: Mention = JSON.parse(dataStr);
+          mention.read = true;
+          localStorage.setItem(key, JSON.stringify(mention));
+          syncToCloud(key, mention);
+          window.dispatchEvent(new Event('mentionsUpdated'));
+        }
+      } catch(e) {
+        console.error("Failed to mark as read", e);
       }
     }
   },
 
   extractAndSaveMentions: (text: string, ejName: string, source: "Reunião" | "Dailys") => {
-    // Basic extraction: finding any word/phrase prefixed with @
     const regex = /@([A-Za-zÀ-ÖØ-öø-ÿ0-9_]+(?:\s[A-Za-zÀ-ÖØ-öø-ÿ0-9_]+)*)/g;
     let match;
     const mentionsFound = new Set<string>();
 
     while ((match = regex.exec(text)) !== null) {
-      // The matched name
       const rawName = match[1].trim();
       if (!mentionsFound.has(rawName) && rawName.length > 0) {
         mentionsFound.add(rawName);
         
-        // Find a context string (e.g. up to 40 chars before and after)
         const start = Math.max(0, match.index - 40);
         const end = Math.min(text.length, match.index + match[0].length + 40);
         let contextText = text.substring(start, end).replace(/\n/g, ' ').trim();

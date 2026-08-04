@@ -1,29 +1,53 @@
-import { syncToCloud } from "./cloudSync";
+import { syncToCloud, deleteFromCloud } from "./cloudSync";
 
 export type LeadStatus = 'quente' | 'morno' | 'frio' | 'fechado';
 
 export interface Lead {
   id: string;
-  ejId: string; // The name or ID of the EJ
+  ejId: string;
   name: string;
   expectedValue: number;
   status: LeadStatus;
-  closingDate: string; // ISO date string or YYYY-MM-DD
+  closingDate: string;
   observations: string;
   createdAt: string;
 }
 
-const STORE_KEY = 'sweet_spot_leads';
+const OLD_STORE_KEY = 'sweet_spot_leads';
+const PREFIX = 'sweet_spot_lead_';
 
 export const leadStore = {
   getLeads: (): Lead[] => {
     if (typeof window !== 'undefined') {
       try {
-        const data = localStorage.getItem(STORE_KEY);
-        if (data) {
-          const parsed = JSON.parse(data);
-          return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+        const leads: Lead[] = [];
+        
+        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
+        if (oldDataStr) {
+          try {
+            const oldLeads = JSON.parse(oldDataStr);
+            if (Array.isArray(oldLeads)) {
+              oldLeads.filter(Boolean).forEach((lead: Lead) => {
+                const key = `${PREFIX}${lead.id}`;
+                if (!localStorage.getItem(key)) {
+                  localStorage.setItem(key, JSON.stringify(lead));
+                  syncToCloud(key, lead);
+                }
+              });
+            }
+            localStorage.removeItem(OLD_STORE_KEY);
+          } catch(e) {}
         }
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(PREFIX)) {
+            try {
+              leads.push(JSON.parse(localStorage.getItem(key) || '{}'));
+            } catch(e) {}
+          }
+        }
+        return leads;
       } catch (e) {
         console.error("Failed to load leads", e);
       }
@@ -38,10 +62,9 @@ export const leadStore = {
   addLead: (lead: Lead) => {
     if (typeof window !== 'undefined') {
       try {
-        const current = leadStore.getLeads();
-        current.push(lead);
-        localStorage.setItem(STORE_KEY, JSON.stringify(current));
-        syncToCloud(STORE_KEY, current);
+        const key = `${PREFIX}${lead.id}`;
+        localStorage.setItem(key, JSON.stringify(lead));
+        syncToCloud(key, lead);
         window.dispatchEvent(new Event('leadsUpdated'));
       } catch (e) {
         console.error("Failed to save lead", e);
@@ -52,14 +75,10 @@ export const leadStore = {
   updateLead: (updatedLead: Lead) => {
     if (typeof window !== 'undefined') {
       try {
-        const current = leadStore.getLeads();
-        const index = current.findIndex(e => e.id === updatedLead.id);
-        if (index !== -1) {
-          current[index] = updatedLead;
-          localStorage.setItem(STORE_KEY, JSON.stringify(current));
-          syncToCloud(STORE_KEY, current);
-          window.dispatchEvent(new Event('leadsUpdated'));
-        }
+        const key = `${PREFIX}${updatedLead.id}`;
+        localStorage.setItem(key, JSON.stringify(updatedLead));
+        syncToCloud(key, updatedLead);
+        window.dispatchEvent(new Event('leadsUpdated'));
       } catch (e) {
         console.error("Failed to update lead", e);
       }
@@ -69,10 +88,9 @@ export const leadStore = {
   deleteLead: (id: string) => {
     if (typeof window !== 'undefined') {
       try {
-        const current = leadStore.getLeads();
-        const updated = current.filter(e => e.id !== id);
-        localStorage.setItem(STORE_KEY, JSON.stringify(updated));
-        syncToCloud(STORE_KEY, updated);
+        const key = `${PREFIX}${id}`;
+        localStorage.removeItem(key);
+        deleteFromCloud(key);
         window.dispatchEvent(new Event('leadsUpdated'));
       } catch (e) {
         console.error("Failed to delete lead", e);

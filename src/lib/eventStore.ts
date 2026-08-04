@@ -1,4 +1,4 @@
-import { syncToCloud } from "./cloudSync";
+import { syncToCloud, deleteFromCloud } from "./cloudSync";
 import { supabase } from "@/integrations/supabase/client";
 import { ejListStore } from "./ejListStore";
 
@@ -29,50 +29,76 @@ export interface AppEvent {
   createdAt: string;
   status?: 'active' | 'completed';
   completedAt?: string;
-  completionDates?: Record<string, string>; // Maps ejName to ISO date string of when they completed all goals
+  completionDates?: Record<string, string>;
   startDate?: string;
   endDate?: string;
   auditDate?: string;
 }
 
-const STORE_KEY = 'sweet_spot_events';
+const OLD_STORE_KEY = 'sweet_spot_events';
+const PREFIX = 'sweet_spot_event_';
 
 export const eventStore = {
   getEvents: (): AppEvent[] => {
     if (typeof window !== 'undefined') {
       try {
-        const data = localStorage.getItem(STORE_KEY);
-        if (data) {
-          const parsed = JSON.parse(data);
-          return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+        const events: AppEvent[] = [];
+        
+        // Migrate old monolithic data if it exists
+        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
+        if (oldDataStr) {
+          try {
+            const oldEvents = JSON.parse(oldDataStr);
+            if (Array.isArray(oldEvents)) {
+              oldEvents.filter(Boolean).forEach((ev: AppEvent) => {
+                const key = `${PREFIX}${ev.id}`;
+                if (!localStorage.getItem(key)) {
+                  localStorage.setItem(key, JSON.stringify(ev));
+                  syncToCloud(key, ev);
+                }
+              });
+            }
+            localStorage.removeItem(OLD_STORE_KEY);
+          } catch(e) {}
         }
+
+        // Load all individual items
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(PREFIX)) {
+            try {
+              events.push(JSON.parse(localStorage.getItem(key) || '{}'));
+            } catch(e) {}
+          }
+        }
+        return events;
       } catch (e) {
         console.error("Failed to load events", e);
       }
     }
     return [];
   },
+
   addEvent: (event: AppEvent) => {
     if (typeof window !== 'undefined') {
       try {
-        const current = eventStore.getEvents();
-        current.push(event);
-        localStorage.setItem(STORE_KEY, JSON.stringify(current));
-        syncToCloud(STORE_KEY, current);
+        const key = `${PREFIX}${event.id}`;
+        localStorage.setItem(key, JSON.stringify(event));
+        syncToCloud(key, event);
         window.dispatchEvent(new Event('eventsUpdated'));
       } catch (e) {
         console.error("Failed to save event", e);
       }
     }
   },
+
   updateEvent: (updatedEvent: AppEvent) => {
     if (typeof window !== 'undefined') {
       try {
-        const current = eventStore.getEvents();
-        const index = current.findIndex(e => e.id === updatedEvent.id);
-        if (index !== -1) {
-          // Preserve checked states from the previous version if goals match by ID or text
-          const prevEvent = current[index];
+        const key = `${PREFIX}${updatedEvent.id}`;
+        const existingDataStr = localStorage.getItem(key);
+        if (existingDataStr) {
+          const prevEvent: AppEvent = JSON.parse(existingDataStr);
           updatedEvent.ejGoals = updatedEvent.ejGoals.map(newGoal => {
             const oldGoal = prevEvent.ejGoals.find(g => g.id === newGoal.id || g.text === newGoal.text);
             if (oldGoal) {
@@ -80,41 +106,40 @@ export const eventStore = {
             }
             return newGoal;
           });
-          current[index] = updatedEvent;
-          localStorage.setItem(STORE_KEY, JSON.stringify(current));
-          syncToCloud(STORE_KEY, current);
-          window.dispatchEvent(new Event('eventsUpdated'));
         }
+        localStorage.setItem(key, JSON.stringify(updatedEvent));
+        syncToCloud(key, updatedEvent);
+        window.dispatchEvent(new Event('eventsUpdated'));
       } catch (e) {
         console.error("Failed to update event", e);
       }
     }
   },
+
   deleteEvent: (eventId: string) => {
     if (typeof window !== 'undefined') {
       try {
-        const current = eventStore.getEvents();
-        const updated = current.filter(e => e.id !== eventId);
-        localStorage.setItem(STORE_KEY, JSON.stringify(updated));
-        syncToCloud(STORE_KEY, updated);
+        const key = `${PREFIX}${eventId}`;
+        localStorage.removeItem(key);
+        deleteFromCloud(key);
         window.dispatchEvent(new Event('eventsUpdated'));
       } catch (e) {
         console.error("Failed to delete event", e);
       }
     }
   },
-  // To toggle goals for specific EJs
+
   toggleGoal: (eventId: string, goalId: string, ejId: string) => {
     if (typeof window !== 'undefined') {
       try {
-        const current = eventStore.getEvents();
-        const event = current.find(e => e.id === eventId);
-        if (event) {
+        const key = `${PREFIX}${eventId}`;
+        const eventData = localStorage.getItem(key);
+        if (eventData) {
+          const event: AppEvent = JSON.parse(eventData);
           const goal = event.ejGoals.find(g => g.id === goalId);
           if (goal) {
             if (!goal.checkedBy) {
               goal.checkedBy = [];
-              // migrate legacy
               if (goal.checked) goal.checkedBy.push(ejId);
             }
             if (goal.checkedBy.includes(ejId)) {
@@ -122,11 +147,9 @@ export const eventStore = {
             } else {
               goal.checkedBy.push(ejId);
               
-              // Disparar notificação para o Guardião desta EJ
               const ejs = ejListStore.getEjs();
               const ej = ejs.find(e => e.name === ejId);
               if (ej && ej.guardian) {
-                // Find user by guardian name and notify
                 supabase.from('profiles').select('id').eq('guardian_name', ej.guardian).maybeSingle().then(({ data }) => {
                   if (data && data.id) {
                     supabase.from('notifications').insert({
@@ -140,7 +163,6 @@ export const eventStore = {
               }
             }
             
-            // Re-evaluate if this EJ completed all goals for the event
             const allGoalsMet = event.ejGoals.every(g => g.checkedBy?.includes(ejId) || g.checked);
             
             if (!event.completionDates) {
@@ -148,19 +170,17 @@ export const eventStore = {
             }
             
             if (allGoalsMet) {
-              // Record the date if it's the first time they completed it, or just keep it
               if (!event.completionDates[ejId]) {
                 event.completionDates[ejId] = new Date().toISOString();
               }
             } else {
-              // Remove the completion date if they unchecked a goal
               if (event.completionDates[ejId]) {
                 delete event.completionDates[ejId];
               }
             }
             
-            localStorage.setItem(STORE_KEY, JSON.stringify(current));
-            syncToCloud(STORE_KEY, current);
+            localStorage.setItem(key, JSON.stringify(event));
+            syncToCloud(key, event);
             window.dispatchEvent(new Event('eventsUpdated'));
           }
         }

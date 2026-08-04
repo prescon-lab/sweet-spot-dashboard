@@ -1,4 +1,4 @@
-import { syncToCloud } from "./cloudSync";
+import { syncToCloud, deleteFromCloud } from "./cloudSync";
 
 export interface UsefulLink {
   id: string;
@@ -7,34 +7,75 @@ export interface UsefulLink {
   category: string;
 }
 
-class LinksStore {
-  // Chave compartilhada na nuvem (app_data) — precisa estar em SYNC_KEYS
-  private readonly STORAGE_KEY = 'vertentes_links';
+const OLD_STORE_KEY = 'vertentes_links';
+const PREFIX = 'vertentes_link_';
 
+class LinksStore {
   private getLinks(): UsefulLink[] {
-    let data = localStorage.getItem(this.STORAGE_KEY);
-    if (!data) {
-      // Migração da chave antiga (só local, não compartilhada)
-      const legacy = localStorage.getItem('vertentes_useful_links');
-      if (legacy) {
-        localStorage.setItem(this.STORAGE_KEY, legacy);
-        localStorage.removeItem('vertentes_useful_links');
-        data = legacy;
-      }
-    }
-    if (data) {
+    if (typeof window !== 'undefined') {
       try {
-        return JSON.parse(data);
+        const links: UsefulLink[] = [];
+        
+        // Migrate old data
+        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
+        if (oldDataStr) {
+          try {
+            const oldLinks = JSON.parse(oldDataStr);
+            if (Array.isArray(oldLinks)) {
+              oldLinks.filter(Boolean).forEach((link: UsefulLink) => {
+                const key = `${PREFIX}${link.id}`;
+                if (!localStorage.getItem(key)) {
+                  localStorage.setItem(key, JSON.stringify(link));
+                  syncToCloud(key, link);
+                }
+              });
+            }
+            localStorage.removeItem(OLD_STORE_KEY);
+          } catch(e) {}
+        }
+        
+        const legacy = localStorage.getItem('vertentes_useful_links');
+        if (legacy) {
+          try {
+            const legacyLinks = JSON.parse(legacy);
+            if (Array.isArray(legacyLinks)) {
+              legacyLinks.filter(Boolean).forEach((link: UsefulLink) => {
+                const key = `${PREFIX}${link.id}`;
+                if (!localStorage.getItem(key)) {
+                  localStorage.setItem(key, JSON.stringify(link));
+                  syncToCloud(key, link);
+                }
+              });
+            }
+            localStorage.removeItem('vertentes_useful_links');
+          } catch(e) {}
+        }
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(PREFIX)) {
+            try {
+              links.push(JSON.parse(localStorage.getItem(key) || '{}'));
+            } catch(e) {}
+          }
+        }
+        
+        if (links.length === 0 && !localStorage.getItem('vertentes_links_initialized')) {
+           const defaults = [
+             { id: '1', title: 'Drive EJs', url: '#', category: 'Documentos' },
+             { id: '2', title: 'Planilha de Metas', url: '#', category: 'Documentos' }
+           ];
+           defaults.forEach(d => this.add(d));
+           localStorage.setItem('vertentes_links_initialized', 'true');
+           return defaults;
+        }
+        
+        return links;
       } catch (e) {
         console.error("Error parsing useful links", e);
       }
     }
-
-    // Default links
-    return [
-      { id: '1', title: 'Drive EJs', url: '#', category: 'Documentos' },
-      { id: '2', title: 'Planilha de Metas', url: '#', category: 'Documentos' },
-    ];
+    return [];
   }
 
   public getAll(): UsefulLink[] {
@@ -53,32 +94,39 @@ class LinksStore {
     }, {} as Record<string, UsefulLink[]>);
   }
 
-  public add(link: Omit<UsefulLink, 'id'>) {
-    const links = this.getLinks();
-    const newLink = { ...link, id: Date.now().toString() };
-    links.push(newLink);
-    this.save(links);
+  public add(link: Omit<UsefulLink, 'id'> | UsefulLink) {
+    if (typeof window !== 'undefined') {
+      const newLink = { ...link, id: link.id || Date.now().toString() };
+      const key = `${PREFIX}${newLink.id}`;
+      localStorage.setItem(key, JSON.stringify(newLink));
+      syncToCloud(key, newLink);
+      window.dispatchEvent(new Event('linksStoreUpdated'));
+    }
   }
 
   public update(id: string, updatedFields: Partial<UsefulLink>) {
-    const links = this.getLinks();
-    const index = links.findIndex(l => l.id === id);
-    if (index !== -1) {
-      links[index] = { ...links[index], ...updatedFields };
-      this.save(links);
+    if (typeof window !== 'undefined') {
+      const key = `${PREFIX}${id}`;
+      const existing = localStorage.getItem(key);
+      if (existing) {
+        try {
+          const link = JSON.parse(existing);
+          const updated = { ...link, ...updatedFields };
+          localStorage.setItem(key, JSON.stringify(updated));
+          syncToCloud(key, updated);
+          window.dispatchEvent(new Event('linksStoreUpdated'));
+        } catch(e) {}
+      }
     }
   }
 
   public remove(id: string) {
-    const links = this.getLinks();
-    const filtered = links.filter(l => l.id !== id);
-    this.save(filtered);
-  }
-
-  private save(links: UsefulLink[]) {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(links));
-    syncToCloud(this.STORAGE_KEY, links);
-    window.dispatchEvent(new Event('linksStoreUpdated'));
+    if (typeof window !== 'undefined') {
+      const key = `${PREFIX}${id}`;
+      localStorage.removeItem(key);
+      deleteFromCloud(key);
+      window.dispatchEvent(new Event('linksStoreUpdated'));
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import { syncToCloud } from "./cloudSync";
+import { syncToCloud, deleteFromCloud } from "./cloudSync";
 
 export interface AnnouncementQuestion {
   text: string;
@@ -23,54 +23,80 @@ export interface Announcement {
   responses?: AnnouncementResponse[];
 }
 
-const STORE_KEY = 'sweet_spot_announcements';
+const OLD_STORE_KEY = 'sweet_spot_announcements';
+const PREFIX = 'sweet_spot_announcement_';
 
 export const announcementStore = {
   getAll: (): Announcement[] => {
     if (typeof window !== 'undefined') {
       try {
-        const data = localStorage.getItem(STORE_KEY);
-        if (data) {
-          return JSON.parse(data);
+        const announcements: Announcement[] = [];
+        
+        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
+        if (oldDataStr) {
+          try {
+            const oldAnns = JSON.parse(oldDataStr);
+            if (Array.isArray(oldAnns)) {
+              oldAnns.filter(Boolean).forEach((ann: Announcement) => {
+                const key = `${PREFIX}${ann.id}`;
+                if (!localStorage.getItem(key)) {
+                  localStorage.setItem(key, JSON.stringify(ann));
+                  syncToCloud(key, ann);
+                }
+              });
+            }
+            localStorage.removeItem(OLD_STORE_KEY);
+          } catch(e) {}
         }
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(PREFIX)) {
+            try {
+              announcements.push(JSON.parse(localStorage.getItem(key) || '{}'));
+            } catch(e) {}
+          }
+        }
+        return announcements;
       } catch (e) {
         console.error("Failed to load announcements", e);
       }
     }
     return [];
   },
-  
-  saveAll: (announcements: Announcement[]) => {
+
+  add: (announcement: Announcement) => {
     if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(STORE_KEY, JSON.stringify(announcements));
-        syncToCloud(STORE_KEY, announcements);
-        window.dispatchEvent(new Event('announcementsUpdated'));
-      } catch (e) {
-        console.error("Failed to save announcements", e);
+      const key = `${PREFIX}${announcement.id}`;
+      localStorage.setItem(key, JSON.stringify(announcement));
+      syncToCloud(key, announcement);
+      window.dispatchEvent(new Event('announcementsUpdated'));
+    }
+  },
+
+  update: (id: string, partial: Partial<Announcement>) => {
+    if (typeof window !== 'undefined') {
+      const key = `${PREFIX}${id}`;
+      const existing = localStorage.getItem(key);
+      if (existing) {
+        try {
+          const ann = JSON.parse(existing);
+          const updated = { ...ann, ...partial };
+          localStorage.setItem(key, JSON.stringify(updated));
+          syncToCloud(key, updated);
+          window.dispatchEvent(new Event('announcementsUpdated'));
+        } catch(e) {}
       }
     }
   },
 
-  add: (announcement: Announcement) => {
-    const all = announcementStore.getAll();
-    all.push(announcement);
-    announcementStore.saveAll(all);
-  },
-
-  update: (id: string, partial: Partial<Announcement>) => {
-    const all = announcementStore.getAll();
-    const idx = all.findIndex((a) => a.id === id);
-    if (idx !== -1) {
-      all[idx] = { ...all[idx], ...partial };
-      announcementStore.saveAll(all);
-    }
-  },
-
   remove: (id: string) => {
-    const all = announcementStore.getAll();
-    const filtered = all.filter((a) => a.id !== id);
-    announcementStore.saveAll(filtered);
+    if (typeof window !== 'undefined') {
+      const key = `${PREFIX}${id}`;
+      localStorage.removeItem(key);
+      deleteFromCloud(key);
+      window.dispatchEvent(new Event('announcementsUpdated'));
+    }
   },
 
   getActiveAnnouncements: (): Announcement[] => {
@@ -86,18 +112,24 @@ export const announcementStore = {
   },
 
   addResponse: (announcementId: string, response: AnnouncementResponse) => {
-    const all = announcementStore.getAll();
-    const idx = all.findIndex((a) => a.id === announcementId);
-    if (idx !== -1) {
-      const ann = all[idx];
-      if (!ann.responses) ann.responses = [];
-      const existingIdx = ann.responses.findIndex(r => r.userEmail === response.userEmail);
-      if (existingIdx !== -1) {
-        ann.responses[existingIdx] = response;
-      } else {
-        ann.responses.push(response);
+    if (typeof window !== 'undefined') {
+      const key = `${PREFIX}${announcementId}`;
+      const existing = localStorage.getItem(key);
+      if (existing) {
+        try {
+          const ann: Announcement = JSON.parse(existing);
+          if (!ann.responses) ann.responses = [];
+          const existingIdx = ann.responses.findIndex(r => r.userEmail === response.userEmail);
+          if (existingIdx !== -1) {
+            ann.responses[existingIdx] = response;
+          } else {
+            ann.responses.push(response);
+          }
+          localStorage.setItem(key, JSON.stringify(ann));
+          syncToCloud(key, ann);
+          window.dispatchEvent(new Event('announcementsUpdated'));
+        } catch(e) {}
       }
-      announcementStore.saveAll(all);
     }
   }
 };

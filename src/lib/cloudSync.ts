@@ -17,7 +17,24 @@ const SYNC_KEYS = [
   "vertentes_gamification"
 ];
 
-const isSyncKey = (key: string) => SYNC_KEYS.includes(key) || key.startsWith("sweet_spot_ej_data_");
+const DYNAMIC_PREFIXES = [
+  "sweet_spot_ej_data_",
+  "sweet_spot_event_",
+  "sweet_spot_lead_",
+  "sweet_spot_mention_",
+  "vertentes_guardian_prescon_",
+  "vertentes_link_",
+  "sweet_spot_announcement_",
+  "sweet_spot_activity_",
+  "vertentes_ej_list_",
+  "vertentes_gamification_",
+  "sweet_spot_daily_config_"
+];
+
+const isSyncKey = (key: string) => {
+  if (SYNC_KEYS.includes(key)) return true;
+  return DYNAMIC_PREFIXES.some(prefix => key.startsWith(prefix));
+};
 
 let isSyncing = false;
 let subscription: any = null;
@@ -84,27 +101,22 @@ export async function initCloudSync() {
 
   subscription = supabase.channel('app_data_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'app_data' }, (payload) => {
-      const row = payload.new as any;
-      if (row && row.key && isSyncKey(row.key)) {
-        const remoteDataStr = JSON.stringify(row.data);
-        const localData = localStorage.getItem(row.key);
-        
-        if (localData !== remoteDataStr) {
-          localStorage.setItem(row.key, remoteDataStr);
+      if (payload.eventType === 'DELETE') {
+        const oldRow = payload.old as any;
+        if (oldRow && oldRow.key && isSyncKey(oldRow.key)) {
+          localStorage.removeItem(oldRow.key);
+          dispatchAll();
+        }
+      } else {
+        const row = payload.new as any;
+        if (row && row.key && isSyncKey(row.key)) {
+          const remoteDataStr = JSON.stringify(row.data);
+          const localData = localStorage.getItem(row.key);
           
-          if (row.key === "vertentes_ej_list") window.dispatchEvent(new Event("ejListUpdated"));
-          if (row.key === "sweet_spot_events") window.dispatchEvent(new Event("eventsUpdated"));
-          if (row.key === "sweet_spot_leads") window.dispatchEvent(new Event("leadsUpdated"));
-          if (row.key === "vertentes_guardian_customizations") window.dispatchEvent(new Event("guardianStoreUpdated"));
-          if (row.key === "sweet_spot_mentions") window.dispatchEvent(new Event("mentionsUpdated"));
-          if (row.key === "vertentes_guardian_prescon") window.dispatchEvent(new Event("presconUpdated"));
-          if (row.key === "sweet_spot_activities") window.dispatchEvent(new Event("activitiesUpdated"));
-          if (row.key.startsWith("sweet_spot_ej_data")) window.dispatchEvent(new Event("ejDataUpdated"));
-          if (row.key === "vertentes_links") window.dispatchEvent(new Event("linksStoreUpdated"));
-          if (row.key === "sweet_spot_daily_config") window.dispatchEvent(new Event("dailyConfigUpdated"));
-          if (row.key === "vertentes_user_activities") window.dispatchEvent(new Event("userActivitiesUpdated"));
-          if (row.key === "sweet_spot_announcements") window.dispatchEvent(new Event("announcementsUpdated"));
-          if (row.key === "vertentes_gamification") window.dispatchEvent(new Event("gamificationUpdated"));
+          if (localData !== remoteDataStr) {
+            localStorage.setItem(row.key, remoteDataStr);
+            dispatchAll(); // Simplify dispatching by just updating all UI
+          }
         }
       }
     })
@@ -127,5 +139,18 @@ export async function syncToCloud(key: string, data: any) {
     }
   } catch (e) {
     console.error("Erro ao sincronizar " + key, e);
+  }
+}
+
+export async function deleteFromCloud(key: string) {
+  if (!isSyncKey(key)) return;
+  
+  try {
+    const { error } = await supabase.from('app_data').delete().eq('key', key);
+    if (error) {
+      console.error(`Erro Supabase ao deletar ${key}:`, error);
+    }
+  } catch (e) {
+    console.error("Erro ao deletar " + key, e);
   }
 }
