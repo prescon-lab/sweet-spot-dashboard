@@ -21,17 +21,26 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useAccessRole } from "@/lib/access";
 
 // --- Countdown Component ---
-function useCountdown(targetDate?: string) {
+// Datas vêm como "YYYY-MM-DD". Auditoria encerra às 23:59:59 do dia; evento começa à meia-noite.
+function parseTarget(date: string, endOfDay: boolean) {
+  const [y, m, d] = date.split("-").map(Number);
+  if (!y || !m || !d) return new Date(date).getTime();
+  return endOfDay
+    ? new Date(y, m - 1, d, 23, 59, 59, 999).getTime()
+    : new Date(y, m - 1, d, 0, 0, 0, 0).getTime();
+}
+
+function useCountdown(targetDate?: string, endOfDay = false) {
   const getTimeLeft = useCallback(() => {
     if (!targetDate) return null;
-    const diff = new Date(targetDate).getTime() - Date.now();
+    const diff = parseTarget(targetDate, endOfDay) - Date.now();
     if (diff <= 0) return null;
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     return { days, hours, minutes, seconds };
-  }, [targetDate]);
+  }, [targetDate, endOfDay]);
 
   const [timeLeft, setTimeLeft] = useState(getTimeLeft());
 
@@ -44,9 +53,10 @@ function useCountdown(targetDate?: string) {
   return timeLeft;
 }
 
-function CountdownDisplay({ title, targetDate, large = false, color = "text-primary", icon: Icon }: { title: string; targetDate?: string; large?: boolean; color?: string; icon: any }) {
-  const time = useCountdown(targetDate);
+function CountdownDisplay({ title, targetDate, large = false, color = "text-primary", icon: Icon, endOfDay = false }: { title: string; targetDate?: string; large?: boolean; color?: string; icon: any; endOfDay?: boolean }) {
+  const time = useCountdown(targetDate, endOfDay);
   if (!targetDate || !time) return null;
+
 
   const bgClass = color === "text-primary" ? "bg-primary/10" : color.replace('text-', 'bg-').replace('-500', '-500/10');
 
