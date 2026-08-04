@@ -198,17 +198,19 @@ function DashboardPanel() {
               </CardHeader>
 
               {/* Countdowns */}
-              {(event.auditDate || event.endDate) && (() => {
+              {(event.auditDate || event.startDate || event.endDate) && (() => {
                 const auditPassed = event.auditDate ? parseTarget(event.auditDate, true) <= Date.now() : true;
+                const eventStart = event.startDate || event.endDate;
                 return (
                   <div className="bg-gradient-to-r from-muted/30 to-muted/10 border-b border-border/50 px-6 py-4 flex flex-wrap items-center justify-around gap-6">
                     {!auditPassed && (
                       <CountdownDisplay targetDate={event.auditDate} endOfDay color="text-orange-500" title="Fim das Auditorias" icon={Timer} />
                     )}
 
-                    {event.endDate && (
-                      <CountdownDisplay targetDate={event.endDate} large={auditPassed} color="text-primary" title="Data do Evento" icon={CalendarClock} />
+                    {eventStart && (
+                      <CountdownDisplay targetDate={eventStart} large={auditPassed} color="text-primary" title="Início do Evento" icon={CalendarClock} />
                     )}
+
                   </div>
                 );
               })()}
