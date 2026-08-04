@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogIn, Loader2, ShieldCheck } from "lucide-react";
 import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
@@ -31,19 +32,45 @@ function AuthPage() {
 
   const handleGoogle = async () => {
     setSigningIn(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
 
-    if (result.error) {
-      toast.error("Não foi possível entrar com o Google.");
-      setSigningIn(false);
-      return;
+    // Fluxo nativo (redirect no topo) — evita erros de popup/iframe (invalid_request).
+    const nativeSignIn = async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+          queryParams: { prompt: "select_account" },
+        },
+      });
+      return error;
+    };
+
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+
+      if (result.redirected) return;
+
+      if (result.error) {
+        const nativeError = await nativeSignIn();
+        if (nativeError) {
+          toast.error("Não foi possível entrar com o Google.");
+          setSigningIn(false);
+        }
+        return;
+      }
+
+      navigate({ to: "/", replace: true });
+    } catch {
+      const nativeError = await nativeSignIn();
+      if (nativeError) {
+        toast.error("Não foi possível entrar com o Google.");
+        setSigningIn(false);
+      }
     }
-    if (result.redirected) return;
-
-    navigate({ to: "/", replace: true });
   };
+
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center p-4">

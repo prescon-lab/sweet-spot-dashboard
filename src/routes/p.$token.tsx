@@ -21,17 +21,26 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useAccessRole } from "@/lib/access";
 
 // --- Countdown Component ---
-function useCountdown(targetDate?: string) {
+// Datas vêm como "YYYY-MM-DD". Auditoria encerra às 23:59:59 do dia; evento começa à meia-noite.
+function parseTarget(date: string, endOfDay: boolean) {
+  const [y, m, d] = date.split("-").map(Number);
+  if (!y || !m || !d) return new Date(date).getTime();
+  return endOfDay
+    ? new Date(y, m - 1, d, 23, 59, 59, 999).getTime()
+    : new Date(y, m - 1, d, 0, 0, 0, 0).getTime();
+}
+
+function useCountdown(targetDate?: string, endOfDay = false) {
   const getTimeLeft = useCallback(() => {
     if (!targetDate) return null;
-    const diff = new Date(targetDate).getTime() - Date.now();
+    const diff = parseTarget(targetDate, endOfDay) - Date.now();
     if (diff <= 0) return null;
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     return { days, hours, minutes, seconds };
-  }, [targetDate]);
+  }, [targetDate, endOfDay]);
 
   const [timeLeft, setTimeLeft] = useState(getTimeLeft());
 
@@ -44,9 +53,10 @@ function useCountdown(targetDate?: string) {
   return timeLeft;
 }
 
-function CountdownDisplay({ title, targetDate, large = false, color = "text-primary", icon: Icon }: { title: string; targetDate?: string; large?: boolean; color?: string; icon: any }) {
-  const time = useCountdown(targetDate);
+function CountdownDisplay({ title, targetDate, large = false, color = "text-primary", icon: Icon, endOfDay = false }: { title: string; targetDate?: string; large?: boolean; color?: string; icon: any; endOfDay?: boolean }) {
+  const time = useCountdown(targetDate, endOfDay);
   if (!targetDate || !time) return null;
+
 
   const bgClass = color === "text-primary" ? "bg-primary/10" : color.replace('text-', 'bg-').replace('-500', '-500/10');
 
@@ -188,16 +198,19 @@ function DashboardPanel() {
               </CardHeader>
 
               {/* Countdowns */}
-              {(event.auditDate || event.endDate) && (() => {
-                const auditPassed = event.auditDate ? new Date(event.auditDate).getTime() <= Date.now() : true;
+              {(event.auditDate || event.startDate || event.endDate) && (() => {
+                const auditPassed = event.auditDate ? parseTarget(event.auditDate, true) <= Date.now() : true;
+                const eventStart = event.startDate || event.endDate;
                 return (
                   <div className="bg-gradient-to-r from-muted/30 to-muted/10 border-b border-border/50 px-6 py-4 flex flex-wrap items-center justify-around gap-6">
                     {!auditPassed && (
-                      <CountdownDisplay targetDate={event.auditDate} color="text-orange-500" title="Fim das Auditorias" icon={Timer} />
+                      <CountdownDisplay targetDate={event.auditDate} endOfDay color="text-orange-500" title="Fim das Auditorias" icon={Timer} />
                     )}
-                    {event.endDate && (
-                      <CountdownDisplay targetDate={event.endDate} large={auditPassed} color="text-primary" title="Data do Evento" icon={CalendarClock} />
+
+                    {eventStart && (
+                      <CountdownDisplay targetDate={eventStart} large={auditPassed} color="text-primary" title="Início do Evento" icon={CalendarClock} />
                     )}
+
                   </div>
                 );
               })()}
