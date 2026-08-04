@@ -161,8 +161,8 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       activityStore.addActivity({ ejName, description: `Guardião alterado para ${guardianName}`, type: "update" });
     }
 
-    const truncate = (str: string, length = 40) => {
-      if (!str) return "Vazio";
+    const truncate = (str: string, length = 1000) => {
+      if (!str) return "";
       return str.length > length ? str.substring(0, length) + "..." : str;
     };
 

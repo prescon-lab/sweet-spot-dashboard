@@ -17,6 +17,8 @@ const SYNC_KEYS = [
   "vertentes_gamification"
 ];
 
+const isSyncKey = (key: string) => SYNC_KEYS.includes(key) || key.startsWith("sweet_spot_ej_data_");
+
 let isSyncing = false;
 let subscription: any = null;
 let authListenerAttached = false;
@@ -31,8 +33,6 @@ function dispatchAll() {
 }
 
 export async function initCloudSync() {
-  // Os dados compartilhados só são legíveis com sessão ativa (RLS).
-  // Portanto (re)sincronizamos sempre que houver login.
   if (!authListenerAttached) {
     authListenerAttached = true;
     supabase.auth.onAuthStateChange((event) => {
@@ -53,7 +53,6 @@ export async function initCloudSync() {
   if (isSyncing) return;
   isSyncing = true;
 
-  // 1. Carregar do Supabase (prioridade inicial)
   try {
     const { data, error } = await supabase.from('app_data').select('*');
     if (error) {
@@ -65,10 +64,9 @@ export async function initCloudSync() {
     if (data) {
       let hasUpdates = false;
       data.forEach((row) => {
-        if (SYNC_KEYS.includes(row.key)) {
+        if (isSyncKey(row.key)) {
           const localData = localStorage.getItem(row.key);
           const remoteDataStr = JSON.stringify(row.data);
-          // Se for diferente, sobrepõe o local
           if (localData !== remoteDataStr) {
             localStorage.setItem(row.key, remoteDataStr);
             hasUpdates = true;
@@ -79,24 +77,21 @@ export async function initCloudSync() {
       if (hasUpdates) {
         dispatchAll();
       }
-
     }
   } catch (e) {
     console.error("Erro na sincronização inicial", e);
   }
 
-  // 2. Escutar mudanças remotas no Supabase (Realtime)
   subscription = supabase.channel('app_data_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'app_data' }, (payload) => {
       const row = payload.new as any;
-      if (row && row.key && SYNC_KEYS.includes(row.key)) {
+      if (row && row.key && isSyncKey(row.key)) {
         const remoteDataStr = JSON.stringify(row.data);
         const localData = localStorage.getItem(row.key);
         
         if (localData !== remoteDataStr) {
           localStorage.setItem(row.key, remoteDataStr);
           
-          // Dispara eventos específicos para atualizar a UI
           if (row.key === "vertentes_ej_list") window.dispatchEvent(new Event("ejListUpdated"));
           if (row.key === "sweet_spot_events") window.dispatchEvent(new Event("eventsUpdated"));
           if (row.key === "sweet_spot_leads") window.dispatchEvent(new Event("leadsUpdated"));
@@ -104,7 +99,7 @@ export async function initCloudSync() {
           if (row.key === "sweet_spot_mentions") window.dispatchEvent(new Event("mentionsUpdated"));
           if (row.key === "vertentes_guardian_prescon") window.dispatchEvent(new Event("presconUpdated"));
           if (row.key === "sweet_spot_activities") window.dispatchEvent(new Event("activitiesUpdated"));
-          if (row.key === "sweet_spot_ej_data") window.dispatchEvent(new Event("ejDataUpdated"));
+          if (row.key.startsWith("sweet_spot_ej_data")) window.dispatchEvent(new Event("ejDataUpdated"));
           if (row.key === "vertentes_links") window.dispatchEvent(new Event("linksStoreUpdated"));
           if (row.key === "sweet_spot_daily_config") window.dispatchEvent(new Event("dailyConfigUpdated"));
           if (row.key === "vertentes_user_activities") window.dispatchEvent(new Event("userActivitiesUpdated"));
@@ -116,9 +111,8 @@ export async function initCloudSync() {
     .subscribe();
 }
 
-// Intercepta qualquer salvamento local e empurra pro banco
 export async function syncToCloud(key: string, data: any) {
-  if (!SYNC_KEYS.includes(key)) return;
+  if (!isSyncKey(key)) return;
   
   try {
     const { error } = await supabase.from('app_data').upsert({ 

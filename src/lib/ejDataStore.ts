@@ -37,16 +37,41 @@ export interface EjData {
   calendarioEventos?: CalendarEvent[];
 }
 
-const STORE_KEY = 'sweet_spot_ej_data';
+const OLD_STORE_KEY = 'sweet_spot_ej_data';
 
 export const ejDataStore = {
   getAllData: (): Record<string, EjData> => {
     if (typeof window !== 'undefined') {
       try {
-        const data = localStorage.getItem(STORE_KEY);
-        if (data) {
-          return JSON.parse(data) || {};
+        const allData: Record<string, EjData> = {};
+        
+        // 1. Migrate old monolithic data to individual keys if it exists
+        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
+        if (oldDataStr) {
+          try {
+            const oldData = JSON.parse(oldDataStr);
+            Object.keys(oldData).forEach(ejName => {
+              const key = `sweet_spot_ej_data_${ejName}`;
+              if (!localStorage.getItem(key)) {
+                localStorage.setItem(key, JSON.stringify(oldData[ejName]));
+                syncToCloud(key, oldData[ejName]);
+              }
+            });
+            localStorage.removeItem(OLD_STORE_KEY);
+          } catch(e) {}
         }
+
+        // 2. Load all individual EJ keys
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sweet_spot_ej_data_')) {
+            const ejName = key.replace('sweet_spot_ej_data_', '');
+            try {
+              allData[ejName] = JSON.parse(localStorage.getItem(key) || '{}');
+            } catch(e) {}
+          }
+        }
+        return allData;
       } catch (e) {
         console.error("Failed to load ej data", e);
       }
@@ -55,20 +80,30 @@ export const ejDataStore = {
   },
   
   getEjData: (ejName: string): EjData | null => {
-    const allData = ejDataStore.getAllData();
-    return allData[ejName] || null;
+    if (typeof window === 'undefined') return null;
+    
+    // Ensure migration runs if needed before reading
+    ejDataStore.getAllData();
+    
+    const key = `sweet_spot_ej_data_${ejName}`;
+    const data = localStorage.getItem(key);
+    if (data) {
+      try {
+        return JSON.parse(data);
+      } catch (e) {}
+    }
+    return null;
   },
 
   saveEjData: (ejName: string, data: Partial<EjData>) => {
     if (typeof window !== 'undefined') {
       try {
-        const allData = ejDataStore.getAllData();
-        const currentData = allData[ejName] || { ejName };
+        const currentData = ejDataStore.getEjData(ejName) || { ejName };
         const updatedData = { ...currentData, ...data };
         
-        allData[ejName] = updatedData;
-        localStorage.setItem(STORE_KEY, JSON.stringify(allData));
-        syncToCloud(STORE_KEY, allData);
+        const key = `sweet_spot_ej_data_${ejName}`;
+        localStorage.setItem(key, JSON.stringify(updatedData));
+        syncToCloud(key, updatedData);
         window.dispatchEvent(new Event('ejDataUpdated'));
       } catch (e) {
         console.error("Failed to save ej data", e);
