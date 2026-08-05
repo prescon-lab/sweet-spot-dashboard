@@ -967,6 +967,30 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                   <p className="text-xs text-[#8B7355] mt-1">Gerenciar leads e faturamento</p>
                 </button>
               </div>
+
+              <div className="pt-2">
+                <div className="bg-card rounded-xl border border-border/50 p-4">
+                  <h4 className="font-semibold text-sm text-foreground mb-3">Últimas Atualizações</h4>
+                  {ejActivities.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">Nenhuma atualização registrada ainda.</p>
+                  ) : (
+                    <div className="space-y-3 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                      {ejActivities.map(act => (
+                        <div key={act.id} className="flex gap-2">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-xs text-foreground/90 break-words">{act.description}</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {new Date(act.timestamp).toLocaleString('pt-BR')}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
