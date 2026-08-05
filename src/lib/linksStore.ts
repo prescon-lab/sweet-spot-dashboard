@@ -1,4 +1,4 @@
-import { syncToCloud, deleteFromCloud } from "./cloudSync";
+import { syncToCloud, deleteFromCloud, isCloudHydrated } from "./cloudSync";
 
 export interface UsefulLink {
   id: string;
@@ -60,7 +60,7 @@ class LinksStore {
           }
         }
         
-        if (links.length === 0 && !localStorage.getItem('vertentes_links_initialized')) {
+        if (links.length === 0 && isCloudHydrated() && !localStorage.getItem('vertentes_links_initialized')) {
            const defaults = [
              { id: '1', title: 'Drive EJs', url: '#', category: 'Documentos' },
              { id: '2', title: 'Planilha de Metas', url: '#', category: 'Documentos' }
@@ -96,7 +96,7 @@ class LinksStore {
 
   public add(link: Omit<UsefulLink, 'id'> | UsefulLink) {
     if (typeof window !== 'undefined') {
-      const newLink = { ...link, id: link.id || Date.now().toString() };
+      const newLink = { ...link, id: (link as UsefulLink).id || Date.now().toString() };
       const key = `${PREFIX}${newLink.id}`;
       localStorage.setItem(key, JSON.stringify(newLink));
       syncToCloud(key, newLink);
