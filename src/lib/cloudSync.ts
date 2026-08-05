@@ -2,18 +2,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const SYNC_KEYS = [
-  "vertentes_ej_list",
-  "sweet_spot_events",
-  "sweet_spot_leads",
   "vertentes_guardian_customizations",
-  "sweet_spot_mentions",
-  "vertentes_guardian_prescon",
-  "sweet_spot_activities",
-  "sweet_spot_ej_data",
-  "vertentes_links",
   "sweet_spot_daily_config",
   "vertentes_user_activities",
-  "sweet_spot_announcements",
   "vertentes_gamification"
 ];
 
@@ -59,7 +50,7 @@ export async function initCloudSync() {
           supabase.removeChannel(subscription);
           subscription = null;
         }
-        void initCloudSync();
+        initCloudSync();
       }
     });
   }
@@ -71,16 +62,38 @@ export async function initCloudSync() {
   isSyncing = true;
 
   try {
-    const { data, error } = await supabase.from('app_data').select('*');
-    if (error) {
-      console.error("Erro Supabase (select):", error);
-      isSyncing = false;
-      return;
+    let allData: any[] = [];
+    let from = 0;
+    const step = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('app_data')
+        .select('*')
+        .range(from, from + step - 1);
+
+      if (error) {
+        console.error("Erro Supabase (select):", error);
+        isSyncing = false;
+        return;
+      }
+
+      if (data && data.length > 0) {
+        allData = [...allData, ...data];
+        if (data.length < step) {
+          hasMore = false;
+        } else {
+          from += step;
+        }
+      } else {
+        hasMore = false;
+      }
     }
 
-    if (data) {
+    if (allData.length > 0) {
       let hasUpdates = false;
-      data.forEach((row) => {
+      allData.forEach((row) => {
         if (isSyncKey(row.key)) {
           const localData = localStorage.getItem(row.key);
           const remoteDataStr = JSON.stringify(row.data);
