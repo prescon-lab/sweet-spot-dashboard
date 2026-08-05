@@ -261,6 +261,7 @@ function AuthGate({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const isAuthRoute = pathname === "/auth";
+  const [dataReady, setDataReady] = useState(isCloudHydrated());
 
   useEffect(() => {
     if (!loading && !session && !isAuthRoute) {
@@ -274,7 +275,18 @@ function AuthGate({ children }: { children: ReactNode }) {
     }
   }, [session, user, loading]);
 
-  if (loading) {
+  useEffect(() => {
+    if (!session || dataReady) return;
+    let active = true;
+    void waitForCloudHydration().then(() => {
+      if (active) setDataReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [session, dataReady]);
+
+  if (loading || (session && !isAuthRoute && !dataReady)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -292,6 +304,7 @@ function AuthGate({ children }: { children: ReactNode }) {
 
   return <>{children}</>;
 }
+
 
 function AppShell() {
   const { session } = useAuth();
