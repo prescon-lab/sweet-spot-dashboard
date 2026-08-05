@@ -422,8 +422,8 @@ function DashboardPanel() {
                             {ejActivities.map(activity => (
                               <div key={activity.id} className="flex items-start gap-2 relative group before:absolute before:left-[3px] before:top-4 before:bottom-[-16px] before:w-[2px] before:bg-border last:before:hidden">
                                 <div className="w-2 h-2 rounded-full bg-primary/40 mt-1.5 relative z-10 shrink-0" />
-                                <div className="flex-1">
-                                  <p className="text-xs text-foreground/80">{activity.description}</p>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs text-foreground/80 whitespace-pre-wrap break-words">{activity.description}</p>
                                   <p className="text-[10px] text-muted-foreground/60 mt-0.5 font-medium uppercase">
                                     {new Date(activity.timestamp).toLocaleString('pt-BR')}
                                   </p>

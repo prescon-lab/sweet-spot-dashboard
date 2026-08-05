@@ -178,7 +178,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
       activityStore.addActivity({ ejName, description: `Guardião alterado para ${guardianName}`, type: "update" });
     }
 
-    const truncate = (str: string, length = 1000) => {
+    const truncate = (str: string, length = 10000) => {
       if (!str) return "";
       return str.length > length ? str.substring(0, length) + "..." : str;
     };
@@ -979,7 +979,7 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
                         <div key={act.id} className="flex gap-2">
                           <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-xs text-foreground/90 break-words">{act.description}</p>
+                            <p className="text-xs text-foreground/90 whitespace-pre-wrap break-words">{act.description}</p>
                             <p className="text-[11px] text-muted-foreground">
                               {new Date(act.timestamp).toLocaleString('pt-BR')}
                             </p>
