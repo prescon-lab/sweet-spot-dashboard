@@ -1,6 +1,6 @@
 import { ejsList as initialEjsList } from "./data";
 import { guardianStore } from "./guardianStore";
-import { syncToCloud } from "./cloudSync";
+import { syncToCloud, isCloudHydrated } from "./cloudSync";
 
 export interface EjItem {
   id: number;
