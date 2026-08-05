@@ -132,7 +132,7 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
         <div className="py-4 max-h-[70vh] overflow-auto">
           {isAdding && (
             <div className="bg-muted/30 p-6 rounded-xl border border-border/50 space-y-4 mb-6">
-              <h3 className="font-semibold text-lg">Novo Lead</h3>
+              <h3 className="font-semibold text-lg">{editingId ? "Editar Lead" : "Novo Lead"}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Nome do Lead</label>
@@ -165,11 +165,8 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
                 <Textarea value={obs} onChange={e => setObs(e.target.value)} placeholder="Detalhes da negociação..." />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => {
-                  setIsAdding(false);
-                  dirtyGuard.markClean();
-                }}>Cancelar</Button>
-                <Button onClick={handleSave}>Salvar Lead</Button>
+                <Button variant="outline" onClick={resetForm}>Cancelar</Button>
+                <Button onClick={handleSave}>{editingId ? "Salvar Alterações" : "Salvar Lead"}</Button>
               </div>
             </div>
           )}
