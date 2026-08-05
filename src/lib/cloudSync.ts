@@ -113,7 +113,9 @@ export async function initCloudSync() {
           }
         }
       });
-      
+
+      markHydrated();
+
       if (hasUpdates) {
         dispatchAll();
       }
@@ -121,6 +123,8 @@ export async function initCloudSync() {
   } catch (e) {
     console.error("Erro na sincronização inicial", e);
   }
+  markHydrated();
+
 
   subscription = supabase.channel('app_data_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'app_data' }, (payload) => {
