@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
-import { Briefcase, Plus, Trash2, CheckCircle2 } from "lucide-react";
+import { Briefcase, Plus, Trash2, CheckCircle2, Pencil } from "lucide-react";
 import { leadStore, Lead, LeadStatus } from "@/lib/leadStore";
 
 interface EjLeadFunnelModalProps {
@@ -17,6 +17,8 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
   const dirtyGuard = useDirtyGuard(open);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  
   
   const [name, setName] = useState("");
   const [value, setValue] = useState("");
@@ -35,28 +37,57 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
     return () => window.removeEventListener('leadsUpdated', handleUpdate);
   }, [open, ejId]);
 
-  const handleSave = () => {
-    if (!name.trim()) return;
-    const numValue = parseFloat(value.replace(/[^0-9,-]+/g,"").replace(",", "."));
-    
-    leadStore.addLead({
-      id: Date.now().toString(),
-      ejId,
-      name,
-      expectedValue: isNaN(numValue) ? 0 : numValue,
-      status,
-      closingDate,
-      observations: obs,
-      createdAt: new Date().toISOString()
-    });
-    
+  const resetForm = () => {
     setIsAdding(false);
+    setEditingId(null);
     setName("");
     setValue("");
     setStatus("morno");
     setClosingDate("");
     setObs("");
     dirtyGuard.markClean();
+  };
+
+  const handleEdit = (lead: Lead) => {
+    setEditingId(lead.id);
+    setIsAdding(true);
+    setName(lead.name);
+    setValue(String(lead.expectedValue ?? "").replace(".", ","));
+    setStatus(lead.status);
+    setClosingDate(lead.closingDate || "");
+    setObs(lead.observations || "");
+  };
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+    const numValue = parseFloat(value.replace(/[^0-9,-]+/g,"").replace(",", "."));
+
+    if (editingId) {
+      const existing = leads.find(l => l.id === editingId);
+      leadStore.updateLead({
+        id: editingId,
+        ejId,
+        name,
+        expectedValue: isNaN(numValue) ? 0 : numValue,
+        status,
+        closingDate,
+        observations: obs,
+        createdAt: existing?.createdAt || new Date().toISOString()
+      });
+    } else {
+      leadStore.addLead({
+        id: Date.now().toString(),
+        ejId,
+        name,
+        expectedValue: isNaN(numValue) ? 0 : numValue,
+        status,
+        closingDate,
+        observations: obs,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    resetForm();
   };
 
   const handleDelete = (id: string) => {
