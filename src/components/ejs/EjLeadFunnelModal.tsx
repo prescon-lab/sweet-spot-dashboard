@@ -205,6 +205,9 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
                         <CheckCircle2 className="h-4 w-4" />
                       </Button>
                     )}
+                    <Button variant="ghost" size="icon" onClick={() => handleEdit(lead)} className="text-primary hover:bg-primary/10" title="Editar Lead">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleDelete(lead.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50" title="Excluir Lead">
                       <Trash2 className="h-4 w-4" />
                     </Button>
