@@ -138,7 +138,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { useRouterState, useNavigate } from "@tanstack/react-router";
 import { Loader2, LogOut, Bell, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { initCloudSync } from "@/lib/cloudSync";
+import { initCloudSync, isCloudHydrated, waitForCloudHydration } from "@/lib/cloudSync";
 import { supabase } from "@/integrations/supabase/client";
 import { mentionStore, Mention } from "@/lib/mentionStore";
 import { userActivityStore } from "@/lib/userActivityStore";
