@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ejListStore } from "@/lib/ejListStore";
-import { ShieldCheck, ShieldOff, Loader2, Users, Search, Trash2, Shield } from "lucide-react";
+import { ejDataStore, type EjData } from "@/lib/ejDataStore";
+import { activityStore } from "@/lib/activityStore";
+import { ShieldCheck, ShieldOff, Loader2, Users, Search, Trash2, Shield, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { listProfilesWithEmail } from "@/lib/adminUsers.functions";
 
@@ -262,7 +264,102 @@ function AdminPage() {
       </p>
 
       {/* DEV ONLY RESET BUTTON */}
-      <div className="mt-12 p-4 border border-red-500/50 bg-red-500/10 rounded-xl max-w-sm space-y-2 opacity-50 hover:opacity-100 transition-opacity">
+      <div className="mt-12 p-4 border border-blue-500/50 bg-blue-500/10 rounded-xl max-w-sm space-y-2 hover:opacity-100 transition-opacity">
+        <h3 className="font-bold text-blue-500 flex items-center gap-2">
+          <RotateCcw className="w-5 h-5" />
+          Restaurar Dados Perdidos
+        </h3>
+        <p className="text-xs text-muted-foreground">Isso tentará recuperar o último status das EJs lendo os relatórios das "Últimas Atualizações". Use isso caso os dados das EJs tenham desaparecido recentemente.</p>
+        <Button 
+          variant="outline" 
+          className="w-full mt-2 font-bold border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
+          onClick={() => {
+            if (!window.confirm("Essa ação vai sobrescrever o estado atual das EJs com a última atualização de texto das atividades. Continuar?")) return;
+            
+            const activities = activityStore.getActivities();
+            const chronological = [...activities].reverse();
+            let recoveredCount = 0;
+            const ejUpdates: Record<string, Partial<EjData>> = {};
+            
+            chronological.forEach(act => {
+              if (act.type !== 'update') return;
+              if (!ejUpdates[act.ejName]) ejUpdates[act.ejName] = {};
+              
+              const updates = ejUpdates[act.ejName];
+              
+              if (act.description.startsWith('Desafio: "')) {
+                const text = act.description.match(/^Desafio: "(.*)"$/);
+                if (text) updates.desafio = text[1].replace(/\.\.\.$/, '');
+              }
+              else if (act.description.startsWith('Dores: "')) {
+                const text = act.description.match(/^Dores: "(.*)"$/);
+                if (text) updates.dores = text[1].replace(/\.\.\.$/, '');
+              }
+              else if (act.description.startsWith('Próxima reunião: ')) {
+                const parts = act.description.replace('Próxima reunião: ', '').split('/');
+                if (parts.length === 3) updates.proximaReuniao = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                else if (act.description.includes('Remarcada')) updates.proximaReuniao = '';
+              }
+              else if (act.description.startsWith('Nova anotação de reunião: "')) {
+                const text = act.description.match(/^Nova anotação de reunião: "(.*)"$/);
+                if (text) {
+                  if (!updates.reunioes) updates.reunioes = [];
+                  updates.reunioes.push({ id: Date.now() + Math.random(), date: new Date(act.timestamp).toISOString().split('T')[0], text: text[1].replace(/\.\.\.$/, '') });
+                }
+              }
+              else if (act.description.startsWith('Nova tarefa adicionada na Daily: "')) {
+                const text = act.description.match(/^Nova tarefa adicionada na Daily: "(.*)"$/);
+                if (text) {
+                  if (!updates.tarefas) updates.tarefas = [];
+                  updates.tarefas.push({ id: Date.now() + Math.random(), date: new Date(act.timestamp).toISOString().split('T')[0], text: text[1].replace(/\.\.\.$/, ''), completed: false });
+                }
+              }
+              else if (act.description.startsWith('Nova demanda Prescon adicionada: "')) {
+                const text = act.description.match(/^Nova demanda Prescon adicionada: "(.*)"$/);
+                if (text) {
+                  if (!updates.presconTasks) updates.presconTasks = [];
+                  updates.presconTasks.push({ id: Date.now() + Math.random(), date: new Date(act.timestamp).toISOString().split('T')[0], text: text[1].replace(/\.\.\.$/, ''), completed: false });
+                }
+              }
+            });
+            
+            Object.keys(ejUpdates).forEach(ejName => {
+              const current = ejDataStore.getEjData(ejName) || { ejName };
+              const recovered = ejUpdates[ejName];
+              
+              const finalData = { ...current };
+              if (recovered.desafio) finalData.desafio = recovered.desafio;
+              if (recovered.dores) finalData.dores = recovered.dores;
+              if (recovered.proximaReuniao !== undefined) finalData.proximaReuniao = recovered.proximaReuniao;
+              
+              if (recovered.reunioes) {
+                finalData.reunioes = [...(current.reunioes || []), ...recovered.reunioes];
+                const seen = new Set();
+                finalData.reunioes = finalData.reunioes.filter(r => { if (seen.has(r.text)) return false; seen.add(r.text); return true; });
+              }
+              if (recovered.tarefas) {
+                finalData.tarefas = [...(current.tarefas || []), ...recovered.tarefas];
+                const seen = new Set();
+                finalData.tarefas = finalData.tarefas.filter(r => { if (seen.has(r.text)) return false; seen.add(r.text); return true; });
+              }
+              if (recovered.presconTasks) {
+                finalData.presconTasks = [...(current.presconTasks || []), ...recovered.presconTasks];
+                const seen = new Set();
+                finalData.presconTasks = finalData.presconTasks.filter(r => { if (seen.has(r.text)) return false; seen.add(r.text); return true; });
+              }
+              
+              ejDataStore.saveEjData(ejName, finalData);
+              recoveredCount++;
+            });
+            
+            toast.success(`Dados recuperados para ${recoveredCount} EJs! Verifique os cards.`);
+          }}
+        >
+          Recuperar Dados
+        </Button>
+      </div>
+
+      <div className="mt-8 p-4 border border-red-500/50 bg-red-500/10 rounded-xl max-w-sm space-y-2 opacity-50 hover:opacity-100 transition-opacity">
         <h3 className="font-bold text-red-500">Ferramenta de Limpeza (Para Testes)</h3>
         <p className="text-xs text-muted-foreground">Isso apagará TODOS os dados de EJs, Guardiões, Reuniões e Menções do banco para que você comece do zero. Use com cuidado!</p>
         <Button 
