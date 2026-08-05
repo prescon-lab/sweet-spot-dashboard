@@ -96,7 +96,7 @@ class LinksStore {
 
   public add(link: Omit<UsefulLink, 'id'> | UsefulLink) {
     if (typeof window !== 'undefined') {
-      const newLink = { ...link, id: link.id || Date.now().toString() };
+      const newLink = { ...link, id: (link as UsefulLink).id || Date.now().toString() };
       const key = `${PREFIX}${newLink.id}`;
       localStorage.setItem(key, JSON.stringify(newLink));
       syncToCloud(key, newLink);
