@@ -1,4 +1,4 @@
-import { syncToCloud, deleteFromCloud } from "./cloudSync";
+import { syncToCloud, deleteFromCloud, isCloudHydrated } from "./cloudSync";
 
 export interface UsefulLink {
   id: string;
