@@ -271,7 +271,7 @@ function DashboardPanel() {
           {/* Global Revenue Card */}
           {(() => {
             const safeLeads = Array.isArray(leads) ? leads : [];
-            const total = safeLeads.reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
+            const fechado = safeLeads.filter(l => l?.status === 'fechado').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
             const quente = safeLeads.filter(l => l?.status === 'quente').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
             const morno = safeLeads.filter(l => l?.status === 'morno').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
             const frio = safeLeads.filter(l => l?.status === 'frio').reduce((acc, lead) => acc + (lead?.expectedValue || 0), 0);
@@ -292,8 +292,8 @@ function DashboardPanel() {
                 <CardContent className="p-5">
                   <div className="flex flex-col gap-4">
                     <div className="text-left">
-                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Total Provável</p>
-                      <p className="text-3xl font-bold text-foreground">{formatBRL(total)}</p>
+                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Já Fechado</p>
+                      <p className="text-3xl font-bold text-green-600 dark:text-green-500">{formatBRL(fechado)}</p>
                     </div>
                     <div className="flex flex-wrap gap-3">
                       <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px]">
