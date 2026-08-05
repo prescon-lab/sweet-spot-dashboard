@@ -68,6 +68,23 @@ export function EjDetailModal({ open, onOpenChange, ejData }: EjDetailModalProps
   const [mentionSearch, setMentionSearch] = useState<string | null>(null);
   const [guardianName, setGuardianName] = useState("");
   const [mentionUsers, setMentionUsers] = useState<string[]>([]);
+  const [ejActivities, setEjActivities] = useState<{ id: string; description: string; timestamp: string }[]>([]);
+
+  useEffect(() => {
+    const load = () => {
+      const ejName = ejData?.name || "";
+      if (!open || !ejName) { setEjActivities([]); return; }
+      setEjActivities(activityStore.getActivities().filter(a => a.ejName === ejName));
+    };
+    load();
+    window.addEventListener('ejActivitiesUpdated', load);
+    window.addEventListener('activitiesUpdated', load);
+    return () => {
+      window.removeEventListener('ejActivitiesUpdated', load);
+      window.removeEventListener('activitiesUpdated', load);
+    };
+  }, [open, ejData?.name]);
+
 
   const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
