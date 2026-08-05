@@ -1,6 +1,6 @@
 import { ejsList as initialEjsList } from "./data";
 import { guardianStore } from "./guardianStore";
-import { syncToCloud } from "./cloudSync";
+import { syncToCloud, isCloudHydrated } from "./cloudSync";
 
 export interface EjItem {
   id: number;
@@ -46,7 +46,7 @@ export const ejListStore = {
           }
         }
         
-        if (needsDefaults && !localStorage.getItem('vertentes_ejs_initialized')) {
+        if (needsDefaults && isCloudHydrated() && !localStorage.getItem('vertentes_ejs_initialized')) {
            initialEjsList.forEach(ej => {
              const key = `${PREFIX}${ej.name}`;
              localStorage.setItem(key, JSON.stringify(ej));
@@ -55,6 +55,7 @@ export const ejListStore = {
            localStorage.setItem('vertentes_ejs_initialized', 'true');
            return initialEjsList.sort((a, b) => a.name.localeCompare(b.name));
         }
+
         
         return ejs.length > 0 ? ejs.sort((a, b) => a.name.localeCompare(b.name)) : initialEjsList.sort((a, b) => a.name.localeCompare(b.name));
       } catch (e) {

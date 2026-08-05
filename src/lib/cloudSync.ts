@@ -31,6 +31,29 @@ let isSyncing = false;
 let subscription: any = null;
 let authListenerAttached = false;
 
+let hydrated = false;
+let resolveHydration: () => void = () => {};
+let hydrationPromise = new Promise<void>((resolve) => {
+  resolveHydration = resolve;
+});
+
+/** True once the shared cloud data has been pulled into localStorage at least once. */
+export function isCloudHydrated() {
+  return hydrated;
+}
+
+/** Resolves once the shared cloud data has been pulled into localStorage. */
+export function waitForCloudHydration() {
+  return hydrationPromise;
+}
+
+function markHydrated() {
+  if (hydrated) return;
+  hydrated = true;
+  resolveHydration();
+}
+
+
 function dispatchAll() {
   [
     "ejListUpdated", "eventsUpdated", "leadsUpdated", "guardianStoreUpdated",
@@ -103,7 +126,9 @@ export async function initCloudSync() {
           }
         }
       });
-      
+
+      markHydrated();
+
       if (hasUpdates) {
         dispatchAll();
       }
@@ -111,6 +136,8 @@ export async function initCloudSync() {
   } catch (e) {
     console.error("Erro na sincronização inicial", e);
   }
+  markHydrated();
+
 
   subscription = supabase.channel('app_data_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'app_data' }, (payload) => {
