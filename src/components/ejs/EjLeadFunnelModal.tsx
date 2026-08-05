@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
-import { Briefcase, Plus, Trash2, CheckCircle2 } from "lucide-react";
+import { Briefcase, Plus, Trash2, CheckCircle2, Pencil } from "lucide-react";
 import { leadStore, Lead, LeadStatus } from "@/lib/leadStore";
 
 interface EjLeadFunnelModalProps {
@@ -17,6 +17,8 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
   const dirtyGuard = useDirtyGuard(open);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  
   
   const [name, setName] = useState("");
   const [value, setValue] = useState("");
@@ -35,28 +37,57 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
     return () => window.removeEventListener('leadsUpdated', handleUpdate);
   }, [open, ejId]);
 
-  const handleSave = () => {
-    if (!name.trim()) return;
-    const numValue = parseFloat(value.replace(/[^0-9,-]+/g,"").replace(",", "."));
-    
-    leadStore.addLead({
-      id: Date.now().toString(),
-      ejId,
-      name,
-      expectedValue: isNaN(numValue) ? 0 : numValue,
-      status,
-      closingDate,
-      observations: obs,
-      createdAt: new Date().toISOString()
-    });
-    
+  const resetForm = () => {
     setIsAdding(false);
+    setEditingId(null);
     setName("");
     setValue("");
     setStatus("morno");
     setClosingDate("");
     setObs("");
     dirtyGuard.markClean();
+  };
+
+  const handleEdit = (lead: Lead) => {
+    setEditingId(lead.id);
+    setIsAdding(true);
+    setName(lead.name);
+    setValue(String(lead.expectedValue ?? "").replace(".", ","));
+    setStatus(lead.status);
+    setClosingDate(lead.closingDate || "");
+    setObs(lead.observations || "");
+  };
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+    const numValue = parseFloat(value.replace(/[^0-9,-]+/g,"").replace(",", "."));
+
+    if (editingId) {
+      const existing = leads.find(l => l.id === editingId);
+      leadStore.updateLead({
+        id: editingId,
+        ejId,
+        name,
+        expectedValue: isNaN(numValue) ? 0 : numValue,
+        status,
+        closingDate,
+        observations: obs,
+        createdAt: existing?.createdAt || new Date().toISOString()
+      });
+    } else {
+      leadStore.addLead({
+        id: Date.now().toString(),
+        ejId,
+        name,
+        expectedValue: isNaN(numValue) ? 0 : numValue,
+        status,
+        closingDate,
+        observations: obs,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    resetForm();
   };
 
   const handleDelete = (id: string) => {
@@ -101,7 +132,7 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
         <div className="py-4 max-h-[70vh] overflow-auto">
           {isAdding && (
             <div className="bg-muted/30 p-6 rounded-xl border border-border/50 space-y-4 mb-6">
-              <h3 className="font-semibold text-lg">Novo Lead</h3>
+              <h3 className="font-semibold text-lg">{editingId ? "Editar Lead" : "Novo Lead"}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Nome do Lead</label>
@@ -134,11 +165,8 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
                 <Textarea value={obs} onChange={e => setObs(e.target.value)} placeholder="Detalhes da negociação..." />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => {
-                  setIsAdding(false);
-                  dirtyGuard.markClean();
-                }}>Cancelar</Button>
-                <Button onClick={handleSave}>Salvar Lead</Button>
+                <Button variant="outline" onClick={resetForm}>Cancelar</Button>
+                <Button onClick={handleSave}>{editingId ? "Salvar Alterações" : "Salvar Lead"}</Button>
               </div>
             </div>
           )}
@@ -177,6 +205,9 @@ export function EjLeadFunnelModal({ open, onOpenChange, ejId }: EjLeadFunnelModa
                         <CheckCircle2 className="h-4 w-4" />
                       </Button>
                     )}
+                    <Button variant="ghost" size="icon" onClick={() => handleEdit(lead)} className="text-primary hover:bg-primary/10" title="Editar Lead">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleDelete(lead.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50" title="Excluir Lead">
                       <Trash2 className="h-4 w-4" />
                     </Button>
