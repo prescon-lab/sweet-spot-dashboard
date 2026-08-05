@@ -18,23 +18,6 @@ export const activityStore = {
       try {
         let activities: Activity[] = [];
         
-        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-        if (oldDataStr) {
-          try {
-            const oldActivities = JSON.parse(oldDataStr);
-            if (Array.isArray(oldActivities)) {
-              oldActivities.filter(Boolean).forEach((act: Activity) => {
-                const key = `${PREFIX}${act.id}`;
-                if (!localStorage.getItem(key)) {
-                  localStorage.setItem(key, JSON.stringify(act));
-                  syncToCloud(key, act);
-                }
-              });
-            }
-            localStorage.removeItem(OLD_STORE_KEY);
-          } catch(e) {}
-        }
-
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith(PREFIX)) {

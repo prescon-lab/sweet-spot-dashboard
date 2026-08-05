@@ -32,23 +32,6 @@ export const announcementStore = {
       try {
         const announcements: Announcement[] = [];
         
-        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-        if (oldDataStr) {
-          try {
-            const oldAnns = JSON.parse(oldDataStr);
-            if (Array.isArray(oldAnns)) {
-              oldAnns.filter(Boolean).forEach((ann: Announcement) => {
-                const key = `${PREFIX}${ann.id}`;
-                if (!localStorage.getItem(key)) {
-                  localStorage.setItem(key, JSON.stringify(ann));
-                  syncToCloud(key, ann);
-                }
-              });
-            }
-            localStorage.removeItem(OLD_STORE_KEY);
-          } catch(e) {}
-        }
-
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith(PREFIX)) {

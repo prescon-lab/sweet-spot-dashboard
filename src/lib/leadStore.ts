@@ -22,23 +22,6 @@ export const leadStore = {
       try {
         const leads: Lead[] = [];
         
-        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-        if (oldDataStr) {
-          try {
-            const oldLeads = JSON.parse(oldDataStr);
-            if (Array.isArray(oldLeads)) {
-              oldLeads.filter(Boolean).forEach((lead: Lead) => {
-                const key = `${PREFIX}${lead.id}`;
-                if (!localStorage.getItem(key)) {
-                  localStorage.setItem(key, JSON.stringify(lead));
-                  syncToCloud(key, lead);
-                }
-              });
-            }
-            localStorage.removeItem(OLD_STORE_KEY);
-          } catch(e) {}
-        }
-
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith(PREFIX)) {

@@ -16,41 +16,6 @@ class LinksStore {
       try {
         const links: UsefulLink[] = [];
         
-        // Migrate old data
-        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-        if (oldDataStr) {
-          try {
-            const oldLinks = JSON.parse(oldDataStr);
-            if (Array.isArray(oldLinks)) {
-              oldLinks.filter(Boolean).forEach((link: UsefulLink) => {
-                const key = `${PREFIX}${link.id}`;
-                if (!localStorage.getItem(key)) {
-                  localStorage.setItem(key, JSON.stringify(link));
-                  syncToCloud(key, link);
-                }
-              });
-            }
-            localStorage.removeItem(OLD_STORE_KEY);
-          } catch(e) {}
-        }
-        
-        const legacy = localStorage.getItem('vertentes_useful_links');
-        if (legacy) {
-          try {
-            const legacyLinks = JSON.parse(legacy);
-            if (Array.isArray(legacyLinks)) {
-              legacyLinks.filter(Boolean).forEach((link: UsefulLink) => {
-                const key = `${PREFIX}${link.id}`;
-                if (!localStorage.getItem(key)) {
-                  localStorage.setItem(key, JSON.stringify(link));
-                  syncToCloud(key, link);
-                }
-              });
-            }
-            localStorage.removeItem('vertentes_useful_links');
-          } catch(e) {}
-        }
-
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith(PREFIX)) {

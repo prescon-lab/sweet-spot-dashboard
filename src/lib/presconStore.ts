@@ -13,28 +13,10 @@ const PREFIX = "vertentes_guardian_prescon_";
 
 type PresconMap = Record<string, PresconItem[]>;
 
-function migrateIfNeeded() {
-  if (typeof window === "undefined") return;
-  try {
-    const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-    if (oldDataStr) {
-      const oldMap = JSON.parse(oldDataStr) as PresconMap;
-      Object.keys(oldMap).forEach(guardianName => {
-        const key = `${PREFIX}${guardianName}`;
-        if (!localStorage.getItem(key)) {
-          localStorage.setItem(key, JSON.stringify(oldMap[guardianName]));
-          syncToCloud(key, oldMap[guardianName]);
-        }
-      });
-      localStorage.removeItem(OLD_STORE_KEY);
-    }
-  } catch (e) {}
-}
-
 export const presconStore = {
   getItems(guardianName: string): PresconItem[] {
     if (typeof window === "undefined") return [];
-    migrateIfNeeded();
+    
     
     try {
       const key = `${PREFIX}${guardianName}`;

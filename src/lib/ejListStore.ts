@@ -19,22 +19,7 @@ export const ejListStore = {
         const ejs: EjItem[] = [];
         let needsDefaults = true;
         
-        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-        if (oldDataStr) {
-          try {
-            const oldEjs = JSON.parse(oldDataStr);
-            if (Array.isArray(oldEjs)) {
-              oldEjs.filter(Boolean).forEach((ej: EjItem) => {
-                const key = `${PREFIX}${ej.name}`;
-                if (!localStorage.getItem(key)) {
-                  localStorage.setItem(key, JSON.stringify(ej));
-                  syncToCloud(key, ej);
-                }
-              });
-            }
-            localStorage.removeItem(OLD_STORE_KEY);
-          } catch(e) {}
-        }
+        // Removed migration
 
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);

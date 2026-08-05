@@ -37,31 +37,13 @@ export interface EjData {
   calendarioEventos?: CalendarEvent[];
 }
 
-const OLD_STORE_KEY = 'sweet_spot_ej_data';
-
 export const ejDataStore = {
   getAllData: (): Record<string, EjData> => {
     if (typeof window !== 'undefined') {
       try {
         const allData: Record<string, EjData> = {};
         
-        // 1. Migrate old monolithic data to individual keys if it exists
-        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-        if (oldDataStr) {
-          try {
-            const oldData = JSON.parse(oldDataStr);
-            Object.keys(oldData).forEach(ejName => {
-              const key = `sweet_spot_ej_data_${ejName}`;
-              if (!localStorage.getItem(key)) {
-                localStorage.setItem(key, JSON.stringify(oldData[ejName]));
-                syncToCloud(key, oldData[ejName]);
-              }
-            });
-            localStorage.removeItem(OLD_STORE_KEY);
-          } catch(e) {}
-        }
-
-        // 2. Load all individual EJ keys
+        // Load all individual EJ keys
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith('sweet_spot_ej_data_')) {

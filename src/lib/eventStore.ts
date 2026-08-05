@@ -44,24 +44,6 @@ export const eventStore = {
       try {
         const events: AppEvent[] = [];
         
-        // Migrate old monolithic data if it exists
-        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-        if (oldDataStr) {
-          try {
-            const oldEvents = JSON.parse(oldDataStr);
-            if (Array.isArray(oldEvents)) {
-              oldEvents.filter(Boolean).forEach((ev: AppEvent) => {
-                const key = `${PREFIX}${ev.id}`;
-                if (!localStorage.getItem(key)) {
-                  localStorage.setItem(key, JSON.stringify(ev));
-                  syncToCloud(key, ev);
-                }
-              });
-            }
-            localStorage.removeItem(OLD_STORE_KEY);
-          } catch(e) {}
-        }
-
         // Load all individual items
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);

@@ -20,23 +20,6 @@ export const mentionStore = {
       try {
         const mentions: Mention[] = [];
         
-        const oldDataStr = localStorage.getItem(OLD_STORE_KEY);
-        if (oldDataStr) {
-          try {
-            const oldMentions = JSON.parse(oldDataStr);
-            if (Array.isArray(oldMentions)) {
-              oldMentions.filter(Boolean).forEach((m: Mention) => {
-                const key = `${PREFIX}${m.id}`;
-                if (!localStorage.getItem(key)) {
-                  localStorage.setItem(key, JSON.stringify(m));
-                  syncToCloud(key, m);
-                }
-              });
-            }
-            localStorage.removeItem(OLD_STORE_KEY);
-          } catch(e) {}
-        }
-
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith(PREFIX)) {
