@@ -60,7 +60,7 @@ class LinksStore {
           }
         }
         
-        if (links.length === 0 && !localStorage.getItem('vertentes_links_initialized')) {
+        if (links.length === 0 && isCloudHydrated() && !localStorage.getItem('vertentes_links_initialized')) {
            const defaults = [
              { id: '1', title: 'Drive EJs', url: '#', category: 'Documentos' },
              { id: '2', title: 'Planilha de Metas', url: '#', category: 'Documentos' }
