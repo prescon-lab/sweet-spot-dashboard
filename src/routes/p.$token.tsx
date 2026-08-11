@@ -281,34 +281,50 @@ function DashboardPanel() {
             return (
               <Card 
                 className="glass-card cursor-pointer hover:shadow-lg transition-all border-primary/20"
-                onClick={() => setLeadsModalOpen(true)}
+                onClick={() => { setLeadsModalStatus('todos'); setLeadsModalOpen(true); }}
               >
                 <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
                   <CardTitle className="text-lg uppercase tracking-wider text-primary flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" />
                     Previsão de Faturamento da Rede
                   </CardTitle>
-                  <CardDescription>Soma de todos os funis de vendas das EJs</CardDescription>
+                  <CardDescription>Clique em cada etapa para ver a lista de contratos</CardDescription>
                 </CardHeader>
                 <CardContent className="p-5">
                   <div className="flex flex-col gap-4">
-                    <div className="text-left">
-                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Valor Já Fechado</p>
+                    <button
+                      type="button"
+                      className="text-left rounded-xl p-3 -m-1 hover:bg-green-500/10 transition-colors min-h-[44px]"
+                      onClick={(e) => { e.stopPropagation(); setLeadsModalStatus('fechado'); setLeadsModalOpen(true); }}
+                    >
+                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Contratos Fechados</p>
                       <p className="text-3xl font-bold text-green-600 dark:text-green-500">{formatBRL(fechado)}</p>
-                    </div>
+                    </button>
                     <div className="flex flex-wrap gap-3">
-                      <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px]">
+                      <button
+                        type="button"
+                        className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px] min-h-[44px] hover:bg-red-500/20 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setLeadsModalStatus('quente'); setLeadsModalOpen(true); }}
+                      >
                         <p className="text-xs font-bold text-red-600 uppercase mb-1">Quente</p>
                         <p className="text-base font-bold text-red-600 dark:text-red-400">{formatBRL(quente)}</p>
-                      </div>
-                      <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px]">
+                      </button>
+                      <button
+                        type="button"
+                        className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px] min-h-[44px] hover:bg-orange-500/20 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setLeadsModalStatus('morno'); setLeadsModalOpen(true); }}
+                      >
                         <p className="text-xs font-bold text-orange-600 uppercase mb-1">Morno</p>
                         <p className="text-base font-bold text-orange-600 dark:text-orange-400">{formatBRL(morno)}</p>
-                      </div>
-                      <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px]">
+                      </button>
+                      <button
+                        type="button"
+                        className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl text-center flex-1 min-w-[120px] min-h-[44px] hover:bg-blue-500/20 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setLeadsModalStatus('frio'); setLeadsModalOpen(true); }}
+                      >
                         <p className="text-xs font-bold text-blue-600 uppercase mb-1">Frio</p>
                         <p className="text-base font-bold text-blue-600 dark:text-blue-400">{formatBRL(frio)}</p>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </CardContent>
