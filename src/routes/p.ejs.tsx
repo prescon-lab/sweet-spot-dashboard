@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { GuardianDetailModal } from "@/components/guardians/GuardianDetailModal";
-import { Search, ChevronDown, Flame, Trophy } from "lucide-react";
+import { Search, ChevronDown, Flame, Trophy, AlarmClock } from "lucide-react";
 import { ejDataStore } from "@/lib/ejDataStore";
 import { eventStore } from "@/lib/eventStore";
 import { ejListStore } from "@/lib/ejListStore";
+import { leadStore, Lead } from "@/lib/leadStore";
 
 export const Route = createFileRoute("/p/ejs")({
   head: () => ({
