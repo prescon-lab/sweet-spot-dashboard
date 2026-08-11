@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EjDetailModal } from "@/components/ejs/EjDetailModal";
 import { GuardianDetailModal } from "@/components/guardians/GuardianDetailModal";
-import { Search, ChevronDown, Flame, Trophy } from "lucide-react";
+import { Search, ChevronDown, Flame, Trophy, AlarmClock } from "lucide-react";
 import { ejDataStore } from "@/lib/ejDataStore";
 import { eventStore } from "@/lib/eventStore";
 import { ejListStore } from "@/lib/ejListStore";
+import { leadStore, Lead } from "@/lib/leadStore";
 
 export const Route = createFileRoute("/p/ejs")({
   head: () => ({
@@ -34,14 +35,45 @@ function EjsPanel() {
   const [guardianModalOpen, setGuardianModalOpen] = useState(false);
   const [selectedGuardianForModal, setSelectedGuardianForModal] = useState<any>(null);
   const [ejs, setEjs] = useState(() => ejListStore.getEjs());
+  const [leads, setLeads] = useState<Lead[]>([]);
 
   useEffect(() => {
     const handleUpdate = () => {
       setEjs(ejListStore.getEjs());
     };
+    const handleLeads = () => setLeads(leadStore.getLeads());
+    handleLeads();
     window.addEventListener('ejListUpdated', handleUpdate);
-    return () => window.removeEventListener('ejListUpdated', handleUpdate);
+    window.addEventListener('leadsUpdated', handleLeads);
+    return () => {
+      window.removeEventListener('ejListUpdated', handleUpdate);
+      window.removeEventListener('leadsUpdated', handleLeads);
+    };
   }, []);
+
+  // Contratos vencendo nos próximos 3 dias, por EJ
+  const expiringByEj = (() => {
+    const map: Record<string, Lead[]> = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const limit = new Date(today);
+    limit.setDate(limit.getDate() + 3);
+    limit.setHours(23, 59, 59, 999);
+
+    leads.forEach((lead) => {
+      if (!lead?.closingDate || lead.status === 'fechado') return;
+      const parts = String(lead.closingDate).split('-').map(Number);
+      const due = parts.length === 3 && !parts.some(isNaN)
+        ? new Date(parts[0], parts[1] - 1, parts[2])
+        : new Date(lead.closingDate);
+      if (isNaN(due.getTime())) return;
+      due.setHours(23, 59, 59, 999);
+      if (due >= today && due <= limit) {
+        map[lead.ejId] = [...(map[lead.ejId] || []), lead];
+      }
+    });
+    return map;
+  })();
 
   // Derivar lista de guardiões únicos
   const uniqueGuardians = ejListStore.getUniqueGuardians();
@@ -118,6 +150,8 @@ function EjsPanel() {
           const allGoals = allEvents.flatMap(e => e.ejGoals || []);
           const allGoalsMet = allGoals.length > 0 && allGoals.every(g => g.checkedBy?.includes(ej.name) || g.checked);
 
+          const expiringLeads = expiringByEj[ej.name] || [];
+
           return (
             <div 
               key={ej.id}
@@ -126,6 +160,14 @@ function EjsPanel() {
             >
               {/* Icons Badge Area */}
               <div className="absolute top-3 right-3 flex gap-1 z-10">
+                {expiringLeads.length > 0 && (
+                  <div
+                    className="bg-red-600 text-white p-1.5 rounded-full shadow-md animate-pulse"
+                    title={`Contratos vencendo em até 3 dias: ${expiringLeads.map(l => `${l.name} (${new Date(l.closingDate).toLocaleDateString('pt-BR')})`).join(', ')}`}
+                  >
+                    <AlarmClock className="w-4 h-4" />
+                  </div>
+                )}
                 {isAposta && !allGoalsMet && (
                   <div className="bg-orange-500 text-white p-1.5 rounded-full shadow-md" title="EJ é Aposta">
                     <Flame className="w-4 h-4" />
@@ -147,6 +189,11 @@ function EjsPanel() {
               </div>
             <h3 className="text-foreground font-bold text-base tracking-wider uppercase truncate w-full group-hover:text-primary transition-colors">{ej.name}</h3>
             <p className="text-muted-foreground text-xs font-semibold uppercase mt-1 truncate w-full">{ej.guardian}</p>
+            {expiringLeads.length > 0 && (
+              <p className="mt-3 text-[11px] font-semibold text-red-600 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1 leading-tight">
+                {expiringLeads.length === 1 ? '1 contrato vence' : `${expiringLeads.length} contratos vencem`} em até 3 dias
+              </p>
+            )}
           </div>
           );
         })}
