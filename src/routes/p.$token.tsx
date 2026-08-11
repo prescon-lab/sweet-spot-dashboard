@@ -570,8 +570,16 @@ function DashboardPanel() {
                     <p className="text-center text-muted-foreground p-8 bg-card rounded-xl border">Nenhum contrato nesta etapa ainda.</p>
                   ) : (
                     <div className="space-y-4">
-                      {visible.map(lead => (
-                        <div key={lead.id} className="bg-card p-4 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                       {visible.map(lead => (
+                         <div
+                           key={lead.id}
+                           role="button"
+                           tabIndex={0}
+                           title="Clique para editar o funil desta EJ"
+                           onClick={() => { setFunnelEjId(lead.ejId); setFunnelOpen(true); }}
+                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFunnelEjId(lead.ejId); setFunnelOpen(true); } }}
+                           className="bg-card p-4 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:border-primary/40 hover:shadow-md transition-all"
+                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary uppercase text-[10px]">
