@@ -623,6 +623,15 @@ function DashboardPanel() {
           })()}
         </DialogContent>
       </Dialog>
+
+      <EjLeadFunnelModal
+        open={funnelOpen}
+        onOpenChange={(o) => {
+          setFunnelOpen(o);
+          if (!o) setLeads(leadStore.getLeads());
+        }}
+        ejId={funnelEjId}
+      />
     </div>
   );
 }
