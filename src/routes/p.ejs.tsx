@@ -35,14 +35,45 @@ function EjsPanel() {
   const [guardianModalOpen, setGuardianModalOpen] = useState(false);
   const [selectedGuardianForModal, setSelectedGuardianForModal] = useState<any>(null);
   const [ejs, setEjs] = useState(() => ejListStore.getEjs());
+  const [leads, setLeads] = useState<Lead[]>([]);
 
   useEffect(() => {
     const handleUpdate = () => {
       setEjs(ejListStore.getEjs());
     };
+    const handleLeads = () => setLeads(leadStore.getLeads());
+    handleLeads();
     window.addEventListener('ejListUpdated', handleUpdate);
-    return () => window.removeEventListener('ejListUpdated', handleUpdate);
+    window.addEventListener('leadsUpdated', handleLeads);
+    return () => {
+      window.removeEventListener('ejListUpdated', handleUpdate);
+      window.removeEventListener('leadsUpdated', handleLeads);
+    };
   }, []);
+
+  // Contratos vencendo nos próximos 3 dias, por EJ
+  const expiringByEj = (() => {
+    const map: Record<string, Lead[]> = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const limit = new Date(today);
+    limit.setDate(limit.getDate() + 3);
+    limit.setHours(23, 59, 59, 999);
+
+    leads.forEach((lead) => {
+      if (!lead?.closingDate || lead.status === 'fechado') return;
+      const parts = String(lead.closingDate).split('-').map(Number);
+      const due = parts.length === 3 && !parts.some(isNaN)
+        ? new Date(parts[0], parts[1] - 1, parts[2])
+        : new Date(lead.closingDate);
+      if (isNaN(due.getTime())) return;
+      due.setHours(23, 59, 59, 999);
+      if (due >= today && due <= limit) {
+        map[lead.ejId] = [...(map[lead.ejId] || []), lead];
+      }
+    });
+    return map;
+  })();
 
   // Derivar lista de guardiões únicos
   const uniqueGuardians = ejListStore.getUniqueGuardians();
