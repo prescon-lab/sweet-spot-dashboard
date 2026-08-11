@@ -524,55 +524,93 @@ function DashboardPanel() {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Detalhamento de Faturamento
+              {leadsModalStatus === 'todos' ? 'Detalhamento de Faturamento'
+                : leadsModalStatus === 'fechado' ? 'Contratos Fechados'
+                : `Leads ${leadsModalStatus === 'quente' ? 'Quentes' : leadsModalStatus === 'morno' ? 'Mornos' : 'Frios'}`}
             </DialogTitle>
           </DialogHeader>
-          <div className="py-4 max-h-[70vh] overflow-auto">
-            {!Array.isArray(leads) || leads.length === 0 ? (
-              <p className="text-center text-muted-foreground p-8 bg-card rounded-xl border">Nenhum lead cadastrado na rede ainda.</p>
-            ) : (
-              <div className="space-y-4">
-                {[...leads].sort((a, b) => {
-                  const dateA = a.closingDate ? new Date(a.closingDate).getTime() : 0;
-                  const dateB = b.closingDate ? new Date(b.closingDate).getTime() : 0;
-                  return dateA - dateB;
-                }).map(lead => (
-                  <div key={lead.id} className="bg-card p-4 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary uppercase text-[10px]">
-                          {lead.ejId}
-                        </Badge>
-                        <span className="font-bold text-foreground">{lead.name}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{lead.observations || 'Sem observações detalhadas'}</p>
+          {(() => {
+            const statuses: Array<'todos' | 'fechado' | 'quente' | 'morno' | 'frio'> = ['todos', 'fechado', 'quente', 'morno', 'frio'];
+            const labels: Record<string, string> = { todos: 'Todos', fechado: 'Fechados', quente: 'Quente', morno: 'Morno', frio: 'Frio' };
+            const safeLeads = Array.isArray(leads) ? leads : [];
+            const visible = safeLeads
+              .filter(l => leadsModalStatus === 'todos' ? true : l?.status === leadsModalStatus)
+              .sort((a, b) => {
+                const ta = a.closingDate ? new Date(a.closingDate).getTime() : NaN;
+                const tb = b.closingDate ? new Date(b.closingDate).getTime() : NaN;
+                const va = Number.isNaN(ta), vb = Number.isNaN(tb);
+                if (va && vb) return 0;
+                if (va) return 1; // sem data por último
+                if (vb) return -1;
+                return ta - tb;
+              });
+            const total = visible.reduce((acc, l) => acc + (l?.expectedValue || 0), 0);
+
+            return (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  {statuses.map(s => (
+                    <Button
+                      key={s}
+                      type="button"
+                      size="sm"
+                      variant={leadsModalStatus === s ? 'default' : 'outline'}
+                      className="rounded-full min-h-[36px]"
+                      onClick={() => setLeadsModalStatus(s)}
+                    >
+                      {labels[s]}
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {visible.length} contrato(s) • Total {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}
+                </p>
+                <div className="py-2 max-h-[60vh] overflow-auto">
+                  {visible.length === 0 ? (
+                    <p className="text-center text-muted-foreground p-8 bg-card rounded-xl border">Nenhum contrato nesta etapa ainda.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {visible.map(lead => (
+                        <div key={lead.id} className="bg-card p-4 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary uppercase text-[10px]">
+                                {lead.ejId}
+                              </Badge>
+                              <span className="font-bold text-foreground">{lead.name}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{lead.observations || 'Sem observações detalhadas'}</p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="font-bold text-primary text-lg">
+                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lead.expectedValue)}
+                              </p>
+                            </div>
+                            <div className="w-24 text-center">
+                              <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase ${
+                                lead.status === 'fechado' ? 'bg-green-600 text-white' :
+                                lead.status === 'quente' ? 'bg-red-500 text-white' : 
+                                lead.status === 'morno' ? 'bg-orange-500 text-white' : 'bg-blue-500 text-white'
+                              }`}>
+                                {lead.status}
+                              </span>
+                            </div>
+                            <div className="w-28 text-right">
+                              <p className="text-xs text-muted-foreground uppercase font-semibold">Vencimento</p>
+                              <p className="text-sm font-medium">
+                                {lead.closingDate ? new Date(lead.closingDate).toLocaleDateString('pt-BR') : 'Sem data'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-bold text-primary text-lg">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lead.expectedValue)}
-                        </p>
-                      </div>
-                      <div className="w-24 text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase ${
-                          lead.status === 'quente' ? 'bg-red-500 text-white' : 
-                          lead.status === 'morno' ? 'bg-orange-500 text-white' : 'bg-blue-500 text-white'
-                        }`}>
-                          {lead.status}
-                        </span>
-                      </div>
-                      <div className="w-28 text-right">
-                        <p className="text-xs text-muted-foreground uppercase font-semibold">Vencimento</p>
-                        <p className="text-sm font-medium">
-                          {lead.closingDate ? new Date(lead.closingDate).toLocaleDateString() : 'N/A'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
