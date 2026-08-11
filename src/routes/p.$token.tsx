@@ -105,6 +105,7 @@ function DashboardPanel() {
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadsModalOpen, setLeadsModalOpen] = useState(false);
+  const [leadsModalStatus, setLeadsModalStatus] = useState<'todos' | 'fechado' | 'quente' | 'morno' | 'frio'>('todos');
   const [activities, setActivities] = useState<Activity[]>([]);
   const [mentions, setMentions] = useState<Mention[]>([]);
   const [expandedEjUpdates, setExpandedEjUpdates] = useState<Record<string, boolean>>({});
